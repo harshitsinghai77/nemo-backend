@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "noiist"
+version = "0.1.0"
+description = "Get Spotify Recommendations directly in your inbox"
+authors = ["Harshit Singhai <harshitsinghai77@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+fastapi = "^0.65.1"
+python-environ = "^0.4.54"
+uvicorn = {extras = ["standard"], version = "^0.14.0"}
+databases = {extras = ["postgresql"], version = "^0.4.3"}
+psycopg2 = "^2.8.6"
+requests = "^2.25.1"
+aiofiles = "^0.7.0"
+Jinja2 = "^3.0.1"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+black = "^21.5b2"
+isort = "^5.8.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
