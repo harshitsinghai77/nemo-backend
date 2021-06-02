@@ -1,5 +1,6 @@
 import base64
 import datetime
+import logging
 import os
 from typing import Optional
 
@@ -7,8 +8,10 @@ import requests
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse, RedirectResponse
 
-from noiist.models import model
 from noiist.config.database import database
+from noiist.models import model
+
+LOGGER = logging.getLogger()
 
 spotify_auth = APIRouter()
 
@@ -16,7 +19,8 @@ SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token"
 SPOTIFY_USER_URL = "https://api.spotify.com/v1/me"
 SCOPE = "user-read-recently-played"
 GRANT_TYPE = "authorization_code"
-REDIRECT_URI = "http://localhost:8000/authorize-spotify"
+
+REDIRECT_URI = os.getenv("SPOTIFY_REDIRECT_URI")
 SPOTIFY_CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
 SPOTIFY_CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
 
@@ -39,7 +43,7 @@ def get_user_information(access_token: str):
         r = session.get(url=SPOTIFY_USER_URL, headers=headers)
         return r.json()
     except requests.exceptions.RequestException as e:
-        print("Some error occured.", e)
+        LOGGER.error("Error occured while `get_user_information`", e)
 
 
 def get_access_and_refresh_token(code: str):
@@ -101,7 +105,7 @@ async def get_access_token_and_refresh_token(code: Optional[str] = None):
             return RedirectResponse(url=url)
 
         except requests.exceptions.RequestException as e:
-            print(e)
+            LOGGER.error("Error occured", e)
             return HTMLResponse(content=error_html_content, status_code=200)
 
     return HTMLResponse(content=error_html_content, status_code=200)

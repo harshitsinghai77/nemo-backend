@@ -1,14 +1,12 @@
 import uvicorn
 from fastapi import FastAPI, Request
-from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 
 from noiist.config.database import database, engine, metadata
 from noiist.config.settings import get_setting
 from noiist.routers.spotify import spotify_auth
-
-from fastapi.templating import Jinja2Templates
-
 
 settings = get_setting()
 metadata.create_all(engine)
