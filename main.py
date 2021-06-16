@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from noiist.config.database import database, engine, metadata
 from noiist.config.settings import get_setting
 from noiist.routers.spotify import spotify_auth
+from noiist.routers.noisli import noisli_route
 
 settings = get_setting()
 metadata.create_all(engine)
@@ -38,6 +39,12 @@ app.include_router(
     spotify_auth,
     prefix="/authorize-spotify",
     tags=["SpotifyAuth"],
+)
+
+app.include_router(
+    noisli_route,
+    prefix="/noisli",
+    tags=["Noisli"],
 )
 
 if __name__ == "__main__":

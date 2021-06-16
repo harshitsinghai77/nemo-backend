@@ -73,7 +73,6 @@ async def create_new_user(user_dict):
 @spotify_auth.get("/")
 async def get_access_token_and_refresh_token(code: Optional[str] = None):
     if code:
-
         try:
             resp_token = get_access_and_refresh_token(code=code)
             access_token = resp_token["access_token"]
