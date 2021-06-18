@@ -4,15 +4,22 @@ import logging
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse, RedirectResponse
 from pydantic import BaseModel
-from google.oauth2 import id_token
-from google.auth.transport import requests
+
+import jwt
+from cryptography.x509 import load_pem_x509_certificate
+from cryptography.hazmat.backends import default_backend
 
 from noiist.config.database import database
 from noiist.models import noisli
+from noiist.routers.constants import CERT_STR
 
 LOGGER = logging.getLogger()
-CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 noisli_route = APIRouter()
+
+# Specify the CLIENT_ID of the app that accesses the backend:
+cert_obj = load_pem_x509_certificate(CERT_STR, default_backend())
+public_key = cert_obj.public_key()
 
 
 class Item(BaseModel):
@@ -33,13 +40,10 @@ async def create_new_user(user_dict):
 @noisli_route.post("/login")
 async def get_access_token_and_refresh_token(item: Item):
     try:
-        # Specify the CLIENT_ID of the app that accesses the backend:
-        idinfo = id_token.verify_oauth2_token(
-            item.google_token,
-            requests.Request(),
-            CLIENT_ID,
+        idinfo = jwt.decode(
+            item.google_token, public_key, algorithms="RS256", audience=GOOGLE_CLIENT_ID
         )
-
+        print(idinfo)
         # Or, if multiple clients access the backend server:
         # idinfo = id_token.verify_oauth2_token(token, requests.Request())
         # if idinfo['aud'] not in [CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]:

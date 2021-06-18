@@ -14,9 +14,7 @@ psycopg2 = "^2.8.6"
 requests = "^2.25.1"
 aiofiles = "^0.7.0"
 Jinja2 = "^3.0.1"
-google-api-python-client = "^2.9.0"
-google-auth-httplib2 = "^0.1.0"
-google-auth-oauthlib = "^0.4.4"
+PyJWT = {extras = ["crypto"], version = "^2.1.0"}
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
