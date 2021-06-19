@@ -6,9 +6,13 @@ noisli_user = Table(
     "core_noisli_user",
     metadata,
     Column("created_at", DateTime),
-    Column("id", Integer, primary_key=True, unique=True),
-    Column("name", String(length=255), nullable=False),
+    Column("id", Integer, primary_key=True, unique=True, autoincrement=True),
+    Column(
+        "google_id", String, primary_key=True, unique=True, nullable=False
+    ),  # The unique ID of the user's Google Account
+    Column("given_name", String(length=255), nullable=False),
+    Column("family_name", String(length=255)),
     Column("email", Text, unique=True),
     Column("profile_pic", Text),
-    Column("is_active", Boolean, server_default="False"),
+    Column("email_verified", Boolean, server_default="False"),
 )

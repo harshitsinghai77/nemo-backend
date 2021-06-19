@@ -8,6 +8,14 @@ import requests
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse, RedirectResponse
 
+from noiist.routers.constants import (
+    SPOTIFY_TOKEN_URL,
+    SPOTIFY_USER_URL,
+    GRANT_TYPE,
+    REDIRECT_URI,
+    SPOTIFY_CLIENT_ID,
+    SPOTIFY_CLIENT_SECRET,
+)
 from noiist.config.database import database
 from noiist.models import model
 
