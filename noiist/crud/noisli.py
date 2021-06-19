@@ -1,6 +1,5 @@
-from pydantic.types import NoneStr
 from noiist.config.database import database
-from noiist.models.noisli import noisli_user
+from noiist.models.noisli import noisli_user, noisli_user_settings
 
 
 class NoisliAdmin:
@@ -8,6 +7,10 @@ class NoisliAdmin:
     async def create(user_dict):
         query = noisli_user.insert().values(**user_dict)
         last_record = await database.execute(query)
+
+        query_settings = noisli_user_settings.insert().values({"user_id": last_record})
+        await database.execute(query_settings)
+
         return {**user_dict, "id": last_record}
 
     @staticmethod

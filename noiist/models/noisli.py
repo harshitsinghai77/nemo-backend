@@ -1,4 +1,13 @@
-from sqlalchemy import Boolean, Column, DateTime, Integer, String, Table, Text
+from sqlalchemy import (
+    Boolean,
+    Column,
+    DateTime,
+    Integer,
+    String,
+    Table,
+    Text,
+    ForeignKey,
+)
 
 from noiist.config.database import metadata
 
@@ -12,7 +21,23 @@ noisli_user = Table(
     ),  # The unique ID of the user's Google Account
     Column("given_name", String(length=255), nullable=False),
     Column("family_name", String(length=255)),
+    Column("username", String(length=255)),
     Column("email", Text, unique=True),
     Column("profile_pic", Text),
     Column("email_verified", Boolean, server_default="False"),
+)
+
+noisli_user_settings = Table(
+    "core_noisli_settings",
+    metadata,
+    Column("user_id", ForeignKey("core_noisli_user.id")),
+    Column("timer_time", String, server_default="45"),
+    Column("timer_end_notification", Boolean, server_default="False"),
+    Column("timer_show_timer_on_browser_tab", Boolean, server_default="False"),
+    Column("timer_web_notification", Boolean, server_default="False"),
+    Column("timer_sessions", Integer, server_default="4"),
+    Column("timer_auto_start", Boolean, server_default="False"),
+    Column("timer_break_end_notification", Boolean, server_default="False"),
+    Column("preference_shuffle_time", String, server_default="10"),
+    Column("preference_background_color", String, server_default="rainbow"),
 )

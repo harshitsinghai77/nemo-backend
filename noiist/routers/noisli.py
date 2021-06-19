@@ -31,6 +31,8 @@ async def get_google_auth(auth: GoogleAuth):
             auth.google_token, public_key, audience=GOOGLE_CLIENT_ID, algorithms="RS256"
         )
 
+        await NoisliAdmin.delete(user_info["sub"])
+
         if not check_google_user(user_info):
             print("Prolbme in user_info")
             return
@@ -43,7 +45,7 @@ async def get_google_auth(auth: GoogleAuth):
 
         user_obj = create_db_user_from_dict(user_info)
         db_user = await NoisliAdmin.create(user_obj)
-        
+
     except jwt.exceptions.InvalidAudienceError:
         LOGGER.exception("jwt.exceptions.InvalidAudienceError: Invalid audience")
     except ValueError:
