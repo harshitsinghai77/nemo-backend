@@ -1,3 +1,4 @@
+from sqlalchemy.sql.expression import select
 from noiist.config.database import database
 from noiist.models.noisli import noisli_user, noisli_user_settings
 
@@ -7,10 +8,6 @@ class NoisliAdmin:
     async def create(user_dict):
         query = noisli_user.insert().values(**user_dict)
         last_record = await database.execute(query)
-
-        query_settings = noisli_user_settings.insert().values({"user_id": last_record})
-        await database.execute(query_settings)
-
         return {**user_dict, "id": last_record}
 
     @staticmethod
@@ -40,3 +37,18 @@ class NoisliAdmin:
             noisli_user.c.google_id == google_id and noisli_user.c.email == email
         )
         return await database.fetch_one(query)
+
+    @staticmethod
+    async def get_user_settings():
+        join = noisli_user.join(
+            noisli_user_settings, noisli_user.c.id == noisli_user_settings.c.user_id
+        )
+        stmt = select([noisli_user_settings]).select_from(join)
+        return await database.fetch_one(stmt)
+
+
+class NoisliSettingsAdmin:
+    @staticmethod
+    async def create(user_id):
+        query_settings = noisli_user_settings.insert().values({"user_id": user_id})
+        return await database.execute(query_settings)

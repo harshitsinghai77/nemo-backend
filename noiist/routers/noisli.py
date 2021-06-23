@@ -1,55 +1,88 @@
+from datetime import timedelta
 import logging
 
 from fastapi import APIRouter
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.encoders import jsonable_encoder
+from fastapi.exceptions import HTTPException
+from fastapi.responses import JSONResponse
+from starlette.requests import Request
+
 from pydantic import BaseModel
 
-import jwt
-from cryptography.x509 import load_pem_x509_certificate
-from cryptography.hazmat.backends import default_backend
+from noiist.config.database import database
+from noiist.models.noisli import noisli_user_settings
+from noiist.routers.constants import (
+    JWT_ACCESS_TOKEN_EXPIRE_DAYS,
+    COOKIE_AUTHORIZATION_NAME,
+    COOKIE_DOMAIN,
+)
 
-from noiist.utils.noisliy import check_google_user, create_db_user_from_dict
-from noiist.crud.noisli import NoisliAdmin
-from noiist.routers.constants import CERT_STR, GOOGLE_CLIENT_ID
+from noiist.utils.noisliy import (
+    check_google_user,
+    create_dict_from_payload,
+    get_user_payload,
+    create_access_token,
+)
+from noiist.crud.noisli import NoisliAdmin, NoisliSettingsAdmin
 
 LOGGER = logging.getLogger()
 noisli_route = APIRouter()
-
-# Specify the CLIENT_ID of the app that accesses the backend:
-cert_obj = load_pem_x509_certificate(CERT_STR, default_backend())
-public_key = cert_obj.public_key()
 
 
 class GoogleAuth(BaseModel):
     google_token: str
 
 
+class JWToken(BaseModel):
+    jwt_token: str
+
+
 @noisli_route.post("/login")
 async def get_google_auth(auth: GoogleAuth):
-    try:
-        user_info = jwt.decode(
-            auth.google_token, public_key, audience=GOOGLE_CLIENT_ID, algorithms="RS256"
-        )
+    payload = get_user_payload(token=auth.google_token)
 
-        await NoisliAdmin.delete(user_info["sub"])
+    # query = noisli_user_settings.delete()
+    # await database.execute(query)
+    # await NoisliAdmin.delete(payload["sub"])
 
-        if not check_google_user(user_info):
-            print("Prolbme in user_info")
-            return
+    if not check_google_user(payload):
+        raise HTTPException(status_code=400, detail="Unable to validate google user")
 
-        user_exists = await NoisliAdmin.check_user_exists(
-            user_info["sub"], user_info["email"]
-        )
-        if user_exists:
-            return
+    user = await NoisliAdmin.check_user_exists(payload["sub"], payload["email"])
 
-        user_obj = create_db_user_from_dict(user_info)
-        db_user = await NoisliAdmin.create(user_obj)
+    # If user does not exists then create a new user and new settings for the user
+    if not user:
+        user_obj = create_dict_from_payload(payload)
+        user = await NoisliAdmin.create(user_obj)
+        await NoisliSettingsAdmin.create(user_id=user["id"])
 
-    except jwt.exceptions.InvalidAudienceError:
-        LOGGER.exception("jwt.exceptions.InvalidAudienceError: Invalid audience")
-    except ValueError:
-        # Invalid token
-        pass
+    # create a access token
+    access_token_expires = timedelta(minutes=JWT_ACCESS_TOKEN_EXPIRE_DAYS)
+    access_token = create_access_token(
+        data={"email": user["email"], "google_id": user["google_id"]},
+        expires_delta=access_token_expires,
+    )
+    access_token = jsonable_encoder(access_token)
 
-    return HTMLResponse(content="<h1>Hello World</h1>", status_code=200)
+    response = JSONResponse({"access_token": access_token, "token_type": "bearer"})
+    response.set_cookie(
+        COOKIE_AUTHORIZATION_NAME,
+        value=f"Bearer {access_token}",
+        domain=COOKIE_DOMAIN,
+        httponly=True,
+        max_age=1800,
+        expires=1800,
+    )
+
+    return response
+
+
+@noisli_route.get("/get-details")
+async def get_user_details(request: Request = None):
+    token = request.headers.get("x-auth-token")
+    if not token:
+        raise HTTPException(status_code=400, detail="Incorrect headers")
+
+    # user = get_user_payload(token)
+    settings = await NoisliAdmin.get_user_settings()
+    return {**settings}
