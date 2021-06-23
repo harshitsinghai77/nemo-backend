@@ -57,6 +57,14 @@ def get_user_payload(token):
         raise credentials_exception
 
 
+def get_current_user(token):
+    try:
+        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=JWT_ALGORITHM)
+        return payload
+    except jwt.PyJWTError:
+        raise credentials_exception
+
+
 def create_access_token(*, data: dict, expires_delta: timedelta = None):
     to_encode = data.copy()
     if expires_delta:

@@ -11,14 +11,18 @@ class NoisliAdmin:
         return {**user_dict, "id": last_record}
 
     @staticmethod
-    async def update(user_dict):
-        query = noisli_user.update().where(noisli_user.c.id == 7).values(**user_dict)
+    async def update(google_id, user_dict):
+        query = (
+            noisli_user.update()
+            .where(noisli_user.c.google_id == google_id)
+            .values(**user_dict)
+        )
         last_record = await database.execute(query)
         return {**user_dict, "id": last_record}
 
     @staticmethod
-    async def get(id):
-        query = noisli_user.select().where(noisli_user.c.id == id)
+    async def get(google_id):
+        query = noisli_user.select().where(noisli_user.c.google_id == google_id)
         return await database.fetch_one(query)
 
     @staticmethod
@@ -49,6 +53,13 @@ class NoisliAdmin:
 
 class NoisliSettingsAdmin:
     @staticmethod
-    async def create(user_id):
-        query_settings = noisli_user_settings.insert().values({"user_id": user_id})
+    async def create(google_id):
+        query_settings = noisli_user_settings.insert().values({"google_id": google_id})
         return await database.execute(query_settings)
+
+    @staticmethod
+    async def get(google_id):
+        query = noisli_user_settings.select().where(
+            noisli_user.c.google_id == google_id
+        )
+        return await database.fetch_one(query)

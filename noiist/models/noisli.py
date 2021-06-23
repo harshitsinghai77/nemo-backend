@@ -30,7 +30,7 @@ noisli_user = Table(
 noisli_user_settings = Table(
     "core_noisli_settings",
     metadata,
-    Column("user_id", ForeignKey("core_noisli_user.id")),
+    Column("google_id", ForeignKey("core_noisli_user.google_id")),
     Column("timer_time", String, server_default="45"),
     Column("timer_end_notification", Boolean, server_default="False"),
     Column("timer_show_timer_on_browser_tab", Boolean, server_default="False"),
