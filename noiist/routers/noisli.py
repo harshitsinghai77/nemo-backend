@@ -17,7 +17,7 @@ from noiist.routers.constants import (
     COOKIE_DOMAIN,
 )
 
-from noiist.utils.noisliy import (
+from noiist.utils.noisli import (
     check_google_user,
     create_dict_from_payload,
     get_user_payload,
@@ -39,6 +39,7 @@ class JWToken(BaseModel):
 
 @noisli_route.post("/login")
 async def get_google_auth(auth: GoogleAuth):
+    # Get user payload from auth token
     payload = get_user_payload(token=auth.google_token)
 
     # query = noisli_user_settings.delete()
@@ -50,7 +51,7 @@ async def get_google_auth(auth: GoogleAuth):
 
     user = await NoisliAdmin.check_user_exists(payload["sub"], payload["email"])
 
-    # If user does not exists then create a new user and new settings for the user
+    # If user does not exists then create new user and settings for the user
     if not user:
         user_obj = create_dict_from_payload(payload)
         user = await NoisliAdmin.create(user_obj)
