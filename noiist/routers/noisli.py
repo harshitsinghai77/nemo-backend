@@ -54,7 +54,7 @@ class UserUpdate(BaseModel):
 
 
 @noisli_route.post("/login")
-async def get_google_auth(auth: GoogleAuth):
+async def create_user(auth: GoogleAuth):
     # Get user payload from auth token
     payload = get_user_payload(token=auth.google_token)
 
@@ -94,7 +94,7 @@ async def get_google_auth(auth: GoogleAuth):
 
 
 @noisli_route.get("/get-settings")
-async def get_user_details(request: Request = None):
+async def get_user_settings(request: Request = None):
     token = request.headers.get("x-auth-token")
     if not token:
         raise HTTPException(status_code=400, detail="Incorrect headers")
@@ -107,7 +107,7 @@ async def get_user_details(request: Request = None):
 
 
 @noisli_route.get("/get-account", response_model=UserAccount)
-async def get_user_details(request: Request = None):
+async def get_user_account(request: Request = None):
     token = request.headers.get("x-auth-token")
     if not token:
         raise HTTPException(status_code=400, detail="Incorrect headers")
@@ -120,7 +120,7 @@ async def get_user_details(request: Request = None):
 
 
 @noisli_route.patch("/get-account", response_model=UserAccount)
-async def get_user_details(request: Request = None):
+async def update_user_account(request: Request = None):
     token = request.headers.get("x-auth-token")
     if not token:
         raise HTTPException(status_code=400, detail="Incorrect headers")
@@ -131,3 +131,19 @@ async def get_user_details(request: Request = None):
         raise HTTPException(status_code=404, detail="No user found from the token")
     user = await NoisliAdmin.update(google_id=user["google_id"], user_dict=updated_body)
     return user
+
+
+@noisli_route.patch("/timer-settings")
+async def update_user_timer_settings(request: Request = None):
+    token = request.headers.get("x-auth-token")
+    if not token:
+        raise HTTPException(status_code=400, detail="Incorrect headers")
+
+    user = get_current_user(token)
+    updated_body = await request.json()
+    if not user:
+        raise HTTPException(status_code=404, detail="No user found from the token")
+    user = await NoisliSettingsAdmin.update(
+        google_id=user["google_id"], settings_dict=updated_body
+    )
+    return {"status": True}

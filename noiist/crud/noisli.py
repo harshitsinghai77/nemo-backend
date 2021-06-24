@@ -60,6 +60,15 @@ class NoisliSettingsAdmin:
     @staticmethod
     async def get(google_id):
         query = noisli_user_settings.select().where(
-            noisli_user.c.google_id == google_id
+            noisli_user_settings.c.google_id == google_id
         )
         return await database.fetch_one(query)
+
+    @staticmethod
+    async def update(google_id, settings_dict):
+        query = (
+            noisli_user_settings.update()
+            .where(noisli_user_settings.c.google_id == google_id)
+            .values(**settings_dict)
+        )
+        return await database.execute(query)
