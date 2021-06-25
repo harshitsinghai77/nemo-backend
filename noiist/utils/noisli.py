@@ -2,21 +2,14 @@ import os
 from datetime import datetime, timedelta
 
 import jwt
-from cryptography.x509 import load_pem_x509_certificate
-from cryptography.hazmat.backends import default_backend
+from google.oauth2 import id_token
+from google.auth.transport import requests
 
-from fastapi import Depends
-from fastapi.security import OAuth2PasswordBearer
 from fastapi.exceptions import HTTPException
 from starlette.status import HTTP_403_FORBIDDEN
 
-from noiist.routers.constants import CERT_STR, GOOGLE_CLIENT_ID
+from noiist.routers.constants import GOOGLE_CLIENT_ID
 
-# Specify the CLIENT_ID of the app that accesses the backend:
-cert_obj = load_pem_x509_certificate(CERT_STR, default_backend())
-public_key = cert_obj.public_key()
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 credentials_exception = HTTPException(
     status_code=HTTP_403_FORBIDDEN, detail="Could not validate credentials"
 )
@@ -49,11 +42,11 @@ def create_dict_from_payload(payload):
 
 def get_user_payload(token):
     try:
-        payload = jwt.decode(
-            token, public_key, audience=GOOGLE_CLIENT_ID, algorithms="RS256"
+        decoded = id_token.verify_oauth2_token(
+            token, requests.Request(), GOOGLE_CLIENT_ID
         )
-        return payload
-    except jwt.PyJWTError:
+        return decoded
+    except ValueError:
         raise credentials_exception
 
 

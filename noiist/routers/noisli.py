@@ -1,6 +1,6 @@
 from datetime import timedelta
 import logging
-from typing import Dict, Optional
+from typing import Optional
 
 from fastapi import APIRouter
 from fastapi.encoders import jsonable_encoder
@@ -46,6 +46,11 @@ class UserAccount(BaseModel):
     email: str
 
 
+class UserPreferences(BaseModel):
+    preference_shuffle_time: str
+    preference_background_color: str
+
+
 class UserUpdate(BaseModel):
     given_name: Optional[str] = None
     family_name: Optional[str] = None
@@ -57,7 +62,6 @@ class UserUpdate(BaseModel):
 async def create_user(auth: GoogleAuth):
     # Get user payload from auth token
     payload = get_user_payload(token=auth.google_token)
-
     query = noisli_user_settings.delete()
     await database.execute(query)
     await NoisliAdmin.delete(payload["sub"])
@@ -93,7 +97,7 @@ async def create_user(auth: GoogleAuth):
     return response
 
 
-@noisli_route.get("/get-settings")
+@noisli_route.get("/settings")
 async def get_user_settings(request: Request = None):
     token = request.headers.get("x-auth-token")
     if not token:
@@ -106,34 +110,7 @@ async def get_user_settings(request: Request = None):
     return settings
 
 
-@noisli_route.get("/get-account", response_model=UserAccount)
-async def get_user_account(request: Request = None):
-    token = request.headers.get("x-auth-token")
-    if not token:
-        raise HTTPException(status_code=400, detail="Incorrect headers")
-
-    user = get_current_user(token)
-    if not user:
-        raise HTTPException(status_code=404, detail="No user found from the token")
-    user = await NoisliAdmin.get(user["google_id"])
-    return user
-
-
-@noisli_route.patch("/get-account", response_model=UserAccount)
-async def update_user_account(request: Request = None):
-    token = request.headers.get("x-auth-token")
-    if not token:
-        raise HTTPException(status_code=400, detail="Incorrect headers")
-
-    user = get_current_user(token)
-    updated_body = await request.json()
-    if not user:
-        raise HTTPException(status_code=404, detail="No user found from the token")
-    user = await NoisliAdmin.update(google_id=user["google_id"], user_dict=updated_body)
-    return user
-
-
-@noisli_route.patch("/timer-settings")
+@noisli_route.patch("/settings")
 async def update_user_timer_settings(request: Request = None):
     token = request.headers.get("x-auth-token")
     if not token:
@@ -147,3 +124,30 @@ async def update_user_timer_settings(request: Request = None):
         google_id=user["google_id"], settings_dict=updated_body
     )
     return {"status": True}
+
+
+@noisli_route.get("/account", response_model=UserAccount)
+async def get_user_account(request: Request = None):
+    token = request.headers.get("x-auth-token")
+    if not token:
+        raise HTTPException(status_code=400, detail="Incorrect headers")
+
+    user = get_current_user(token)
+    if not user:
+        raise HTTPException(status_code=404, detail="No user found from the token")
+    user = await NoisliAdmin.get(user["google_id"])
+    return user
+
+
+@noisli_route.patch("/account", response_model=UserAccount)
+async def update_user_account(request: Request = None):
+    token = request.headers.get("x-auth-token")
+    if not token:
+        raise HTTPException(status_code=400, detail="Incorrect headers")
+
+    user = get_current_user(token)
+    updated_body = await request.json()
+    if not user:
+        raise HTTPException(status_code=404, detail="No user found from the token")
+    user = await NoisliAdmin.update(google_id=user["google_id"], user_dict=updated_body)
+    return user
