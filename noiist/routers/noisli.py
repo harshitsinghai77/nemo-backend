@@ -107,6 +107,8 @@ async def get_user_settings(request: Request = None):
     if not user:
         raise HTTPException(status_code=404, detail="No user found from the token")
     settings = await NoisliSettingsAdmin.get(user["google_id"])
+    if not settings:
+        raise HTTPException(status_code=404, detail="No settings found for the user")
     return settings
 
 
@@ -123,7 +125,7 @@ async def update_user_timer_settings(request: Request = None):
     user = await NoisliSettingsAdmin.update(
         google_id=user["google_id"], settings_dict=updated_body
     )
-    return {"status": True}
+    return user
 
 
 @noisli_route.get("/account", response_model=UserAccount)

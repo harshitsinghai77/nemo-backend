@@ -71,4 +71,5 @@ class NoisliSettingsAdmin:
             .where(noisli_user_settings.c.google_id == google_id)
             .values(**settings_dict)
         )
-        return await database.execute(query)
+        await database.execute(query)
+        return {**settings_dict}
