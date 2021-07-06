@@ -23,6 +23,7 @@ GRANT_TYPE = "authorization_code"
 REDIRECT_URI = os.getenv("SPOTIFY_REDIRECT_URI")
 SPOTIFY_CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
 SPOTIFY_CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
+NOIIST_FRONTEND_URL = os.getenv("NOIIST_FRONTEND_URL")
 
 auth_str = "{}:{}".format(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET)
 b64_auth_str = base64.b64encode(auth_str.encode()).decode()
@@ -43,7 +44,7 @@ def get_user_information(access_token: str):
         r = session.get(url=SPOTIFY_USER_URL, headers=headers)
         return r.json()
     except requests.exceptions.RequestException as e:
-        LOGGER.error("Error occured while `get_user_information`", e)
+        LOGGER.error("Request error while `get_user_information` %s", e)
 
 
 def get_access_and_refresh_token(code: str):
@@ -101,11 +102,11 @@ async def get_access_token_and_refresh_token(code: Optional[str] = None):
                 already_exists = False
 
             # Redirect to frontend with information to display
-            url = f"/authorization-success?name={name}&already_exists={already_exists}"
+            url = f"{NOIIST_FRONTEND_URL}/authorization-success?name={name}&already_exists={already_exists}"
             return RedirectResponse(url=url)
 
         except requests.exceptions.RequestException as e:
-            LOGGER.error("Error occured", e)
+            LOGGER.error("Error occured %s", e)
             return HTMLResponse(content=error_html_content, status_code=200)
 
     return HTMLResponse(content=error_html_content, status_code=200)

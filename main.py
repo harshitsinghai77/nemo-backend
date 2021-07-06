@@ -1,8 +1,6 @@
 import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 
 from noiist.config.database import database, engine, metadata
 from noiist.config.settings import get_setting
@@ -12,13 +10,6 @@ settings = get_setting()
 metadata.create_all(engine)
 
 app = FastAPI(title=settings.APP_NAME)
-app.mount(
-    "/static",
-    StaticFiles(directory="frontend/build/static"),
-    name="static",
-)
-templates = Jinja2Templates(directory="frontend/build")
-
 origins = ["http://localhost:3000"]
 
 app.add_middleware(
@@ -39,21 +30,9 @@ async def startup():
 async def shutdown():
     await database.disconnect()
 
-
-@app.get("/")
-async def serve_spa(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
-
-
-@app.get("/authorization-success")
-async def serve_spa(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
-
-
-@app.get("/get-started")
-async def serve_spa(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
-
+@app.get('/')
+def index():
+    return "App succesfully running."
 
 app.include_router(
     spotify_auth,
