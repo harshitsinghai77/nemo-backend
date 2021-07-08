@@ -42,3 +42,12 @@ noisli_user_settings = Table(
     Column("preference_shuffle_time", String, server_default="10"),
     Column("preference_background_color", String, server_default="rainbow"),
 )
+
+noisli_user_analytics = Table(
+    "core_noisli_analytics",
+    metadata,
+    Column("created_at", DateTime),
+    Column("google_id", ForeignKey("core_noisli_user.google_id")),
+    Column("duration", Integer),  # in seconds
+    Column("full_date", DateTime),
+)

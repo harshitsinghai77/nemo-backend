@@ -1,5 +1,5 @@
 import uvicorn
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from noiist.config.database import database, engine, metadata
@@ -31,27 +31,11 @@ async def startup():
 async def shutdown():
     await database.disconnect()
 
-<<<<<<< HEAD
+
 @app.get('/')
 def index():
     return "App succesfully running."
-=======
 
-@app.get("/")
-async def serve_landing_page(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
-
-
-@app.get("/authorization-success")
-async def serve_athorization(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
-
-
-@app.get("/get-started")
-async def serve_get_started(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
-
->>>>>>> 9ccaa83 (Add new dependency)
 
 app.include_router(
     spotify_auth,

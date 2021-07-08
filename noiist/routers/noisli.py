@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 import logging
 from typing import Optional
 
@@ -9,9 +9,6 @@ from fastapi.responses import JSONResponse
 from starlette.requests import Request
 
 from pydantic import BaseModel
-
-from noiist.config.database import database
-from noiist.models.noisli import noisli_user_settings
 from noiist.routers.constants import (
     JWT_ACCESS_TOKEN_EXPIRE_DAYS,
     COOKIE_AUTHORIZATION_NAME,
@@ -25,21 +22,27 @@ from noiist.utils.noisli import (
     create_access_token,
     get_current_user,
 )
-from noiist.crud.noisli import NoisliAdmin, NoisliSettingsAdmin
+from noiist.crud.noisli import NoisliUser, NoisliSettings, NoisliAnalytics
 
 LOGGER = logging.getLogger()
 noisli_route = APIRouter()
 
 
 class GoogleAuth(BaseModel):
+    """User google token."""
+
     google_token: str
 
 
 class JWToken(BaseModel):
+    """Returns JWT token for the user."""
+
     jwt_token: str
 
 
 class UserAccount(BaseModel):
+    """Return user account."""
+
     given_name: str
     family_name: str
     username: str = None
@@ -47,34 +50,60 @@ class UserAccount(BaseModel):
 
 
 class UserPreferences(BaseModel):
+    """Update user UI preference."""
+
     preference_shuffle_time: str
     preference_background_color: str
 
 
 class UserUpdate(BaseModel):
+    """Update user settings."""
+
     given_name: Optional[str] = None
     family_name: Optional[str] = None
     username: Optional[str] = None
     email: Optional[str] = None
 
 
+class UserAnalytics(BaseModel):
+    """User Analytics"""
+
+    created_at: datetime
+    google_id: str
+    duration: int
+    full_date: datetime
+
+
 @noisli_route.post("/login")
 async def create_user(auth: GoogleAuth):
+    """Create a new user or return existing user
+
+    Args:
+        auth (GoogleAuth): String containing unique JWT Token from google
+
+    Raises:
+        HTTPException: [description]
+
+    Returns:
+        `string`: JWT Access token
+    """
     # Get user payload from auth token
     payload = get_user_payload(token=auth.google_token)
-    query = noisli_user_settings.delete()
-    await database.execute(query)
-    await NoisliAdmin.delete(payload["sub"])
+    # query = noisli_user_settings.delete()
+    # await database.execute(query)
+    # await NoisliUser.delete(payload["sub"])
 
     if not check_google_user(payload):
-        raise HTTPException(status_code=400, detail="Unable to validate google user")
+        raise HTTPException(
+            status_code=400, detail="Unable to validate google user")
 
-    user = await NoisliAdmin.check_user_exists(payload["sub"], payload["email"])
+    user = await NoisliUser.check_user_exists(payload["sub"],
+                                              payload["email"])
     # If user does not exists then create new user and settings for the user
     if not user:
         user_obj = create_dict_from_payload(payload)
-        user = await NoisliAdmin.create(user_obj)
-        await NoisliSettingsAdmin.create(google_id=user["google_id"])
+        user = await NoisliUser.create(user_obj)
+        await NoisliUser.create(google_id=user["google_id"])
 
     # create a access token
     access_token_expires = timedelta(days=JWT_ACCESS_TOKEN_EXPIRE_DAYS)
@@ -84,7 +113,8 @@ async def create_user(auth: GoogleAuth):
     )
     access_token = jsonable_encoder(access_token)
 
-    response = JSONResponse({"access_token": access_token, "token_type": "bearer"})
+    response = JSONResponse(
+        {"access_token": access_token, "token_type": "bearer"})
     response.set_cookie(
         COOKIE_AUTHORIZATION_NAME,
         value=f"Bearer {access_token}",
@@ -105,10 +135,12 @@ async def get_user_settings(request: Request = None):
 
     user = get_current_user(token)
     if not user:
-        raise HTTPException(status_code=404, detail="No user found from the token")
-    settings = await NoisliSettingsAdmin.get(user["google_id"])
+        raise HTTPException(
+            status_code=404, detail="No user found from the token")
+    settings = await NoisliSettings.get(user["google_id"])
     if not settings:
-        raise HTTPException(status_code=404, detail="No settings found for the user")
+        raise HTTPException(
+            status_code=404, detail="No settings found for the user")
     return settings
 
 
@@ -121,8 +153,9 @@ async def update_user_timer_settings(request: Request = None):
     user = get_current_user(token)
     updated_body = await request.json()
     if not user:
-        raise HTTPException(status_code=404, detail="No user found from the token")
-    user = await NoisliSettingsAdmin.update(
+        raise HTTPException(
+            status_code=404, detail="No user found from the token")
+    user = await NoisliSettings.update(
         google_id=user["google_id"], settings_dict=updated_body
     )
     return user
@@ -136,8 +169,9 @@ async def get_user_account(request: Request = None):
 
     user = get_current_user(token)
     if not user:
-        raise HTTPException(status_code=404, detail="No user found from the token")
-    user = await NoisliAdmin.get(user["google_id"])
+        raise HTTPException(
+            status_code=404, detail="No user found from the token")
+    user = await NoisliUser.get(user["google_id"])
     return user
 
 
@@ -150,6 +184,30 @@ async def update_user_account(request: Request = None):
     user = get_current_user(token)
     updated_body = await request.json()
     if not user:
-        raise HTTPException(status_code=404, detail="No user found from the token")
-    user = await NoisliAdmin.update(google_id=user["google_id"], user_dict=updated_body)
+        raise HTTPException(
+            status_code=404, detail="No user found from the token")
+    user = await NoisliUser.update(google_id=user["google_id"],
+                                   user_dict=updated_body)
     return user
+
+
+@noisli_route.post("/analytics", response_model=UserAnalytics)
+async def create_user_analytics(request: Request = None):
+    token = request.headers.get("x-auth-token")
+    if not token:
+        raise HTTPException(status_code=400, detail="Incorrect headers")
+    user = get_current_user(token)
+    req_body = await request.json()
+    if not user:
+        raise HTTPException(
+            status_code=404, detail="No user found from the token")
+
+    user_analytics = {
+        "created_at": datetime.now(),
+        "google_id": user['google_id'],
+        "duration": req_body['duration'],
+        "full_date": datetime.now(),
+    }
+
+    analytics = await NoisliAnalytics.create(user_analytics)
+    return analytics
