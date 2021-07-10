@@ -102,3 +102,15 @@ class NoisliAnalytics:
             noisli_user_analytics.c.google_id == google_id
         )
         return await database.fetch_all(query)
+
+    @staticmethod
+    async def get_analytics(google_id):
+        """Get Weekly Anlytics."""
+        query = """
+            SELECT TO_CHAR(full_date, 'Mon DD') as weekday, SUM(duration) as total_count
+            from core_noisli_analytics
+            where full_date > CURRENT_DATE - INTERVAL '7 days' and google_id=:google_id
+            GROUP BY TO_CHAR(full_date, 'Mon DD')
+        """
+        results = await database.fetch_all(query, values={"google_id": google_id})
+        return results

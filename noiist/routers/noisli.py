@@ -191,6 +191,20 @@ async def update_user_account(request: Request = None):
     return user
 
 
+@noisli_route.get("/analytics")
+async def get_user_analytics(request: Request = None):
+    token = request.headers.get("x-auth-token")
+    if not token:
+        raise HTTPException(status_code=400, detail="Incorrect headers")
+    user = get_current_user(token)
+    if not user:
+        raise HTTPException(
+            status_code=404, detail="No user found from the token")
+
+    results = await NoisliAnalytics.get_analytics(google_id=user["google_id"])
+    return results
+
+
 @noisli_route.post("/analytics", response_model=UserAnalytics)
 async def create_user_analytics(request: Request = None):
     token = request.headers.get("x-auth-token")
@@ -202,11 +216,12 @@ async def create_user_analytics(request: Request = None):
         raise HTTPException(
             status_code=404, detail="No user found from the token")
 
+    user_date = datetime.now()
     user_analytics = {
-        "created_at": datetime.now(),
+        "created_at": user_date,
         "google_id": user['google_id'],
         "duration": req_body['duration'],
-        "full_date": datetime.now(),
+        "full_date": user_date,
     }
 
     analytics = await NoisliAnalytics.create(user_analytics)
