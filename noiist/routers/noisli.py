@@ -43,10 +43,11 @@ class JWToken(BaseModel):
 class UserAccount(BaseModel):
     """Return user account."""
 
-    given_name: str
-    family_name: str
-    username: str = None
-    email: str
+    given_name: Optional[str] = None
+    family_name: Optional[str] = None
+    username: Optional[str] = None
+    email: Optional[str] = None
+    profile_pic: Optional[str] = None
 
 
 class UserPreferences(BaseModel):
@@ -54,15 +55,6 @@ class UserPreferences(BaseModel):
 
     preference_shuffle_time: str
     preference_background_color: str
-
-
-class UserUpdate(BaseModel):
-    """Update user settings."""
-
-    given_name: Optional[str] = None
-    family_name: Optional[str] = None
-    username: Optional[str] = None
-    email: Optional[str] = None
 
 
 class UserAnalytics(BaseModel):
@@ -89,10 +81,6 @@ async def create_user(auth: GoogleAuth):
     """
     # Get user payload from auth token
     payload = get_user_payload(token=auth.google_token)
-    # query = noisli_user_settings.delete()
-    # await database.execute(query)
-    # await NoisliUser.delete(payload["sub"])
-
     if not check_google_user(payload):
         raise HTTPException(
             status_code=400, detail="Unable to validate google user")
@@ -103,7 +91,7 @@ async def create_user(auth: GoogleAuth):
     if not user:
         user_obj = create_dict_from_payload(payload)
         user = await NoisliUser.create(user_obj)
-        await NoisliUser.create(google_id=user["google_id"])
+        await NoisliSettings.create(google_id=user["google_id"])
 
     # create a access token
     access_token_expires = timedelta(days=JWT_ACCESS_TOKEN_EXPIRE_DAYS)
@@ -226,3 +214,16 @@ async def create_user_analytics(request: Request = None):
 
     analytics = await NoisliAnalytics.create(user_analytics)
     return analytics
+
+
+@noisli_route.get("/delete")
+async def delete_user(request: Request = None):
+    token = request.headers.get("x-auth-token")
+    if not token:
+        raise HTTPException(status_code=400, detail="Incorrect headers")
+    user = get_current_user(token)
+    user_google_id = user['google_id']
+    await NoisliAnalytics.delete(google_id=user_google_id)
+    await NoisliSettings.delete(google_id=user_google_id)
+    await NoisliUser.delete(google_id=user_google_id)
+    return {'success': True, 'google_id': user_google_id}

@@ -37,7 +37,7 @@ class NoisliUser:
         query = noisli_user.delete().where(
             noisli_user.c.google_id == google_id
         )
-        return await database.fetch_one(query)
+        return await database.execute(query)
 
     @staticmethod
     async def check_if_email_exists(email: str):
@@ -84,6 +84,12 @@ class NoisliSettings:
         await database.execute(query)
         return settings_dict
 
+    @staticmethod
+    async def delete(google_id):
+        """Delete user settings"""
+        query = noisli_user_settings.delete().where(noisli_user_settings.c.google_id == google_id)
+        return await database.execute(query)
+
 
 class NoisliAnalytics:
     """Utility class to manage noisli user analytics."""
@@ -114,3 +120,11 @@ class NoisliAnalytics:
         """
         results = await database.fetch_all(query, values={"google_id": google_id})
         return results
+
+    @staticmethod
+    async def delete(google_id):
+        """Delete user analytics"""
+        query = noisli_user_analytics.delete().where(
+            noisli_user_analytics.c.google_id == google_id
+        )
+        return await database.execute(query)
