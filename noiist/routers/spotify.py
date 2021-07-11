@@ -8,21 +8,20 @@ import requests
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse, RedirectResponse
 
+from noiist.routers.constants import (
+    SPOTIFY_TOKEN_URL,
+    SPOTIFY_USER_URL,
+    GRANT_TYPE,
+    REDIRECT_URI,
+    SPOTIFY_CLIENT_ID,
+    SPOTIFY_CLIENT_SECRET,
+)
 from noiist.config.database import database
 from noiist.models import model
 
 LOGGER = logging.getLogger()
 
 spotify_auth = APIRouter()
-
-SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token"
-SPOTIFY_USER_URL = "https://api.spotify.com/v1/me"
-SCOPE = "user-read-recently-played"
-GRANT_TYPE = "authorization_code"
-
-REDIRECT_URI = os.getenv("SPOTIFY_REDIRECT_URI")
-SPOTIFY_CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
-SPOTIFY_CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
 NOIIST_FRONTEND_URL = os.getenv("NOIIST_FRONTEND_URL")
 
 auth_str = "{}:{}".format(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET)
@@ -73,7 +72,6 @@ async def create_new_user(user_dict):
 @spotify_auth.get("/")
 async def get_access_token_and_refresh_token(code: Optional[str] = None):
     if code:
-
         try:
             resp_token = get_access_and_refresh_token(code=code)
             access_token = resp_token["access_token"]
@@ -102,7 +100,7 @@ async def get_access_token_and_refresh_token(code: Optional[str] = None):
                 already_exists = False
 
             # Redirect to frontend with information to display
-            url = f"{NOIIST_FRONTEND_URL}/authorization-success?name={name}&already_exists={already_exists}"
+            url = f"{NOIIST_FRONTEND_URL}/authorization-success?name={name}&already_exists={already_exists}"  # noqa: E501
             return RedirectResponse(url=url)
 
         except requests.exceptions.RequestException as e:

@@ -1,10 +1,11 @@
 import uvicorn
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from noiist.config.database import database, engine, metadata
 from noiist.config.settings import get_setting
 from noiist.routers.spotify import spotify_auth
+from noiist.routers.noisli import noisli_route
 
 settings = get_setting()
 metadata.create_all(engine)
@@ -30,14 +31,22 @@ async def startup():
 async def shutdown():
     await database.disconnect()
 
+
 @app.get('/')
 def index():
     return "App succesfully running."
+
 
 app.include_router(
     spotify_auth,
     prefix="/authorize-spotify",
     tags=["SpotifyAuth"],
+)
+
+app.include_router(
+    noisli_route,
+    prefix="/noisli",
+    tags=["Noisli"],
 )
 
 if __name__ == "__main__":
