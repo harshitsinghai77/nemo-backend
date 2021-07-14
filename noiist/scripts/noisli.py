@@ -16,11 +16,11 @@ async def fake_analytics_data():
     from noiist.config.database import database
 
     await database.connect()
-    date = datetime.now()-timedelta(days=1)
+    date = datetime.now()-timedelta(days=2)
     user_analytics = {
         "created_at": date,
         "google_id": '105048648072263223821',
-        "duration": 2500,
+        "duration": 1500,
         "full_date": date,
     }
 
@@ -39,11 +39,28 @@ async def get_analytics():
         from core_noisli_analytics
         where full_date > CURRENT_DATE - INTERVAL '7 days' and google_id=:google_id
         GROUP BY TO_CHAR(full_date, 'Mon DD')
+        ORDER BY full_date
     """
 
     results = await database.fetch_all(query, values={"google_id": google_id})
     for r in results:
         print(r['weekday'], r['total_count'])
+    await database.disconnect()
+
+
+async def get_stastics():
+    from noiist.config.database import database
+
+    await database.connect()
+    google_id = "105048648072263223821"
+    query = """
+        SELECT * from core_noisli_analytics
+        where full_date > CURRENT_DATE - INTERVAL '7 days' and google_id=:google_id
+        and duration = (SELECT MAX (duration) from core_noisli_analytics)
+    """
+
+    results = await database.fetch_one(query, values={"google_id": google_id})
+    print({**results})
     await database.disconnect()
 
 loop = asyncio.get_event_loop()

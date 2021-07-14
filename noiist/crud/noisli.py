@@ -117,8 +117,20 @@ class NoisliAnalytics:
             from core_noisli_analytics
             where full_date > CURRENT_DATE - INTERVAL '7 days' and google_id=:google_id
             GROUP BY TO_CHAR(full_date, 'Mon DD')
+            ORDER BY TO_CHAR(full_date, 'Mon DD')
         """
         results = await database.fetch_all(query, values={"google_id": google_id})
+        return results
+
+    @staticmethod
+    async def get_best_day(google_id):
+        """Return most number of seconds completed in the last 7 days."""
+        query = """
+            SELECT * from core_noisli_analytics
+            where full_date > CURRENT_DATE - INTERVAL '7 days' and google_id=:google_id
+            and duration = (SELECT MAX (duration) from core_noisli_analytics)
+        """
+        results = await database.fetch_one(query, values={"google_id": google_id})
         return results
 
     @staticmethod

@@ -11,9 +11,7 @@ DB_PORT = os.getenv("DB_PORT", "5436")
 DB_MAX_SIZE = 10
 
 environment = os.getenv("ENV", "development")
-
 DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-
 if environment == "development":
     DATABASE_URL = "postgresql://noisli:password@localhost:5432/noisli"
 

@@ -227,3 +227,14 @@ async def delete_user(request: Request = None):
     await NoisliSettings.delete(google_id=user_google_id)
     await NoisliUser.delete(google_id=user_google_id)
     return {'success': True, 'google_id': user_google_id}
+
+
+@noisli_route.get("/statistics")
+async def get_stats(request: Request = None):
+    token = request.headers.get("x-auth-token")
+    if not token:
+        raise HTTPException(status_code=400, detail="Incorrect headers")
+    user = get_current_user(token)
+    user_google_id = user['google_id']
+    results = await NoisliAnalytics.get_best_day(google_id=user_google_id)
+    return results
