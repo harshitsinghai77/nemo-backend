@@ -1,11 +1,11 @@
 from datetime import datetime, timedelta
 import logging
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Header
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import HTTPException
+from fastapi.param_functions import Depends
 from fastapi.responses import JSONResponse
-from starlette.requests import Request
 
 from noiist.pydantic.noisli import (
     GoogleAuth,
@@ -31,6 +31,16 @@ from noiist.crud.noisli import NoisliUser, NoisliSettings, NoisliAnalytics
 
 LOGGER = logging.getLogger()
 noisli_route = APIRouter()
+
+
+async def current_user(x_auth_token: str = Header(None)):
+    if not x_auth_token:
+        raise HTTPException(status_code=400, detail="x-auth-token header missing.")
+    user = get_current_user(x_auth_token)
+    if not user:
+        raise HTTPException(
+            status_code=404, detail="No user found from the token. Invalid x-auth-token.")
+    return user
 
 
 @noisli_route.post("/login")
@@ -83,15 +93,7 @@ async def create_user(auth: GoogleAuth):
 
 
 @noisli_route.get("/settings")
-async def get_user_settings(request: Request = None):
-    token = request.headers.get("x-auth-token")
-    if not token:
-        raise HTTPException(status_code=400, detail="Incorrect headers")
-
-    user = get_current_user(token)
-    if not user:
-        raise HTTPException(
-            status_code=404, detail="No user found from the token")
+async def get_user_settings(user=Depends(current_user)):
     settings = await NoisliSettings.get(user["google_id"])
     if not settings:
         raise HTTPException(
@@ -100,15 +102,7 @@ async def get_user_settings(request: Request = None):
 
 
 @noisli_route.patch("/settings")
-async def update_user_timer_settings(settings: UserSettings, request: Request = None):
-    token = request.headers.get("x-auth-token")
-    if not token:
-        raise HTTPException(status_code=400, detail="Incorrect headers")
-
-    user = get_current_user(token)
-    if not user:
-        raise HTTPException(
-            status_code=404, detail="No user found from the token")
+async def update_user_timer_settings(settings: UserSettings, user=Depends(current_user)):
     updated_body = settings.dict(exclude_unset=True)
     user = await NoisliSettings.update(
         google_id=user["google_id"], settings_dict=updated_body
@@ -117,58 +111,27 @@ async def update_user_timer_settings(settings: UserSettings, request: Request = 
 
 
 @noisli_route.get("/account", response_model=UserAccount)
-async def get_user_account(request: Request = None):
-    token = request.headers.get("x-auth-token")
-    if not token:
-        raise HTTPException(status_code=400, detail="Incorrect headers")
-
-    user = get_current_user(token)
-    if not user:
-        raise HTTPException(
-            status_code=404, detail="No user found from the token")
+async def get_user_account(user=Depends(current_user)):
     user = await NoisliUser.get(user["google_id"])
     return user
 
 
 @noisli_route.patch("/account", response_model=UserAccount)
-async def update_user_account(account: Account, request: Request = None):
-    token = request.headers.get("x-auth-token")
-    if not token:
-        raise HTTPException(status_code=400, detail="Incorrect headers")
-
-    user = get_current_user(token)
+async def update_user_account(account: Account, user=Depends(current_user)):
     account_dict = account.dict()
-    if not user:
-        raise HTTPException(
-            status_code=404, detail="No user found from the token")
     user = await NoisliUser.update(google_id=user["google_id"],
                                    user_dict=account_dict)
     return user
 
 
 @noisli_route.get("/analytics")
-async def get_user_analytics(request: Request = None):
-    token = request.headers.get("x-auth-token")
-    if not token:
-        raise HTTPException(status_code=400, detail="Incorrect headers")
-    user = get_current_user(token)
-    if not user:
-        raise HTTPException(
-            status_code=404, detail="No user found from the token")
-
+async def get_user_analytics(user=Depends(current_user)):
     results = await NoisliAnalytics.get_analytics(google_id=user["google_id"])
     return results
 
 
 @noisli_route.post("/analytics", response_model=GetAnalytics)
-async def create_user_analytics(analytics: Analytics, request: Request = None):
-    token = request.headers.get("x-auth-token")
-    if not token:
-        raise HTTPException(status_code=400, detail="Incorrect headers")
-    user = get_current_user(token)
-    if not user:
-        raise HTTPException(
-            status_code=404, detail="No user found from the token")
+async def create_user_analytics(analytics: Analytics, user=Depends(current_user)):
     user_date = datetime.now()
     user_analytics = {
         "created_at": user_date,
@@ -182,22 +145,14 @@ async def create_user_analytics(analytics: Analytics, request: Request = None):
 
 
 @noisli_route.get("/statistics")
-async def get_stats(request: Request = None):
-    token = request.headers.get("x-auth-token")
-    if not token:
-        raise HTTPException(status_code=400, detail="Incorrect headers")
-    user = get_current_user(token)
+async def get_stats(user=Depends(current_user)):
     user_google_id = user['google_id']
     results = await NoisliAnalytics.get_best_day(google_id=user_google_id)
     return results
 
 
 @noisli_route.delete("/delete")
-async def delete_user(request: Request = None):
-    token = request.headers.get("x-auth-token")
-    if not token:
-        raise HTTPException(status_code=400, detail="Incorrect headers")
-    user = get_current_user(token)
+async def delete_user(user=Depends(current_user)):
     user_google_id = user['google_id']
     await NoisliAnalytics.delete(google_id=user_google_id)
     await NoisliSettings.delete(google_id=user_google_id)
