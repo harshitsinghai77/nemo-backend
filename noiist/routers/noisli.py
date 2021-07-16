@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 import logging
-from typing import Optional
 
 from fastapi import APIRouter
 from fastapi.encoders import jsonable_encoder
@@ -8,13 +7,19 @@ from fastapi.exceptions import HTTPException
 from fastapi.responses import JSONResponse
 from starlette.requests import Request
 
-from pydantic import BaseModel
+from noiist.pydantic.noisli import (
+    GoogleAuth,
+    UserAccount,
+    GetAnalytics,
+    UserSettings,
+    Analytics,
+    Account
+)
 from noiist.routers.constants import (
     JWT_ACCESS_TOKEN_EXPIRE_DAYS,
     COOKIE_AUTHORIZATION_NAME,
     COOKIE_DOMAIN,
 )
-
 from noiist.utils.noisli import (
     check_google_user,
     create_dict_from_payload,
@@ -26,44 +31,6 @@ from noiist.crud.noisli import NoisliUser, NoisliSettings, NoisliAnalytics
 
 LOGGER = logging.getLogger()
 noisli_route = APIRouter()
-
-
-class GoogleAuth(BaseModel):
-    """User google token."""
-
-    google_token: str
-
-
-class JWToken(BaseModel):
-    """Returns JWT token for the user."""
-
-    jwt_token: str
-
-
-class UserAccount(BaseModel):
-    """Return user account."""
-
-    given_name: Optional[str] = None
-    family_name: Optional[str] = None
-    username: Optional[str] = None
-    email: Optional[str] = None
-    profile_pic: Optional[str] = None
-
-
-class UserPreferences(BaseModel):
-    """Update user UI preference."""
-
-    preference_shuffle_time: str
-    preference_background_color: str
-
-
-class UserAnalytics(BaseModel):
-    """User Analytics"""
-
-    created_at: datetime
-    google_id: str
-    duration: int
-    full_date: datetime
 
 
 @noisli_route.post("/login")
@@ -133,16 +100,16 @@ async def get_user_settings(request: Request = None):
 
 
 @noisli_route.patch("/settings")
-async def update_user_timer_settings(request: Request = None):
+async def update_user_timer_settings(settings: UserSettings, request: Request = None):
     token = request.headers.get("x-auth-token")
     if not token:
         raise HTTPException(status_code=400, detail="Incorrect headers")
 
     user = get_current_user(token)
-    updated_body = await request.json()
     if not user:
         raise HTTPException(
             status_code=404, detail="No user found from the token")
+    updated_body = settings.dict(exclude_unset=True)
     user = await NoisliSettings.update(
         google_id=user["google_id"], settings_dict=updated_body
     )
@@ -164,18 +131,18 @@ async def get_user_account(request: Request = None):
 
 
 @noisli_route.patch("/account", response_model=UserAccount)
-async def update_user_account(request: Request = None):
+async def update_user_account(account: Account, request: Request = None):
     token = request.headers.get("x-auth-token")
     if not token:
         raise HTTPException(status_code=400, detail="Incorrect headers")
 
     user = get_current_user(token)
-    updated_body = await request.json()
+    account_dict = account.dict()
     if not user:
         raise HTTPException(
             status_code=404, detail="No user found from the token")
     user = await NoisliUser.update(google_id=user["google_id"],
-                                   user_dict=updated_body)
+                                   user_dict=account_dict)
     return user
 
 
@@ -193,22 +160,20 @@ async def get_user_analytics(request: Request = None):
     return results
 
 
-@noisli_route.post("/analytics", response_model=UserAnalytics)
-async def create_user_analytics(request: Request = None):
+@noisli_route.post("/analytics", response_model=GetAnalytics)
+async def create_user_analytics(analytics: Analytics, request: Request = None):
     token = request.headers.get("x-auth-token")
     if not token:
         raise HTTPException(status_code=400, detail="Incorrect headers")
     user = get_current_user(token)
-    req_body = await request.json()
     if not user:
         raise HTTPException(
             status_code=404, detail="No user found from the token")
-
     user_date = datetime.now()
     user_analytics = {
         "created_at": user_date,
         "google_id": user['google_id'],
-        "duration": req_body['duration'],
+        "duration": analytics.duration,
         "full_date": user_date,
     }
 
