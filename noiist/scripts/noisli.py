@@ -16,11 +16,11 @@ async def fake_analytics_data():
     from noiist.config.database import database
 
     await database.connect()
-    date = datetime.now()-timedelta(days=2)
+    date = datetime.now()-timedelta(days=3)
     user_analytics = {
         "created_at": date,
         "google_id": '105048648072263223821',
-        "duration": 1500,
+        "duration": 4000,
         "full_date": date,
     }
 
@@ -64,5 +64,5 @@ async def get_stastics():
     await database.disconnect()
 
 loop = asyncio.get_event_loop()
-loop.run_until_complete(get_analytics())
+loop.run_until_complete(fake_analytics_data())
 loop.close()

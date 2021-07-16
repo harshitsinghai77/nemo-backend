@@ -10,6 +10,9 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 43200  # 30 Days
     JWT_TOKEN_TYPE: str = "bearer"
+    ORIGINS = ["https://noisli.netlify.app"]
+    if os.getenv("ENV") == "development":
+        ORIGINS.append("http://localhost:3000")
 
     REGISTRATION_TOKEN_LIFETIME = 60 * 60
     TOKEN_ALGORITHM = "HS256"

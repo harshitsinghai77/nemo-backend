@@ -11,11 +11,10 @@ settings = get_setting()
 metadata.create_all(engine)
 
 app = FastAPI(title=settings.APP_NAME)
-origins = ["https://noisli.netlify.app"]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=settings.ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
