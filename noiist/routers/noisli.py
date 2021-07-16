@@ -192,7 +192,7 @@ async def get_stats(request: Request = None):
     return results
 
 
-@noisli_route.get("/delete")
+@noisli_route.delete("/delete")
 async def delete_user(request: Request = None):
     token = request.headers.get("x-auth-token")
     if not token:
