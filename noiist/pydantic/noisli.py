@@ -39,6 +39,8 @@ class UserSettings(BaseModel):
     timer_sessions: Optional[int]
     timer_auto_start: Optional[bool]
     timer_break_end_notification: Optional[bool]
+    preference_shuffle_time: Optional[str]
+    preference_background_color: Optional[str]
 
 
 class Analytics(BaseModel):
