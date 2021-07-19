@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 import logging
 
-from fastapi import APIRouter, Header
+from fastapi import APIRouter, Header, BackgroundTasks
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import HTTPException
 from fastapi.param_functions import Depends
@@ -28,6 +28,7 @@ from noiist.utils.noisli import (
     get_current_user,
 )
 from noiist.crud.noisli import NoisliUser, NoisliSettings, NoisliAnalytics
+from noiist.emails.send_email import send_email
 
 LOGGER = logging.getLogger()
 noisli_route = APIRouter()
@@ -44,7 +45,7 @@ async def current_user(x_auth_token: str = Header(None)):
 
 
 @noisli_route.post("/login")
-async def create_user(auth: GoogleAuth):
+async def create_user(auth: GoogleAuth, background_tasks: BackgroundTasks):
     """Create a new user or return existing user
 
     Args:
@@ -69,6 +70,12 @@ async def create_user(auth: GoogleAuth):
         user_obj = create_dict_from_payload(payload)
         user = await NoisliUser.create(user_obj)
         await NoisliSettings.create(google_id=user["google_id"])
+        # send welcome email to user as a background task
+        background_tasks.add_task(
+            send_email,
+            receiver_fullname=user_obj['given_name'],
+            receiver_email=user_obj['email']
+        )
 
     # create a access token
     access_token_expires = timedelta(days=JWT_ACCESS_TOKEN_EXPIRE_DAYS)
