@@ -2,10 +2,9 @@ import os
 from datetime import datetime, timedelta
 
 import jwt
-from google.oauth2 import id_token
-from google.auth.transport import requests
-
 from fastapi.exceptions import HTTPException
+from google.auth.transport import requests
+from google.oauth2 import id_token
 from starlette.status import HTTP_403_FORBIDDEN
 
 from noiist.routers.constants import GOOGLE_CLIENT_ID

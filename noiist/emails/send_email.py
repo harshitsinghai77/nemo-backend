@@ -1,15 +1,15 @@
 import os
 import smtplib
 import ssl
-from smtplib import SMTPAuthenticationError
-from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from smtplib import SMTPAuthenticationError
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 env = Environment(
     loader=FileSystemLoader(searchpath="noiist/emails/templates/"),
-    autoescape=select_autoescape()
+    autoescape=select_autoescape(),
 )
 
 template = env.get_template("welcome-email.html")
@@ -39,8 +39,6 @@ def send_email(receiver_fullname: str, receiver_email: str):
     try:
         with smtplib.SMTP_SSL("smtp.gmail.com", email_port, context=context) as server:
             server.login(app_email, app_password)
-            server.sendmail(
-                app_email, receiver_email, email_message.as_string()
-            )
+            server.sendmail(app_email, receiver_email, email_message.as_string())
     except SMTPAuthenticationError:
         print("The server didn’t accept the username/password combination.")

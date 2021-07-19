@@ -12,14 +12,15 @@ def dangerously_drop_noistli_table():
 async def fake_analytics_data():
     """Fake analytics data for testing."""
     from datetime import datetime, timedelta
-    from noiist.models.noisli import noisli_user_analytics
+
     from noiist.config.database import database
+    from noiist.models.noisli import noisli_user_analytics
 
     await database.connect()
-    date = datetime.now()-timedelta(days=3)
+    date = datetime.now() - timedelta(days=3)
     user_analytics = {
         "created_at": date,
-        "google_id": '105048648072263223821',
+        "google_id": "105048648072263223821",
         "duration": 4000,
         "full_date": date,
     }
@@ -44,7 +45,7 @@ async def get_analytics():
 
     results = await database.fetch_all(query, values={"google_id": google_id})
     for r in results:
-        print(r['weekday'], r['total_count'])
+        print(r["weekday"], r["total_count"])
     await database.disconnect()
 
 
@@ -62,6 +63,7 @@ async def get_stastics():
     results = await database.fetch_one(query, values={"google_id": google_id})
     print({**results})
     await database.disconnect()
+
 
 loop = asyncio.get_event_loop()
 loop.run_until_complete(fake_analytics_data())

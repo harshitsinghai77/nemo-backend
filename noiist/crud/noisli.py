@@ -1,5 +1,6 @@
 from noiist.config.database import database
-from noiist.models.noisli import noisli_user, noisli_user_settings, noisli_user_analytics
+from noiist.models.noisli import (noisli_user, noisli_user_analytics,
+                                  noisli_user_settings)
 
 
 class NoisliUser:
@@ -26,17 +27,13 @@ class NoisliUser:
     @staticmethod
     async def get(google_id):
         """Get the user from the database."""
-        query = noisli_user.select().where(
-            noisli_user.c.google_id == google_id
-        )
+        query = noisli_user.select().where(noisli_user.c.google_id == google_id)
         return await database.fetch_one(query)
 
     @staticmethod
     async def delete(google_id: str):
         """Delete the user from the database."""
-        query = noisli_user.delete().where(
-            noisli_user.c.google_id == google_id
-        )
+        query = noisli_user.delete().where(noisli_user.c.google_id == google_id)
         return await database.execute(query)
 
     @staticmethod
@@ -49,8 +46,7 @@ class NoisliUser:
     async def check_user_exists(google_id: str, email: str):
         """Check if user exists."""
         query = noisli_user.select().where(
-            noisli_user.c.google_id == google_id and
-            noisli_user.c.email == email
+            noisli_user.c.google_id == google_id and noisli_user.c.email == email
         )
         return await database.fetch_one(query)
 
@@ -61,8 +57,7 @@ class NoisliSettings:
     @staticmethod
     async def create(google_id):
         """Create new user settings."""
-        query_settings = noisli_user_settings.insert().values(
-            {"google_id": google_id})
+        query_settings = noisli_user_settings.insert().values({"google_id": google_id})
         return await database.execute(query_settings)
 
     @staticmethod
@@ -87,7 +82,9 @@ class NoisliSettings:
     @staticmethod
     async def delete(google_id):
         """Delete user settings"""
-        query = noisli_user_settings.delete().where(noisli_user_settings.c.google_id == google_id)
+        query = noisli_user_settings.delete().where(
+            noisli_user_settings.c.google_id == google_id
+        )
         return await database.execute(query)
 
 

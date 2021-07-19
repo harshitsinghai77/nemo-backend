@@ -6,4 +6,7 @@ deploy:
 
 rundev:
 	uvicorn main:app --reload
-	
+
+format:
+	black .
+	isort .
