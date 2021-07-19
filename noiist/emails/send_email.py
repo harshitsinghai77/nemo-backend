@@ -36,9 +36,6 @@ def send_email(receiver_fullname: str, receiver_email: str):
 
     # Create secure connection with server and send email
     context = ssl.create_default_context()
-    try:
-        with smtplib.SMTP_SSL("smtp.gmail.com", email_port, context=context) as server:
-            server.login(app_email, app_password)
-            server.sendmail(app_email, receiver_email, email_message.as_string())
-    except SMTPAuthenticationError:
-        print("The server didn’t accept the username/password combination.")
+    with smtplib.SMTP_SSL("smtp.gmail.com", email_port, context=context) as server:
+        server.login(app_email, app_password)
+        server.sendmail(app_email, receiver_email, email_message.as_string())
