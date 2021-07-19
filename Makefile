@@ -3,3 +3,6 @@ requirments:
 
 deploy:
 	git push heroku master
+
+rundev:
+	uvicorn main:app --reload
