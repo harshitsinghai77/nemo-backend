@@ -6,3 +6,4 @@ deploy:
 
 rundev:
 	uvicorn main:app --reload
+	
