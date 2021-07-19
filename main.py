@@ -1,3 +1,4 @@
+"""Main app which serves the application."""
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -23,16 +24,19 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def startup():
+    """Connect to database on startup."""
     await database.connect()
 
 
 @app.on_event("shutdown")
 async def shutdown():
+    """Disconnect to database on shutdown."""
     await database.disconnect()
 
 
 @app.get("/")
 def index():
+    """Generic message if backend is deployed succesfully."""
     return "App succesfully running."
 
 
