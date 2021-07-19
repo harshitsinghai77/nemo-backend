@@ -70,7 +70,7 @@ async def create_user(auth: GoogleAuth, background_tasks: BackgroundTasks):
         user_obj = create_dict_from_payload(payload)
         user = await NoisliUser.create(user_obj)
         await NoisliSettings.create(google_id=user["google_id"])
-        # send welcome email to user with FastAPI background task
+        # send welcome email to user as a background task
         background_tasks.add_task(
             send_email,
             receiver_fullname=user_obj['given_name'],
