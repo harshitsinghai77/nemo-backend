@@ -17,8 +17,7 @@ start_docker:
 	docker run -d --name noiist-app -p 5000:5000 noiist-app
 
 format:
-	black .
-	isort .
-
+	bash format.sh
+	
 lint:
 	pylint noiist
