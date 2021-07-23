@@ -10,12 +10,12 @@ deploy:
 runserver:
 	uvicorn main:app --reload
 
-build_docker:
+docker_image:
 	docker build -t noiist-app .
 
-start_docker:
+start_docker_container:
 	docker run -d --name noiist-app -p 5000:5000 noiist-app
-
+  
 format:
 	bash format.sh
 	
