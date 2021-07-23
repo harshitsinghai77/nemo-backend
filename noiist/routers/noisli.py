@@ -9,13 +9,26 @@ from fastapi.responses import JSONResponse
 
 from noiist.crud.noisli import NoisliAnalytics, NoisliSettings, NoisliUser
 from noiist.emails.send_email import send_email
-from noiist.pydantic.noisli import (Account, Analytics, GetAnalytics,
-                                    GoogleAuth, UserAccount, UserSettings)
-from noiist.routers.constants import (COOKIE_AUTHORIZATION_NAME, COOKIE_DOMAIN,
-                                      JWT_ACCESS_TOKEN_EXPIRE_DAYS)
-from noiist.utils.noisli import (check_google_user, create_access_token,
-                                 create_dict_from_payload, get_current_user,
-                                 get_user_payload)
+from noiist.pydantic.noisli import (
+    Account,
+    Analytics,
+    GetAnalytics,
+    GoogleAuth,
+    UserAccount,
+    UserSettings,
+)
+from noiist.routers.constants import (
+    COOKIE_AUTHORIZATION_NAME,
+    COOKIE_DOMAIN,
+    JWT_ACCESS_TOKEN_EXPIRE_DAYS,
+)
+from noiist.utils.noisli import (
+    check_google_user,
+    create_access_token,
+    create_dict_from_payload,
+    get_current_user,
+    get_user_payload,
+)
 
 LOGGER = logging.getLogger()
 noisli_route = APIRouter()

@@ -3,7 +3,6 @@ import smtplib
 import ssl
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from smtplib import SMTPAuthenticationError
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
@@ -14,9 +13,9 @@ env = Environment(
 
 template = env.get_template("welcome-email.html")
 
-app_email = os.getenv("GMAIL_EMAIL")
-app_password = os.getenv("GMAIL_EMAIL_PASSWORD")
-email_port = os.getenv("GMAIL_EMAIL_PORT")
+app_email: str = os.getenv("GMAIL_EMAIL", "")
+app_password: str = os.getenv("GMAIL_EMAIL_PASSWORD", "")
+email_port: int = int(os.getenv("GMAIL_EMAIL_PORT", 465))
 
 email_message = MIMEMultipart("alternative")
 email_message["Subject"] = "Welcome to Noisli"

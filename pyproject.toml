@@ -22,6 +22,16 @@ black = "^21.5b2"
 isort = "^5.8.0"
 flake8 = "^3.9.2"
 autopep8 = "^1.5.7"
+autoflake = "^1.4"
+mypy = "^0.910"
+types-requests = "^2.25.0"
+sqlalchemy-stubs = "^0.4"
+
+[tool.isort]
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+line_length = 100
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

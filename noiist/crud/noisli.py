@@ -1,6 +1,5 @@
 from noiist.config.database import database
-from noiist.models.noisli import (noisli_user, noisli_user_analytics,
-                                  noisli_user_settings)
+from noiist.models.noisli import noisli_user, noisli_user_analytics, noisli_user_settings
 
 
 class NoisliUser:
