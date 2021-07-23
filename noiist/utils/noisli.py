@@ -13,8 +13,8 @@ credentials_exception = HTTPException(
     status_code=HTTP_403_FORBIDDEN, detail="Could not validate credentials"
 )
 
-JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
-JWT_ALGORITHM = os.getenv("JWT_ALGORITHM")
+JWT_SECRET_KEY: str = os.getenv("JWT_SECRET_KEY", "09d25e094faa6ca")
+JWT_ALGORITHM: str = os.getenv("JWT_ALGORITHM", "HS256")
 
 
 def check_google_user(payload):

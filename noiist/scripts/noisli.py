@@ -17,11 +17,11 @@ async def fake_analytics_data():
     from noiist.models.noisli import noisli_user_analytics
 
     await database.connect()
-    date = datetime.now() - timedelta(days=3)
+    date = datetime.now() - timedelta(days=4)
     user_analytics = {
         "created_at": date,
         "google_id": "105048648072263223821",
-        "duration": 4000,
+        "duration": 20000,
         "full_date": date,
     }
 

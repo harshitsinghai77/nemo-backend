@@ -10,9 +10,14 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 
 from noiist.config.database import database
 from noiist.models import model
-from noiist.routers.constants import (GRANT_TYPE, REDIRECT_URI,
-                                      SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET,
-                                      SPOTIFY_TOKEN_URL, SPOTIFY_USER_URL)
+from noiist.routers.constants import (
+    GRANT_TYPE,
+    REDIRECT_URI,
+    SPOTIFY_CLIENT_ID,
+    SPOTIFY_CLIENT_SECRET,
+    SPOTIFY_TOKEN_URL,
+    SPOTIFY_USER_URL,
+)
 
 LOGGER = logging.getLogger()
 
