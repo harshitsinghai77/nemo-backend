@@ -1,14 +1,14 @@
-from noiist.config.database import database
-from noiist.models.noisli import noisli_user, noisli_user_analytics, noisli_user_settings
+from nemo.config.database import database
+from nemo.models.nemo import nemo_user, nemo_user_analytics, nemo_user_settings
 
 
-class NoisliUser:
-    """Utility class to manage noisli user."""
+class NemoUser:
+    """Utility class to manage nemo user."""
 
     @staticmethod
     async def create(user_dict):
         """Create a new user."""
-        query = noisli_user.insert().values(**user_dict)
+        query = nemo_user.insert().values(**user_dict)
         last_record = await database.execute(query)
         return {**user_dict, "id": last_record}
 
@@ -16,8 +16,8 @@ class NoisliUser:
     async def update(google_id, user_dict):
         """Update an existing user."""
         query = (
-            noisli_user.update()
-            .where(noisli_user.c.google_id == google_id)
+            nemo_user.update()
+            .where(nemo_user.c.google_id == google_id)
             .values(**user_dict)
         )
         last_record = await database.execute(query)
@@ -26,44 +26,44 @@ class NoisliUser:
     @staticmethod
     async def get(google_id):
         """Get the user from the database."""
-        query = noisli_user.select().where(noisli_user.c.google_id == google_id)
+        query = nemo_user.select().where(nemo_user.c.google_id == google_id)
         return await database.fetch_one(query)
 
     @staticmethod
     async def delete(google_id: str):
         """Delete the user from the database."""
-        query = noisli_user.delete().where(noisli_user.c.google_id == google_id)
+        query = nemo_user.delete().where(nemo_user.c.google_id == google_id)
         return await database.execute(query)
 
     @staticmethod
     async def check_if_email_exists(email: str):
         """Check if the email already exists."""
-        query = noisli_user.select().where(noisli_user.c.email == email)
+        query = nemo_user.select().where(nemo_user.c.email == email)
         return await database.fetch_one(query)
 
     @staticmethod
     async def check_user_exists(google_id: str, email: str):
         """Check if user exists."""
-        query = noisli_user.select().where(
-            noisli_user.c.google_id == google_id and noisli_user.c.email == email
+        query = nemo_user.select().where(
+            nemo_user.c.google_id == google_id and nemo_user.c.email == email
         )
         return await database.fetch_one(query)
 
 
-class NoisliSettings:
-    """Utility class to manage noisli user settings."""
+class NemoSettings:
+    """Utility class to manage nemo user settings."""
 
     @staticmethod
     async def create(google_id):
         """Create new user settings."""
-        query_settings = noisli_user_settings.insert().values({"google_id": google_id})
+        query_settings = nemo_user_settings.insert().values({"google_id": google_id})
         return await database.execute(query_settings)
 
     @staticmethod
     async def get(google_id):
         """Get user settings."""
-        query = noisli_user_settings.select().where(
-            noisli_user_settings.c.google_id == google_id
+        query = nemo_user_settings.select().where(
+            nemo_user_settings.c.google_id == google_id
         )
         return await database.fetch_one(query)
 
@@ -71,8 +71,8 @@ class NoisliSettings:
     async def update(google_id, settings_dict):
         """Update user settings."""
         query = (
-            noisli_user_settings.update()
-            .where(noisli_user_settings.c.google_id == google_id)
+            nemo_user_settings.update()
+            .where(nemo_user_settings.c.google_id == google_id)
             .values(**settings_dict)
         )
         await database.execute(query)
@@ -81,27 +81,27 @@ class NoisliSettings:
     @staticmethod
     async def delete(google_id):
         """Delete user settings"""
-        query = noisli_user_settings.delete().where(
-            noisli_user_settings.c.google_id == google_id
+        query = nemo_user_settings.delete().where(
+            nemo_user_settings.c.google_id == google_id
         )
         return await database.execute(query)
 
 
-class NoisliAnalytics:
-    """Utility class to manage noisli user analytics."""
+class NemoAnalytics:
+    """Utility class to manage nemo user analytics."""
 
     @staticmethod
     async def create(user_analytics):
         """Create new analytics."""
-        query = noisli_user_analytics.insert().values(**user_analytics)
+        query = nemo_user_analytics.insert().values(**user_analytics)
         await database.execute(query)
         return user_analytics
 
     @staticmethod
     async def get(google_id):
         """Get user analytics."""
-        query = noisli_user_analytics.select().where(
-            noisli_user_analytics.c.google_id == google_id
+        query = nemo_user_analytics.select().where(
+            nemo_user_analytics.c.google_id == google_id
         )
         return await database.fetch_all(query)
 
@@ -110,7 +110,7 @@ class NoisliAnalytics:
         """Get Weekly Anlytics."""
         query = """
             SELECT TO_CHAR(full_date, 'Mon DD') as weekday, SUM(duration) as total_count
-            from core_noisli_analytics
+            from core_nemo_analytics
             where full_date > CURRENT_DATE - INTERVAL '7 days' and google_id=:google_id
             GROUP BY TO_CHAR(full_date, 'Mon DD')
             ORDER BY TO_CHAR(full_date, 'Mon DD')
@@ -122,9 +122,9 @@ class NoisliAnalytics:
     async def get_best_day(google_id):
         """Return most number of seconds completed in the last 7 days."""
         query = """
-            SELECT * from core_noisli_analytics
+            SELECT * from core_nemo_analytics
             where full_date > CURRENT_DATE - INTERVAL '7 days' and google_id=:google_id
-            and duration = (SELECT MAX (duration) from core_noisli_analytics)
+            and duration = (SELECT MAX (duration) from core_nemo_analytics)
         """
         results = await database.fetch_one(query, values={"google_id": google_id})
         return results
@@ -132,7 +132,7 @@ class NoisliAnalytics:
     @staticmethod
     async def delete(google_id):
         """Delete user analytics"""
-        query = noisli_user_analytics.delete().where(
-            noisli_user_analytics.c.google_id == google_id
+        query = nemo_user_analytics.delete().where(
+            nemo_user_analytics.c.google_id == google_id
         )
         return await database.execute(query)

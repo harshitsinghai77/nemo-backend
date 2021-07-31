@@ -1,7 +1,7 @@
 from sqlalchemy import Boolean, Column, DateTime, Integer, String, Table, Text
 from sqlalchemy.sql import func
 
-from noiist.config.database import metadata
+from nemo.config.database import metadata
 
 user = Table(
     "core_user",

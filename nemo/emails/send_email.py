@@ -7,7 +7,7 @@ from email.mime.text import MIMEText
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 env = Environment(
-    loader=FileSystemLoader(searchpath="noiist/emails/templates/"),
+    loader=FileSystemLoader(searchpath="nemo/emails/templates/"),
     autoescape=select_autoescape(),
 )
 
@@ -18,7 +18,7 @@ app_password: str = os.getenv("GMAIL_EMAIL_PASSWORD", "")
 email_port: int = int(os.getenv("GMAIL_EMAIL_PORT", 465))
 
 email_message = MIMEMultipart("alternative")
-email_message["Subject"] = "Welcome to Noisli"
+email_message["Subject"] = "Welcome to Nemo"
 email_message["From"] = app_email
 
 

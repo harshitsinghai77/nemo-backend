@@ -3,10 +3,10 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from noiist.config.database import database, engine, metadata
-from noiist.config.settings import get_setting
-from noiist.routers.noisli import noisli_route
-from noiist.routers.spotify import spotify_auth
+from nemo.config.database import database, engine, metadata
+from nemo.config.settings import get_setting
+from nemo.routers.nemo import nemo_route
+from nemo.routers.spotify import spotify_auth
 
 settings = get_setting()
 metadata.create_all(engine)
@@ -47,9 +47,9 @@ app.include_router(
 )
 
 app.include_router(
-    noisli_route,
-    prefix="/noisli",
-    tags=["Noisli"],
+    nemo_route,
+    prefix="/nemo",
+    tags=["Nemo"],
 )
 
 if __name__ == "__main__":

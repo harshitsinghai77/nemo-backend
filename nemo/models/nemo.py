@@ -1,9 +1,9 @@
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Table, Text
 
-from noiist.config.database import metadata
+from nemo.config.database import metadata
 
-noisli_user = Table(
-    "core_noisli_user",
+nemo_user = Table(
+    "core_nemo_user",
     metadata,
     Column("created_at", DateTime),
     Column("id", Integer, primary_key=True, unique=True, autoincrement=True),
@@ -18,10 +18,10 @@ noisli_user = Table(
     Column("email_verified", Boolean, server_default="False"),
 )
 
-noisli_user_settings = Table(
-    "core_noisli_settings",
+nemo_user_settings = Table(
+    "core_nemo_settings",
     metadata,
-    Column("google_id", ForeignKey("core_noisli_user.google_id")),
+    Column("google_id", ForeignKey("core_nemo_user.google_id")),
     Column("timer_time", String, server_default="2700"),
     Column("display_time", String, server_default="45 : 00"),
     Column("timer_end_notification", Boolean, server_default="False"),
@@ -34,11 +34,11 @@ noisli_user_settings = Table(
     Column("preference_background_color", String, server_default="rainbow"),
 )
 
-noisli_user_analytics = Table(
-    "core_noisli_analytics",
+nemo_user_analytics = Table(
+    "core_nemo_analytics",
     metadata,
     Column("created_at", DateTime),
-    Column("google_id", ForeignKey("core_noisli_user.google_id")),
+    Column("google_id", ForeignKey("core_nemo_user.google_id")),
     Column("duration", Integer),  # in seconds
     Column("full_date", DateTime),
 )

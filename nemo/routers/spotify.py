@@ -8,9 +8,9 @@ import requests
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse, RedirectResponse
 
-from noiist.config.database import database
-from noiist.models import model
-from noiist.routers.constants import (
+from nemo.config.database import database
+from nemo.models import model
+from nemo.routers.constants import (
     GRANT_TYPE,
     REDIRECT_URI,
     SPOTIFY_CLIENT_ID,

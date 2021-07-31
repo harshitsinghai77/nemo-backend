@@ -1,6 +1,6 @@
-# Backend powering Noisli and Noiist
+# Backend powering Nemo and Noiist
 
-### Noisli: https://noisli.netlify.app/
+### Nemo: https://noisli.netlify.app/
 
 ### Noiist: https://noiist.netlify.app/
 
@@ -13,11 +13,11 @@
 5. Frontend hosted on Netlify
 6. Backend hosted on Heroku
 
-## Noisli
+## Nemo
 
-Noisli is your digital place for focus.
+Nemo is your digital place for focus.
 
-Noisli helps you boost your motivation and help you think more creatively.
+Nemo helps you boost your motivation and help you think more creatively.
 
 Demo: https://noisli.netlify.app/
 

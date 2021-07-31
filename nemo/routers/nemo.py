@@ -7,9 +7,9 @@ from fastapi.exceptions import HTTPException
 from fastapi.param_functions import Depends
 from fastapi.responses import JSONResponse
 
-from noiist.crud.noisli import NoisliAnalytics, NoisliSettings, NoisliUser
-from noiist.emails.send_email import send_email
-from noiist.pydantic.noisli import (
+from nemo.crud.nemo import NemoAnalytics, NemoSettings, NemoUser
+from nemo.emails.send_email import send_email
+from nemo.pydantic.nemo import (
     Account,
     Analytics,
     GetAnalytics,
@@ -17,12 +17,12 @@ from noiist.pydantic.noisli import (
     UserAccount,
     UserSettings,
 )
-from noiist.routers.constants import (
+from nemo.routers.constants import (
     COOKIE_AUTHORIZATION_NAME,
     COOKIE_DOMAIN,
     JWT_ACCESS_TOKEN_EXPIRE_DAYS,
 )
-from noiist.utils.noisli import (
+from nemo.utils.nemo import (
     check_google_user,
     create_access_token,
     create_dict_from_payload,
@@ -31,7 +31,7 @@ from noiist.utils.noisli import (
 )
 
 LOGGER = logging.getLogger()
-noisli_route = APIRouter()
+nemo_route = APIRouter()
 
 
 async def current_user(x_auth_token: str = Header(None)):
@@ -46,7 +46,7 @@ async def current_user(x_auth_token: str = Header(None)):
     return user
 
 
-@noisli_route.post("/login")
+@nemo_route.post("/login")
 async def create_user(auth: GoogleAuth, background_tasks: BackgroundTasks):
     """Create a new user or return existing user
 
@@ -64,12 +64,12 @@ async def create_user(auth: GoogleAuth, background_tasks: BackgroundTasks):
     if not check_google_user(payload):
         raise HTTPException(status_code=400, detail="Unable to validate google user")
 
-    user = await NoisliUser.check_user_exists(payload["sub"], payload["email"])
+    user = await NemoUser.check_user_exists(payload["sub"], payload["email"])
     # If user does not exists then create new user and settings for the user
     if not user:
         user_obj = create_dict_from_payload(payload)
-        user = await NoisliUser.create(user_obj)
-        await NoisliSettings.create(google_id=user["google_id"])
+        user = await NemoUser.create(user_obj)
+        await NemoSettings.create(google_id=user["google_id"])
         # send welcome email to user as a background task
         background_tasks.add_task(
             send_email,
@@ -98,45 +98,45 @@ async def create_user(auth: GoogleAuth, background_tasks: BackgroundTasks):
     return response
 
 
-@noisli_route.get("/settings")
+@nemo_route.get("/settings")
 async def get_user_settings(user=Depends(current_user)):
-    settings = await NoisliSettings.get(user["google_id"])
+    settings = await NemoSettings.get(user["google_id"])
     if not settings:
         raise HTTPException(status_code=404, detail="No settings found for the user")
     return settings
 
 
-@noisli_route.patch("/settings")
+@nemo_route.patch("/settings")
 async def update_user_timer_settings(
     settings: UserSettings, user=Depends(current_user)
 ):
     updated_body = settings.dict(exclude_unset=True)
-    user = await NoisliSettings.update(
+    user = await NemoSettings.update(
         google_id=user["google_id"], settings_dict=updated_body
     )
     return user
 
 
-@noisli_route.get("/account", response_model=UserAccount)
+@nemo_route.get("/account", response_model=UserAccount)
 async def get_user_account(user=Depends(current_user)):
-    user = await NoisliUser.get(user["google_id"])
+    user = await NemoUser.get(user["google_id"])
     return user
 
 
-@noisli_route.patch("/account", response_model=UserAccount)
+@nemo_route.patch("/account", response_model=UserAccount)
 async def update_user_account(account: Account, user=Depends(current_user)):
     account_dict = account.dict()
-    user = await NoisliUser.update(google_id=user["google_id"], user_dict=account_dict)
+    user = await NemoUser.update(google_id=user["google_id"], user_dict=account_dict)
     return user
 
 
-@noisli_route.get("/analytics")
+@nemo_route.get("/analytics")
 async def get_user_analytics(user=Depends(current_user)):
-    results = await NoisliAnalytics.get_analytics(google_id=user["google_id"])
+    results = await NemoAnalytics.get_analytics(google_id=user["google_id"])
     return results
 
 
-@noisli_route.post("/analytics", response_model=GetAnalytics)
+@nemo_route.post("/analytics", response_model=GetAnalytics)
 async def create_user_analytics(analytics: Analytics, user=Depends(current_user)):
     user_date = datetime.now()
     user_analytics = {
@@ -146,21 +146,21 @@ async def create_user_analytics(analytics: Analytics, user=Depends(current_user)
         "full_date": user_date,
     }
 
-    analytics = await NoisliAnalytics.create(user_analytics)
+    analytics = await NemoAnalytics.create(user_analytics)
     return analytics
 
 
-@noisli_route.get("/statistics")
+@nemo_route.get("/statistics")
 async def get_stats(user=Depends(current_user)):
     user_google_id = user["google_id"]
-    results = await NoisliAnalytics.get_best_day(google_id=user_google_id)
+    results = await NemoAnalytics.get_best_day(google_id=user_google_id)
     return results
 
 
-@noisli_route.delete("/delete")
+@nemo_route.delete("/delete")
 async def delete_user(user=Depends(current_user)):
     user_google_id = user["google_id"]
-    await NoisliAnalytics.delete(google_id=user_google_id)
-    await NoisliSettings.delete(google_id=user_google_id)
-    await NoisliUser.delete(google_id=user_google_id)
+    await NemoAnalytics.delete(google_id=user_google_id)
+    await NemoSettings.delete(google_id=user_google_id)
+    await NemoUser.delete(google_id=user_google_id)
     return {"success": True, "google_id": user_google_id}
