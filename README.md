@@ -1,6 +1,6 @@
 # Backend powering Nemo and Noiist
 
-### Nemo: https://noisli.netlify.app/
+### Nemo: https://nemo-app.netlify.app/
 
 ### Noiist: https://noiist.netlify.app/
 
@@ -19,7 +19,7 @@ Nemo is your digital place for focus.
 
 Nemo helps you boost your motivation and help you think more creatively.
 
-Demo: https://noisli.netlify.app/
+Demo: https://nemo-app.netlify.app/
 
 ## Noiist
 

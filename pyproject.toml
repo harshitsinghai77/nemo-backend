@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "noiist"
+name = "nemo"
 version = "0.1.0"
-description = "Get Spotify Recommendations directly in your inbox"
+description = "Backend powering Nemo - Your digital place to focus."
 authors = ["Harshit Singhai <harshitsinghai77@gmail.com>"]
 
 [tool.poetry.dependencies]

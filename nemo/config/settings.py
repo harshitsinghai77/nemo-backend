@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 43200  # 30 Days
     JWT_TOKEN_TYPE: str = "bearer"
-    BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = ["https://noisli.netlify.app"]
+    BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = ["https://nemo-app.netlify.app/"]
     if os.getenv("ENV") == "development":
         BACKEND_CORS_ORIGINS.append("http://localhost:3000")
 
@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     PORT = 3000
     BASE_URL = "{}:{}/".format(HOST, str(PORT))
     MODELS = [
-        "noiist.models.users",
+        "nemo.models.users",
     ]
 
     class Config:
