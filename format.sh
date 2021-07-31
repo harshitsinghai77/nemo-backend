@@ -1,9 +1,9 @@
 # Sort imports one per line, so autoflake can remove unused imports
-isort --force-single-line-imports noiist
-autoflake --remove-all-unused-imports --recursive --remove-unused-variables --in-place noiist --exclude=__init__.py
+isort --force-single-line-imports nemo
+autoflake --remove-all-unused-imports --recursive --remove-unused-variables --in-place nemo --exclude=__init__.py
 black .
-isort noiist
-mypy noiist
-isort --check-only noiist
+isort .
+mypy nemo
+isort nemo
 flake8
-black noiist --check
+black nemo
