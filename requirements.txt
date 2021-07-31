@@ -168,8 +168,6 @@ pyjwt==2.1.0; python_version >= "3.6" \
 python-dotenv==0.19.0; python_version >= "3.5" \
     --hash=sha256:f521bc2ac9a8e03c736f62911605c5d83970021e3fa95b37d769e2bbbe9b6172 \
     --hash=sha256:aae25dc1ebe97c420f50b81fb0e5c949659af713f31fdb63c749ca68748f34b1
-python-environ==0.4.54 \
-    --hash=sha256:6249a14057f95aba3b4906d73276f770e01e659f8098b3f3b34295feac42865b
 pyyaml==5.4.1; python_version >= "2.7" and python_full_version < "3.0.0" or python_full_version >= "3.6.0" \
     --hash=sha256:3b2b1824fe7112845700f815ff6a489360226a5609b96ec2190a45e62a9fc922 \
     --hash=sha256:129def1b7c1bf22faffd67b8f3724645203b79d8f4cc81f674654d9902cb4393 \
