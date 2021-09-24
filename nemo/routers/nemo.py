@@ -36,6 +36,7 @@ nemo_route = APIRouter()
 
 
 async def current_user(x_auth_token: str = Header(None)):
+    """Get current user based on x_auth_token"""
     if not x_auth_token:
         raise HTTPException(status_code=400, detail="x-auth-token header missing.")
     user = get_current_user(x_auth_token)
@@ -101,6 +102,7 @@ async def create_user(auth: GoogleAuth, background_tasks: BackgroundTasks):
 
 @nemo_route.get("/settings")
 async def get_user_settings(user=Depends(current_user)):
+    """Get all user settings."""
     settings = await NemoSettings.get(user["google_id"])
     if not settings:
         raise HTTPException(status_code=404, detail="No settings found for the user")
@@ -111,6 +113,7 @@ async def get_user_settings(user=Depends(current_user)):
 async def update_user_timer_settings(
     settings: UserSettings, user=Depends(current_user)
 ):
+    """Update user settings."""
     updated_body = settings.dict(exclude_unset=True)
     user = await NemoSettings.update(
         google_id=user["google_id"], settings_dict=updated_body
@@ -120,12 +123,14 @@ async def update_user_timer_settings(
 
 @nemo_route.get("/account", response_model=UserAccount)
 async def get_user_account(user=Depends(current_user)):
+    """Get user account."""
     user = await NemoUser.get(user["google_id"])
     return user
 
 
 @nemo_route.patch("/account", response_model=UserAccount)
 async def update_user_account(account: Account, user=Depends(current_user)):
+    """Update user account."""
     account_dict = account.dict()
     user = await NemoUser.update(google_id=user["google_id"], user_dict=account_dict)
     return user
@@ -133,12 +138,14 @@ async def update_user_account(account: Account, user=Depends(current_user)):
 
 @nemo_route.get("/analytics")
 async def get_user_analytics(user=Depends(current_user)):
+    """Get all analytics."""
     results = await NemoAnalytics.get_analytics(google_id=user["google_id"])
     return results
 
 
 @nemo_route.post("/analytics", response_model=GetAnalytics)
 async def create_user_analytics(analytics: Analytics, user=Depends(current_user)):
+    """Create new analytics."""
     user_date = datetime.now()
     user_analytics = {
         "created_at": user_date,
@@ -153,6 +160,7 @@ async def create_user_analytics(analytics: Analytics, user=Depends(current_user)
 
 @nemo_route.get("/statistics")
 async def get_stats(user=Depends(current_user)):
+    """Get all statistics."""
     user_google_id = user["google_id"]
     results = await NemoAnalytics.get_best_day(google_id=user_google_id)
     return results
@@ -160,8 +168,7 @@ async def get_stats(user=Depends(current_user)):
 
 @nemo_route.delete("/delete")
 async def delete_user(user=Depends(current_user)):
+    """Permanently remove user from the database."""
     user_google_id = user["google_id"]
-    await NemoAnalytics.delete(google_id=user_google_id)
-    await NemoSettings.delete(google_id=user_google_id)
-    await NemoUser.delete(google_id=user_google_id)
+    await NemoAnalytics.completely_remove_user(google_id=user_google_id)
     return {"success": True, "google_id": user_google_id}

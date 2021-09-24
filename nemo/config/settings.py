@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 43200  # 30 Days
     JWT_TOKEN_TYPE: str = "bearer"
-    BACKEND_CORS_ORIGINS: List[str] = ["https://nemo-app.netlify.app/"]
+    BACKEND_CORS_ORIGINS: List[str] = ["https://nemo-app.netlify.app"]
     if os.getenv("ENV") == "development":
         BACKEND_CORS_ORIGINS.append("http://localhost:3000")
 

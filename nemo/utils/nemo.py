@@ -18,7 +18,7 @@ JWT_ALGORITHM: str = os.getenv("JWT_ALGORITHM", "HS256")
 
 
 def check_google_user(payload):
-    """A method which return True if all checks are passed."""
+    """Check if payload is valid."""
     if payload["iss"] not in ["accounts.google.com", "https://accounts.google.com"]:
         return False
     if not (payload["email"] and payload["email_verified"]):
@@ -27,7 +27,7 @@ def check_google_user(payload):
 
 
 def create_dict_from_payload(payload):
-    """Returns a dict from the payload."""
+    """Create and return dict from the payload."""
     return {
         "created_at": datetime.utcnow(),
         "google_id": payload["sub"],
@@ -40,6 +40,7 @@ def create_dict_from_payload(payload):
 
 
 def get_user_payload(token):
+    """Verify oauth2_token and decode user."""
     try:
         decoded = id_token.verify_oauth2_token(
             token, requests.Request(), GOOGLE_CLIENT_ID
@@ -50,6 +51,7 @@ def get_user_payload(token):
 
 
 def get_current_user(token):
+    """Get the curren user based on token."""
     try:
         payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=JWT_ALGORITHM)
         return payload
@@ -58,6 +60,7 @@ def get_current_user(token):
 
 
 def create_access_token(*, data: dict, expires_delta: timedelta = None):
+    """Create new access token."""
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta

@@ -14,7 +14,7 @@ class NemoUser:
 
     @staticmethod
     async def update(google_id, user_dict):
-        """Update an existing user."""
+        """Update existing user."""
         query = (
             nemo_user.update()
             .where(nemo_user.c.google_id == google_id)
@@ -34,6 +34,24 @@ class NemoUser:
         """Delete the user from the database."""
         query = nemo_user.delete().where(nemo_user.c.google_id == google_id)
         return await database.execute(query)
+
+    @staticmethod
+    async def completely_remove_user(google_id):
+        """Delete user profile, user settings and user analytics as a transaction."""
+        async with database:
+            async with database.transaction():
+                query_user = nemo_user.delete().where(
+                    nemo_user.c.google_id == google_id
+                )
+                query_settings = nemo_user_settings.delete().where(
+                    nemo_user_settings.c.google_id == google_id
+                )
+                query_analytics = nemo_user_analytics.delete().where(
+                    nemo_user_analytics.c.google_id == google_id
+                )
+                await database.execute(query_analytics)
+                await database.execute(query_settings)
+                await database.execute(query_user)
 
     @staticmethod
     async def check_if_email_exists(email: str):
@@ -92,7 +110,7 @@ class NemoAnalytics:
 
     @staticmethod
     async def create(user_analytics):
-        """Create new analytics."""
+        """Create new analytic."""
         query = nemo_user_analytics.insert().values(**user_analytics)
         await database.execute(query)
         return user_analytics
