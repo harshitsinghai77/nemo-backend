@@ -38,3 +38,6 @@ def send_email(receiver_fullname: str, receiver_email: str):
     with smtplib.SMTP_SSL("smtp.gmail.com", email_port, context=context) as server:
         server.login(app_email, app_password)
         server.sendmail(app_email, receiver_email, email_message.as_string())
+
+
+send_email("Harshit Singhau", "harshitsinghai77@gmail.com")

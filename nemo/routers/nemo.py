@@ -8,7 +8,8 @@ from fastapi.param_functions import Depends
 from fastapi.responses import JSONResponse
 
 from nemo.crud.nemo import NemoAnalytics, NemoSettings, NemoUser
-from nemo.emails.send_email import send_email
+
+# from nemo.emails.send_email import send_email
 from nemo.pydantic.nemo import (
     Account,
     Analytics,
@@ -71,11 +72,11 @@ async def create_user(auth: GoogleAuth, background_tasks: BackgroundTasks):
         user = await NemoUser.create(user_obj)
         await NemoSettings.create(google_id=user["google_id"])
         # send welcome email to user as a background task
-        background_tasks.add_task(
-            send_email,
-            receiver_fullname=user_obj["given_name"],
-            receiver_email=user_obj["email"],
-        )
+        # background_tasks.add_task(
+        #     send_email,
+        #     receiver_fullname=user_obj["given_name"],
+        #     receiver_email=user_obj["email"],
+        # )
 
     # create a access token
     access_token_expires = timedelta(days=JWT_ACCESS_TOKEN_EXPIRE_DAYS)
