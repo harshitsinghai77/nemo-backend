@@ -35,4 +35,4 @@ RUN bash -c "if [ $INSTALL_DEV == 'true' ] ; then poetry install --no-root ; els
 
 EXPOSE 5000
 
-CMD ["uvicorn", "main:app", "--port", "5000", ]
+CMD ["bash", "deploy_prod.sh"]
