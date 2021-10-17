@@ -1,6 +1,7 @@
 """Main app which serves the application."""
 import uvicorn
 from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from nemo.config.database import database, engine, metadata
@@ -37,7 +38,7 @@ async def shutdown():
 @app.get("/")
 def index():
     """Generic message if backend is deployed succesfully."""
-    return "App succesfully running."
+    return HTMLResponse(content="<h1> Welcome to Nemo 🥳</h1> ", status_code=200)
 
 
 app.include_router(

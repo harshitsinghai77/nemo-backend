@@ -20,7 +20,6 @@ DATABASE_URL = (
 if environment == "development":
     DATABASE_URL = "postgresql://nemo:password@localhost:5432/nemo"
 
-print("DATABASE_URL: ", DATABASE_URL)
 database = databases.Database(DATABASE_URL)
 metadata = sqlalchemy.MetaData()
 
