@@ -8,7 +8,6 @@ from fastapi.param_functions import Depends
 from fastapi.responses import JSONResponse
 
 from nemo.crud.nemo import NemoAnalytics, NemoSettings, NemoUser
-
 # from nemo.emails.send_email import send_email
 from nemo.pydantic.nemo import (
     Account,
