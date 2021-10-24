@@ -16,7 +16,7 @@ CACHE_TTL = 18000  # Cache TTL in sec
 
 @cache
 def pafy_worker(category: str, video_id: str):
-    video_url = f"https://www.youtube.com/watch?v={video_id}"
+    video_url = f"http://www.youtube.com/watch?v={video_id}"
     video = pafy.new(video_url)
     best = video.getbestaudio()
     playurl = best.url
