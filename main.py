@@ -3,6 +3,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
+import uvloop
 
 from nemo.config.database import database, engine, metadata
 from nemo.config.settings import get_setting
@@ -53,5 +54,6 @@ app.include_router(
     tags=["Nemo"],
 )
 
+uvloop.install()
 if __name__ == "__main__":
     uvicorn.run(app, host=settings.HOST, port=settings.PORT)

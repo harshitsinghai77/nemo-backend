@@ -1,6 +1,6 @@
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor
-from functools import cache
+from functools import cache, partial
 import json
 
 import pafy
@@ -15,7 +15,7 @@ CACHE_TTL = 18000  # Cache TTL in sec
 
 
 @cache
-def pafy_worker(video_id: str, category: str):
+def pafy_worker(category: str, video_id: str):
     video_url = f"https://www.youtube.com/watch?v={video_id}"
     video = pafy.new(video_url)
     best = video.getbestaudio()
@@ -52,9 +52,10 @@ def get_all_streams(category):
         original_time = datetime.now()
 
     video_urls = streams[category]
-    with ThreadPoolExecutor(max_workers=len(video_urls)) as executor:
-        args = ((url, category) for url in video_urls)
-        result = list(executor.map(lambda p: pafy_worker(*p), args))
+    max_workers = 5
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        some_func = partial(pafy_worker, category)
+        result = list(executor.map(some_func, video_urls))
     return result
 
 

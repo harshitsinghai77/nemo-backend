@@ -1,1 +1,1 @@
-gunicorn main:app --workers 1 --bind 0.0.0.0:5000 -k uvicorn.workers.UvicornWorker
+gunicorn main:app --workers 2 --bind 0.0.0.0:5000 -k uvicorn.workers.UvicornWorker
