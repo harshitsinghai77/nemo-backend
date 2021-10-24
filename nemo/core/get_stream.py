@@ -4,6 +4,8 @@ from functools import cache
 import json
 
 import pafy
+import youtube_dl
+
 
 with open("nemo/data/streams.json") as json_file:
     streams = json.load(json_file)
@@ -53,9 +55,13 @@ def get_all_streams(category):
     with ThreadPoolExecutor(max_workers=len(video_urls)) as executor:
         args = ((url, category) for url in video_urls)
         result = list(executor.map(lambda p: pafy_worker(*p), args))
-
     return result
 
 
 def clear_streams_cache():
     pafy_worker.cache_clear()
+    with youtube_dl.YoutubeDL({}) as ydl:
+        ydl.cache.remove()
+
+
+clear_streams_cache()
