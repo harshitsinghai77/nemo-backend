@@ -1,13 +1,13 @@
 import logging
 from datetime import datetime, timedelta
 
-from fastapi import APIRouter, BackgroundTasks, Header
+from fastapi import APIRouter, status, BackgroundTasks, Header
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import HTTPException
 from fastapi.param_functions import Depends
 from fastapi.responses import JSONResponse
 
-from nemo.crud.nemo import NemoAnalytics, NemoSettings, NemoUser
+
 # from nemo.emails.send_email import send_email
 from nemo.pydantic.nemo import (
     Account,
@@ -17,6 +17,7 @@ from nemo.pydantic.nemo import (
     UserAccount,
     UserSettings,
 )
+from nemo.crud.nemo import NemoAnalytics, NemoSettings, NemoUser
 from nemo.routers.constants import (
     COOKIE_AUTHORIZATION_NAME,
     COOKIE_DOMAIN,
@@ -29,6 +30,7 @@ from nemo.utils.nemo import (
     get_current_user,
     get_user_payload,
 )
+from nemo.core.get_stream import get_all_streams, clear_streams_cache
 
 LOGGER = logging.getLogger()
 nemo_route = APIRouter()
@@ -169,5 +171,32 @@ async def get_stats(user=Depends(current_user)):
 async def delete_user(user=Depends(current_user)):
     """Permanently remove user from the database."""
     user_google_id = user["google_id"]
-    await NemoAnalytics.completely_remove_user(google_id=user_google_id)
-    return {"success": True, "google_id": user_google_id}
+    await NemoUser.completely_remove_user(google_id=user_google_id)
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={"success": True, "google_id": user_google_id},
+    )
+
+
+@nemo_route.get("/get-streams/{category}")
+async def get_streams_meta(category: str):
+    """Get streams from pafy and return the data."""
+    if category:
+        result = get_all_streams(category=category)
+        return result
+    return JSONResponse(
+        status_code=status.HTTP_204_NO_CONTENT,
+        content={"message": "Category not found"},
+    )
+
+
+@nemo_route.get("/clear-streams")
+async def clear_streams():
+    """Clear streams from cache.
+    This should be called when streams url have expired.
+    """
+    clear_streams_cache()
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={"message": "Cleared streams cache."},
+    )
