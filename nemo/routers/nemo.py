@@ -30,7 +30,12 @@ from nemo.utils.nemo import (
     get_current_user,
     get_user_payload,
 )
-from nemo.core.get_stream import get_all_streams, clear_streams_cache
+from nemo.core.get_stream import (
+    get_all_streams,
+    clear_streams_cache,
+    should_cache_expire,
+    update_cache,
+)
 
 LOGGER = logging.getLogger()
 nemo_route = APIRouter()
@@ -179,10 +184,13 @@ async def delete_user(user=Depends(current_user)):
 
 
 @nemo_route.get("/get-streams/{category}")
-async def get_streams_meta(category: str):
+async def get_streams_meta(category: str, background_tasks: BackgroundTasks):
     """Get streams from pafy and return the data."""
     if category:
         result = get_all_streams(category=category)
+        if should_cache_expire():
+            background_tasks.add_task(update_cache)
+
         return result
     return JSONResponse(
         status_code=status.HTTP_204_NO_CONTENT,

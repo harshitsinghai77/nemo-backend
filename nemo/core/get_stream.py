@@ -3,7 +3,6 @@ from concurrent.futures import ThreadPoolExecutor
 from functools import cache, partial
 import json
 
-import time
 import pafy
 import youtube_dl
 
@@ -39,6 +38,23 @@ def check_cache_expiry():
     return diff.total_seconds() >= CACHE_TTL
 
 
+def update_cache():
+    clear_streams_cache()
+    for k in streams.keys():
+        video_urls = streams[k]
+        max_workers = 5
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            some_func = partial(pafy_worker, k)
+            executor.map(some_func, video_urls)
+
+
+def should_cache_expire():
+    if check_cache_expiry():
+        global original_time
+        original_time = datetime.now()
+        return True
+
+
 def get_all_streams(category):
     if category not in streams.keys():
         return {
@@ -47,20 +63,12 @@ def get_all_streams(category):
             )
         }
 
-    if check_cache_expiry():
-        global original_time
-        clear_streams_cache()
-        original_time = datetime.now()
-
     video_urls = streams[category]
-
     max_workers = 5
-    tic = time.perf_counter()
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         some_func = partial(pafy_worker, category)
         result = list(executor.map(some_func, video_urls))
-    toc = time.perf_counter()
-    print(toc - tic)
+
     return result
 
 
@@ -70,4 +78,4 @@ def clear_streams_cache():
         ydl.cache.remove()
 
 
-clear_streams_cache()
+update_cache()
