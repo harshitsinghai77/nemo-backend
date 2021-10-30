@@ -17,11 +17,12 @@ async def fake_analytics_data():
     from nemo.models.nemo import nemo_user_analytics
 
     await database.connect()
-    date = datetime.now() - timedelta(days=4)
+    date = datetime.now() + timedelta(days=1)
+    # date = datetime.now()
     user_analytics = {
         "created_at": date,
-        "google_id": "105048648072263223821",
-        "duration": 20000,
+        "google_id": "100258543595566787621",
+        "duration": 9000,
         "full_date": date,
     }
 
@@ -53,18 +54,14 @@ async def get_stastics():
     from nemo.config.database import database
 
     await database.connect()
-    google_id = "105048648072263223821"
+    google_id = "100258543595566787621"
     query = """
-        SELECT * from core_nemo_analytics
-        where full_date > CURRENT_DATE - INTERVAL '7 days' and google_id=:google_id
-        and duration = (SELECT MAX (duration) from core_nemo_analytics)
+        SELECT SUM(duration) from core_nemo_analytics
+        where DATE(full_date) = CURRENT_DATE and google_id=:google_id
     """
-
     results = await database.fetch_one(query, values={"google_id": google_id})
     print({**results})
     await database.disconnect()
 
 
-loop = asyncio.get_event_loop()
-loop.run_until_complete(fake_analytics_data())
-loop.close()
+asyncio.run(get_stastics())

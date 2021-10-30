@@ -32,6 +32,7 @@ from nemo.utils.nemo import (
 )
 from nemo.core.get_stream import (
     get_all_streams,
+    get_stream_by_id,
     clear_streams_cache,
     should_cache_expire,
     update_cache,
@@ -164,12 +165,20 @@ async def create_user_analytics(analytics: Analytics, user=Depends(current_user)
     return analytics
 
 
-@nemo_route.get("/statistics")
-async def get_stats(user=Depends(current_user)):
-    """Get all statistics."""
+@nemo_route.get("/statistics/{stats}")
+async def get_stats(user=Depends(current_user), stats=str):
+    """Get statistics."""
     user_google_id = user["google_id"]
-    results = await NemoAnalytics.get_best_day(google_id=user_google_id)
-    return results
+    if stats == "best-day":
+        results = await NemoAnalytics.get_best_day(google_id=user_google_id)
+        return results
+    if stats == "current-goal":
+        results = await NemoAnalytics.get_current_goal(google_id=user_google_id)
+        return results
+    return JSONResponse(
+        status_code=status.HTTP_204_NO_CONTENT,
+        content={"message": "Invalid category or category not found"},
+    )
 
 
 @nemo_route.delete("/delete")
@@ -183,18 +192,29 @@ async def delete_user(user=Depends(current_user)):
     )
 
 
-@nemo_route.get("/get-streams/{category}")
-async def get_streams_meta(category: str, background_tasks: BackgroundTasks):
+@nemo_route.get("/get-all-streams/{category}")
+async def get_all_stream(category: str, background_tasks: BackgroundTasks):
     """Get streams from pafy and return the data."""
     if category:
         result = get_all_streams(category=category)
         if should_cache_expire():
             background_tasks.add_task(update_cache)
-
         return result
     return JSONResponse(
         status_code=status.HTTP_204_NO_CONTENT,
         content={"message": "Category not found"},
+    )
+
+
+@nemo_route.get("/get-stream-by-id/{category}/{id}")
+async def get_stream(category: str, id: str):
+    """Fetch streams by id."""
+    if id and category:
+        result = get_stream_by_id(category=category, id=id)
+        return result
+    return JSONResponse(
+        status_code=status.HTTP_204_NO_CONTENT,
+        content={"message": "Category or Id not found"},
     )
 
 

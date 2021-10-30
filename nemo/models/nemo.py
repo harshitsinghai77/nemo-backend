@@ -1,4 +1,13 @@
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Table, Text
+from sqlalchemy import (
+    Boolean,
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Table,
+    Text,
+)
 
 from nemo.config.database import metadata
 
@@ -32,6 +41,7 @@ nemo_user_settings = Table(
     Column("timer_break_end_notification", Boolean, server_default="False"),
     Column("preference_shuffle_time", String, server_default="10"),
     Column("preference_background_color", String, server_default="rainbow"),
+    Column("daily_goal", Integer, server_default="4"),
 )
 
 nemo_user_analytics = Table(

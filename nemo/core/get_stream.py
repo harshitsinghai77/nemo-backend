@@ -20,7 +20,7 @@ def pafy_worker(category: str, video_id: str):
     video = pafy.new(video_url, basic=False, gdata=False, size=False)
     best = video.getbestaudio()
     playurl = best.url
-    temp_dict = {
+    return {
         "category": category,
         "title": video._title,
         "author": video._author,
@@ -29,7 +29,6 @@ def pafy_worker(category: str, video_id: str):
         "url": playurl,
         "expiry": video.expiry,
     }
-    return temp_dict
 
 
 def check_cache_expiry():
@@ -70,6 +69,10 @@ def get_all_streams(category):
         result = list(executor.map(some_func, video_urls))
 
     return result
+
+
+def get_stream_by_id(category: str, id: str):
+    return pafy_worker(category=category, video_id=id)
 
 
 def clear_streams_cache():

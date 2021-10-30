@@ -148,6 +148,15 @@ class NemoAnalytics:
         return results
 
     @staticmethod
+    async def get_current_goal(google_id):
+        """Get current number of hours completed in the day."""
+        query = """
+            SELECT SUM(duration) as current_goal from core_nemo_analytics
+            where DATE(full_date) = CURRENT_DATE and google_id=:google_id
+        """
+        return await database.fetch_one(query, values={"google_id": google_id})
+
+    @staticmethod
     async def delete(google_id):
         """Delete user analytics"""
         query = nemo_user_analytics.delete().where(
