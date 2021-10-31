@@ -1,11 +1,10 @@
-from datetime import datetime
-from concurrent.futures import ThreadPoolExecutor
-from functools import cache, partial
 import json
+from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
+from functools import cache, partial
 
 import pafy
 import youtube_dl
-
 
 with open("nemo/data/streams.json") as json_file:
     streams = json.load(json_file)

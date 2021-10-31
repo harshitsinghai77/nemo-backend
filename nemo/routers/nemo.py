@@ -1,13 +1,20 @@
 import logging
 from datetime import datetime, timedelta
 
-from fastapi import APIRouter, status, BackgroundTasks, Header
+from fastapi import APIRouter, BackgroundTasks, Header, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import HTTPException
 from fastapi.param_functions import Depends
 from fastapi.responses import JSONResponse
 
-
+from nemo.core.get_stream import (
+    clear_streams_cache,
+    get_all_streams,
+    get_stream_by_id,
+    should_cache_expire,
+    update_cache,
+)
+from nemo.crud.nemo import NemoAnalytics, NemoSettings, NemoUser
 # from nemo.emails.send_email import send_email
 from nemo.pydantic.nemo import (
     Account,
@@ -17,7 +24,6 @@ from nemo.pydantic.nemo import (
     UserAccount,
     UserSettings,
 )
-from nemo.crud.nemo import NemoAnalytics, NemoSettings, NemoUser
 from nemo.routers.constants import (
     COOKIE_AUTHORIZATION_NAME,
     COOKIE_DOMAIN,
@@ -29,13 +35,6 @@ from nemo.utils.nemo import (
     create_dict_from_payload,
     get_current_user,
     get_user_payload,
-)
-from nemo.core.get_stream import (
-    get_all_streams,
-    get_stream_by_id,
-    clear_streams_cache,
-    should_cache_expire,
-    update_cache,
 )
 
 LOGGER = logging.getLogger()
@@ -131,8 +130,8 @@ async def update_user_timer_settings(
 @nemo_route.get("/account", response_model=UserAccount)
 async def get_user_account(user=Depends(current_user)):
     """Get user account."""
-    user = await NemoUser.get(user["google_id"])
-    return user
+    account = await NemoUser.get_user_by_id(google_id=user["google_id"])
+    return account
 
 
 @nemo_route.patch("/account", response_model=UserAccount)
@@ -153,12 +152,12 @@ async def get_user_analytics(user=Depends(current_user)):
 @nemo_route.post("/analytics", response_model=GetAnalytics)
 async def create_user_analytics(analytics: Analytics, user=Depends(current_user)):
     """Create new analytics."""
-    user_date = datetime.now()
+    created_at = datetime.now()
     user_analytics = {
-        "created_at": user_date,
+        "created_at": created_at,
         "google_id": user["google_id"],
         "duration": analytics.duration,
-        "full_date": user_date,
+        "full_date": created_at,
     }
 
     analytics = await NemoAnalytics.create(user_analytics)

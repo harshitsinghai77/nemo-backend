@@ -1,9 +1,9 @@
 """Main app which serves the application."""
 import uvicorn
+import uvloop
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
-import uvloop
 
 from nemo.config.database import database, engine, metadata
 from nemo.config.settings import get_setting

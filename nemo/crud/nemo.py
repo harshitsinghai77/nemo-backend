@@ -24,7 +24,7 @@ class NemoUser:
         return {**user_dict, "id": last_record}
 
     @staticmethod
-    async def get(google_id):
+    async def get_user_by_id(google_id: str):
         """Get the user from the database."""
         query = nemo_user.select().where(nemo_user.c.google_id == google_id)
         return await database.fetch_one(query)
@@ -93,8 +93,7 @@ class NemoSettings:
             .where(nemo_user_settings.c.google_id == google_id)
             .values(**settings_dict)
         )
-        await database.execute(query)
-        return settings_dict
+        return await database.execute(query)
 
     @staticmethod
     async def delete(google_id):

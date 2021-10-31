@@ -42,6 +42,7 @@ class UserSettings(BaseModel):
     timer_break_end_notification: Optional[bool]
     preference_shuffle_time: Optional[str]
     preference_background_color: Optional[str]
+    daily_goal: Optional[int]
 
 
 class Analytics(BaseModel):
