@@ -10,7 +10,7 @@ with open("nemo/data/streams.json") as json_file:
     streams = json.load(json_file)
 
 original_time = datetime.now()
-CACHE_TTL = 18000  # Cache TTL in sec
+CACHE_TTL = 19800  # Cache TTL in sec
 
 
 @cache
@@ -36,21 +36,20 @@ def check_cache_expiry():
     return diff.total_seconds() >= CACHE_TTL
 
 
+def reset_cache_time():
+    global original_time
+    original_time = datetime.now()
+
+
 def update_cache():
     clear_streams_cache()
     for k in streams.keys():
         video_urls = streams[k]
-        max_workers = 5
+        max_workers = 10
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             some_func = partial(pafy_worker, k)
             executor.map(some_func, video_urls)
-
-
-def should_cache_expire():
-    if check_cache_expiry():
-        global original_time
-        original_time = datetime.now()
-        return True
+    reset_cache_time()
 
 
 def get_all_streams(category):

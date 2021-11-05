@@ -8,13 +8,14 @@ from fastapi.param_functions import Depends
 from fastapi.responses import JSONResponse
 
 from nemo.core.get_stream import (
+    check_cache_expiry,
     clear_streams_cache,
     get_all_streams,
     get_stream_by_id,
-    should_cache_expire,
     update_cache,
 )
 from nemo.crud.nemo import NemoAnalytics, NemoSettings, NemoUser
+
 # from nemo.emails.send_email import send_email
 from nemo.pydantic.nemo import (
     Account,
@@ -196,7 +197,7 @@ async def get_all_stream(category: str, background_tasks: BackgroundTasks):
     """Get streams from pafy and return the data."""
     if category:
         result = get_all_streams(category=category)
-        if should_cache_expire():
+        if check_cache_expiry():
             background_tasks.add_task(update_cache)
         return result
     return JSONResponse(
