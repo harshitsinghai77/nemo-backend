@@ -33,7 +33,7 @@ async def startup():
 
 
 @app.on_event("startup")
-@repeat_every(seconds=18000)
+@repeat_every(seconds=18000, wait_first=True)
 def update_cache_every_5_hrs():
     update_cache()
 

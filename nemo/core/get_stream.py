@@ -15,6 +15,7 @@ CACHE_TTL = 19800  # Cache TTL in sec
 
 @cache
 def pafy_worker(category: str, video_id: str):
+    """Return a stream url given a category and video_id."""
     video_url = f"http://www.youtube.com/watch?v={video_id}"
     video = pafy.new(video_url, basic=False, gdata=False, size=False)
     best = video.getbestaudio()
@@ -31,17 +32,20 @@ def pafy_worker(category: str, video_id: str):
 
 
 def check_cache_expiry():
+    """Check if cache is expired. By default 5.5 hrs."""
     current_time = datetime.now()
     diff = current_time - original_time
     return diff.total_seconds() >= CACHE_TTL
 
 
 def reset_cache_time():
+    """Reset cache original_time as current time to validate cahce expiry."""
     global original_time
     original_time = datetime.now()
 
 
 def update_cache():
+    """Clear chache, for each category loop through all the video_url and update cache."""
     clear_streams_cache()
     for k in streams.keys():
         video_urls = streams[k]
@@ -49,10 +53,12 @@ def update_cache():
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             some_func = partial(pafy_worker, k)
             executor.map(some_func, video_urls)
+
     reset_cache_time()
 
 
 def get_all_streams(category):
+    """Get all streams corresponding to a category."""
     if category not in streams.keys():
         return {
             "message": "Invalid category: {}. Should be one of {}".format(
@@ -70,10 +76,12 @@ def get_all_streams(category):
 
 
 def get_stream_by_id(category: str, id: str):
+    """Get Any stream by id."""
     return pafy_worker(category=category, video_id=id)
 
 
 def clear_streams_cache():
+    "Clear function cache and remove Youtube DL cache."
     pafy_worker.cache_clear()
     with youtube_dl.YoutubeDL({}) as ydl:
         ydl.cache.remove()

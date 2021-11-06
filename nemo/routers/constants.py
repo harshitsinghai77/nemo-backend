@@ -8,7 +8,7 @@ JWT_ACCESS_TOKEN_EXPIRE_DAYS = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE_DAYS", 30)
 
 # COOKIE
 COOKIE_AUTHORIZATION_NAME: str = os.getenv("COOKIE_AUTHORIZATION_NAME", "Authorization")
-COOKIE_DOMAIN = os.getenv("COOKIE_DOMAIN")
+COOKIE_DOMAIN = os.getenv("COOKIE_DOMAIN", "https://nemo-app.netlify.app/")
 
 # SPOTIFY
 SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token"
