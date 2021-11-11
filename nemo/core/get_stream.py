@@ -9,7 +9,7 @@ import youtube_dl
 with open("nemo/data/streams.json") as json_file:
     streams = json.load(json_file)
 
-original_time = datetime.now()
+last_cache_updated = datetime.now()
 CACHE_TTL = 19800  # Cache TTL in sec
 
 
@@ -35,14 +35,14 @@ def pafy_worker(category: str, video_id: str):
 def check_cache_expiry():
     """Check if cache is expired. By default 5.5 hrs."""
     current_time = datetime.now()
-    diff = current_time - original_time
+    diff = current_time - last_cache_updated
     return diff.total_seconds() >= CACHE_TTL
 
 
-def reset_cache_time():
-    """Reset cache original_time as current time to validate cahce expiry."""
-    global original_time
-    original_time = datetime.now()
+def update_cache_time():
+    """Set last_cache_updated to current time."""
+    global last_cache_updated
+    last_cache_updated = datetime.now()
 
 
 def update_cache():
@@ -54,8 +54,7 @@ def update_cache():
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             some_func = partial(pafy_worker, k)
             executor.map(some_func, video_urls)
-
-    reset_cache_time()
+    update_cache_time()
 
 
 def get_all_streams(category):
@@ -68,7 +67,7 @@ def get_all_streams(category):
         }
 
     video_urls = streams[category]
-    max_workers = 5
+    max_workers = 10
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         some_func = partial(pafy_worker, category)
         result = list(executor.map(some_func, video_urls))
