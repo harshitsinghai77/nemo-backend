@@ -3,8 +3,8 @@ import asyncio
 
 def dangerously_drop_noistli_table():
     """Drop table from the database."""
-    from nemo.config.database import engine
-    from nemo.models.nemo import nemo_user
+    from app.nemo.config.database import engine
+    from app.nemo.models.nemo import nemo_user
 
     nemo_user.drop(engine)
 
@@ -13,8 +13,8 @@ async def fake_analytics_data():
     """Fake analytics data for testing."""
     from datetime import datetime, timedelta
 
-    from nemo.config.database import database
-    from nemo.models.nemo import nemo_user_analytics
+    from app.nemo.config.database import database
+    from app.nemo.models.nemo import nemo_user_analytics
 
     await database.connect()
     date = datetime.now() + timedelta(days=1)
@@ -32,7 +32,7 @@ async def fake_analytics_data():
 
 
 async def get_analytics():
-    from nemo.config.database import database
+    from app.nemo.config.database import database
 
     await database.connect()
     google_id = "105048648072263223821"
@@ -51,7 +51,7 @@ async def get_analytics():
 
 
 async def get_stastics():
-    from nemo.config.database import database
+    from app.nemo.config.database import database
 
     await database.connect()
     google_id = "100258543595566787621"

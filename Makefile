@@ -8,7 +8,7 @@ deploy:
 	git push heroku master
 
 runserver:
-	uvicorn main:app --reload
+	uvicorn app.main:app --reload
 
 docker_image:
 	docker build -t nemo-app .
@@ -27,3 +27,6 @@ apache_benchmark:
 
 molotov_benchmark:
 	molotov -v -r 100 benchmark/molotov-benchmark.py
+
+remove_pycache:
+	find . | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf

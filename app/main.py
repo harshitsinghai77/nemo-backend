@@ -1,15 +1,16 @@
 """Main app which serves the application."""
-import uvicorn
+from mangum import Mangum
+
 import uvloop
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 
 
-from nemo.config.database import database, engine, metadata
-from nemo.config.settings import get_setting
-from nemo.routers.nemo import nemo_route
-from nemo.routers.spotify import spotify_auth
+from app.nemo.config.database import database, engine, metadata
+from app.nemo.config.settings import get_setting
+from app.nemo.routers.nemo import nemo_route
+from app.nemo.routers.spotify import spotify_auth
 
 settings = get_setting()
 metadata.create_all(engine)
@@ -56,5 +57,5 @@ app.include_router(
 )
 
 uvloop.install()
-if __name__ == "__main__":
-    uvicorn.run(app, host=settings.HOST, port=settings.PORT)
+
+handler = Mangum(app)

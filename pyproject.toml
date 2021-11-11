@@ -19,6 +19,7 @@ psycopg2 = "^2.9.1"
 pafy = "^0.5.5"
 youtube_dl = "^2021.6.6"
 google-auth = "^2.3.3"
+mangum = "^0.12.3"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

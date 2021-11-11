@@ -7,7 +7,7 @@ from google.auth.transport import requests
 from google.oauth2 import id_token
 from starlette.status import HTTP_403_FORBIDDEN
 
-from nemo.routers.constants import GOOGLE_CLIENT_ID
+from app.nemo.routers.constants import GOOGLE_CLIENT_ID
 
 credentials_exception = HTTPException(
     status_code=HTTP_403_FORBIDDEN, detail="Could not validate credentials"

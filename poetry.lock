@@ -349,6 +349,17 @@ MarkupSafe = ">=2.0"
 i18n = ["Babel (>=2.7)"]
 
 [[package]]
+name = "mangum"
+version = "0.12.3"
+description = "AWS Lambda & API Gateway support for ASGI"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+typing-extensions = "*"
+
+[[package]]
 name = "markupsafe"
 version = "2.0.1"
 description = "Safely add untrusted strings to HTML/XML markup."
@@ -794,7 +805,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "2f5d251bab16dec86379615afc5a552e72b62baefb3ab8ea8b90c22c3eecb667"
+content-hash = "544f191e9c0cf7c9985c06776e39f0660137021f05fb8fa7480626e6c3bb49c9"
 
 [metadata.files]
 aiodogstatsd = [
@@ -1072,6 +1083,10 @@ isort = [
 jinja2 = [
     {file = "Jinja2-3.0.3-py3-none-any.whl", hash = "sha256:077ce6014f7b40d03b47d1f1ca4b0fc8328a692bd284016f806ed0eaca390ad8"},
     {file = "Jinja2-3.0.3.tar.gz", hash = "sha256:611bb273cd68f3b993fabdc4064fc858c5b47a973cb5aa7999ec1ba405c87cd7"},
+]
+mangum = [
+    {file = "mangum-0.12.3-py3-none-any.whl", hash = "sha256:128a8c1aa2eef13fc94ac5344210df8bd71dfba584b658bec9473e784bd86301"},
+    {file = "mangum-0.12.3.tar.gz", hash = "sha256:a45cc1c57736e7044318e65216eea83a397cb709e39fe6810a46faf0e15d2664"},
 ]
 markupsafe = [
     {file = "MarkupSafe-2.0.1-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:f9081981fe268bd86831e5c75f7de206ef275defcb82bc70740ae6dc507aee51"},

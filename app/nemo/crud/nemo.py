@@ -1,5 +1,5 @@
-from nemo.config.database import database
-from nemo.models.nemo import nemo_user, nemo_user_analytics, nemo_user_settings
+from app.nemo.config.database import database
+from app.nemo.models.nemo import nemo_user, nemo_user_analytics, nemo_user_settings
 
 
 class NemoUser:
