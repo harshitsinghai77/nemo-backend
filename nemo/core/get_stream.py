@@ -18,17 +18,18 @@ def pafy_worker(category: str, video_id: str):
     """Return a stream url given a category and video_id."""
     video_url = f"http://www.youtube.com/watch?v={video_id}"
     video = pafy.new(video_url, basic=False, gdata=False, size=False)
-    best = video.getbestaudio()
-    playurl = best.url
-    return {
-        "category": category,
-        "title": video._title,
-        "author": video._author,
-        "id": video.videoid,
-        "duration": video.duration,
-        "url": playurl,
-        "expiry": video.expiry,
-    }
+    best_audio = video.getbestaudio()
+    if best_audio:
+        playurl = best_audio.url
+        return {
+            "category": category,
+            "title": video._title,
+            "author": video._author,
+            "id": video.videoid,
+            "duration": video.duration,
+            "url": playurl,
+            "expiry": video.expiry,
+        }
 
 
 def check_cache_expiry():

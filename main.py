@@ -5,12 +5,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 
-# from fastapi_utils.tasks import repeat_every
 
 from nemo.config.database import database, engine, metadata
 from nemo.config.settings import get_setting
-
-# from nemo.core.get_stream import update_cache
 from nemo.routers.nemo import nemo_route
 from nemo.routers.spotify import spotify_auth
 
@@ -32,12 +29,6 @@ app.add_middleware(
 async def startup():
     """Connect to database on startup."""
     await database.connect()
-
-
-# @app.on_event("startup")
-# @repeat_every(seconds=18000, wait_first=True)
-# def update_cache_every_5_hrs():
-#     update_cache()
 
 
 @app.on_event("shutdown")
