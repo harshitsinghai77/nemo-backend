@@ -9,7 +9,7 @@ from sqlalchemy import (
     Text,
 )
 
-from app.nemo.config.database import metadata
+from app.api.config.database import metadata
 
 nemo_user = Table(
     "core_nemo_user",

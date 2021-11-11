@@ -8,9 +8,9 @@ import requests
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse, RedirectResponse
 
-from app.nemo.config.database import database
-from app.nemo.models import model
-from app.nemo.routers.constants import (
+from app.api.config.database import database
+from app.api.models import model
+from app.api.routers.constants import (
     GRANT_TYPE,
     REDIRECT_URI,
     SPOTIFY_CLIENT_ID,

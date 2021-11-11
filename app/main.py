@@ -1,16 +1,15 @@
 """Main app which serves the application."""
 from mangum import Mangum
 
-import uvloop
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 
 
-from app.nemo.config.database import database, engine, metadata
-from app.nemo.config.settings import get_setting
-from app.nemo.routers.nemo import nemo_route
-from app.nemo.routers.spotify import spotify_auth
+from app.api.config.database import database, engine, metadata
+from app.api.config.settings import get_setting
+from app.api.routers.nemo import nemo_route
+from app.api.routers.spotify import spotify_auth
 
 settings = get_setting()
 metadata.create_all(engine)
@@ -55,7 +54,5 @@ app.include_router(
     prefix="/nemo",
     tags=["Nemo"],
 )
-
-uvloop.install()
 
 handler = Mangum(app)
