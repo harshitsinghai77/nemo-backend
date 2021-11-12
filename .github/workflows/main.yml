@@ -47,7 +47,7 @@ jobs:
           cd ./venv/lib/python3.9/site-packages
           zip -r9 ../../../../api.zip .
       - name: Add API files to Zip file
-        run: cd ./app && zip -g ../api.zip -r .
+        run: cd ./ && zip -g ./api.zip -r ./app
       - name: Upload zip file artifact
         uses: actions/upload-artifact@v2
         with:

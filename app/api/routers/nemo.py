@@ -15,7 +15,6 @@ from app.api.core.get_stream import (
     update_cache,
 )
 from app.api.crud.nemo import NemoAnalytics, NemoSettings, NemoUser
-
 # from nemo.emails.send_email import send_email
 from app.api.pydantic.nemo import (
     Account,

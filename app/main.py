@@ -1,10 +1,8 @@
 """Main app which serves the application."""
-from mangum import Mangum
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
-
+from mangum import Mangum
 
 from app.api.config.database import database, engine, metadata
 from app.api.config.settings import get_setting
