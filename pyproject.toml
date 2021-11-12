@@ -20,6 +20,7 @@ youtube_dl = "^2021.6.6"
 google-auth = "^2.3.3"
 mangum = "^0.12.3"
 databases = {extras = ["postgresql"], version = "^0.5.3"}
+asyncpg = "^0.24.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

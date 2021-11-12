@@ -828,7 +828,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "360d73d8980ce765166ba6531f256cdf0c9500b2d652fd32905dc3930929753b"
+content-hash = "010f9923e45c91e0d460289a42044bfeed1403f9abf801d844036c176a89b7c9"
 
 [metadata.files]
 aiodogstatsd = [
