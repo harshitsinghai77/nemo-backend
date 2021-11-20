@@ -1,6 +1,15 @@
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Table, Text
+from sqlalchemy import (
+    Boolean,
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Table,
+    Text,
+)
 
-from app.api.config.database import metadata
+from api.config.database import metadata
 
 nemo_user = Table(
     "core_nemo_user",

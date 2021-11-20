@@ -8,9 +8,9 @@ import requests
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse, RedirectResponse
 
-from app.api.config.database import database
-from app.api.models import model
-from app.api.routers.constants import (
+from api.config.database import database
+from api.models import model
+from api.routers.constants import (
     GRANT_TYPE,
     REDIRECT_URI,
     SPOTIFY_CLIENT_ID,

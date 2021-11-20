@@ -4,10 +4,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from mangum import Mangum
 
-from app.api.config.database import database, engine, metadata
-from app.api.config.settings import get_setting
-from app.api.routers.nemo import nemo_route
-from app.api.routers.spotify import spotify_auth
+from api.config.database import database, engine, metadata
+from api.config.settings import get_setting
+from api.routers.nemo import nemo_route
+from api.routers.spotify import spotify_auth
 
 settings = get_setting()
 metadata.create_all(engine)

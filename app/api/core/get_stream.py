@@ -6,7 +6,7 @@ from functools import cache, partial
 import pafy
 import youtube_dl
 
-with open("app/api/data/streams.json") as json_file:
+with open("api/data/streams.json") as json_file:
     streams = json.load(json_file)
 
 last_cache_updated = datetime.now()
@@ -87,4 +87,4 @@ def clear_streams_cache():
         ydl.cache.remove()
 
 
-update_cache()
+# update_cache()
