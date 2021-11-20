@@ -27,13 +27,8 @@ jobs:
           key: ${{ runner.os }}-venv-${{ hashFiles('**/requirements*.txt') }}
           restore-keys: |
             ${{ runner.os }}-venv-
-
       - name: Activate and Install Depencies into Virtual env
-        run: python -m venv venv && source venv/bin/activate
-
-      # Install all the app dependencies
-      - name: Install dependencies
-        run: pip3 install -r requirements.txt
+        run: python -m venv venv && source venv/bin/activate && pip3 install -r requirements.txt
 
       # Build the app and run tests
       - name: Build and Run Test
@@ -44,7 +39,7 @@ jobs:
           cd ./venv/lib/python3.9/site-packages
           zip -r9 ../../../../api.zip .
       - name: Add API files to Zip file
-        run: cd ./ && zip -g ./api.zip -r ./app
+        run: cd ./app && zip -g ../api.zip -r .
       - name: Upload zip file artifact
         uses: actions/upload-artifact@v2
         with:
@@ -54,7 +49,7 @@ jobs:
   continuous-deployment:
     runs-on: ubuntu-latest
     needs: [continuous-integration]
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     steps:
       - name: Install AWS CLI
         uses: unfor19/install-aws-cli-action@v1

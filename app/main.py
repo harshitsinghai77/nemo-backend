@@ -4,14 +4,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from mangum import Mangum
 
-from app.api.config.database import database, engine, metadata
-from app.api.config.settings import get_setting
-from app.api.routers.nemo import nemo_route
-from app.api.routers.spotify import spotify_auth
+from api.config.database import create_table
+from api.config.settings import get_setting
+from api.routers.nemo import nemo_route
+
 
 settings = get_setting()
-metadata.create_all(engine)
-
 app = FastAPI(title=settings.APP_NAME)
 
 app.add_middleware(
@@ -26,13 +24,14 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup():
     """Connect to database on startup."""
-    await database.connect()
+    await create_table()
+    # await database.connect()
 
 
-@app.on_event("shutdown")
-async def shutdown():
-    """Disconnect to database on shutdown."""
-    await database.disconnect()
+# @app.on_event("shutdown")
+# async def shutdown():
+#     """Disconnect to database on shutdown."""
+#     await database.disconnect()
 
 
 @app.get("/")
@@ -40,12 +39,6 @@ def index():
     """Generic message if backend is deployed succesfully."""
     return HTMLResponse(content="<h1> Welcome to Nemo 🥳</h1> ", status_code=200)
 
-
-app.include_router(
-    spotify_auth,
-    prefix="/authorize-spotify",
-    tags=["SpotifyAuth"],
-)
 
 app.include_router(
     nemo_route,

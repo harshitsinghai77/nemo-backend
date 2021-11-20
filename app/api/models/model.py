@@ -1,7 +1,7 @@
 from sqlalchemy import Boolean, Column, DateTime, Integer, String, Table, Text
 from sqlalchemy.sql import func
 
-from app.api.config.database import metadata
+from api.config.database import metadata
 
 user = Table(
     "core_user",
