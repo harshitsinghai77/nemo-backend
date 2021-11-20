@@ -201,7 +201,6 @@ optional = false
 python-versions = ">=3.6"
 
 [package.dependencies]
-asyncpg = {version = "*", optional = true, markers = "extra == \"postgresql\""}
 sqlalchemy = ">=1.4,<1.5"
 
 [package.extras]
@@ -828,7 +827,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "010f9923e45c91e0d460289a42044bfeed1403f9abf801d844036c176a89b7c9"
+content-hash = "04a2fccfb80841e7d45eb65a6e3c09245701325cf8c13c7b28e7ae248e75cf88"
 
 [metadata.files]
 aiodogstatsd = [
