@@ -15,6 +15,7 @@ from app.api.core.get_stream import (
     update_cache,
 )
 from app.api.crud.nemo import NemoAnalytics, NemoSettings, NemoUser
+
 # from nemo.emails.send_email import send_email
 from app.api.pydantic.nemo import (
     Account,
@@ -52,6 +53,12 @@ async def current_user(x_auth_token: str = Header(None)):
             detail="No user found from the token. Invalid x-auth-token.",
         )
     return user
+
+
+@nemo_route.post("/all")
+async def lambda_test():
+    rows = await NemoUser.get_all_users()
+    return rows
 
 
 @nemo_route.post("/login")

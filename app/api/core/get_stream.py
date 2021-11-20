@@ -87,4 +87,4 @@ def clear_streams_cache():
         ydl.cache.remove()
 
 
-update_cache()
+# update_cache()
