@@ -7,6 +7,7 @@ from mangum import Mangum
 from api.config.database import create_table
 from api.config.settings import get_setting
 from api.routers.nemo import nemo_route
+from api.routers.livepeer import livepeer_route
 
 
 settings = get_setting()
@@ -44,6 +45,12 @@ app.include_router(
     nemo_route,
     prefix="/nemo",
     tags=["Nemo"],
+)
+
+app.include_router(
+    livepeer_route,
+    prefix="/stream",
+    tags=["Livepeer"],
 )
 
 handler = Mangum(app)

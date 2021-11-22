@@ -20,6 +20,7 @@ google-auth = "^2.3.3"
 mangum = "^0.12.3"
 SQLAlchemy = "^1.4.27"
 asyncpg = "^0.25.0"
+httpx = "^0.21.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

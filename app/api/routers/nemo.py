@@ -55,12 +55,6 @@ async def current_user(x_auth_token: str = Header(None)):
     return user
 
 
-@nemo_route.post("/all")
-async def lambda_test():
-    rows = await NemoUser.get_all_users()
-    return rows
-
-
 @nemo_route.post("/login")
 async def create_user(auth: GoogleAuth, background_tasks: BackgroundTasks):
     """Create a new user or return existing user
