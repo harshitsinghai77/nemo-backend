@@ -2,7 +2,7 @@ import os
 
 import httpx
 from fastapi import APIRouter, HTTPException
-from api.pydantic.livepeer import LivepeerStream
+from api.pydantic.livepeer import LivepeerStream, LivepeerStreamStatus
 
 livepeer_route = APIRouter()
 
@@ -50,22 +50,20 @@ async def create_new_stream(stream: LivepeerStream):
         resp = await client.post(
             LIVEPEER_BASE_URL + "/stream", json=json_body, headers=HEADERS
         )
-        print("resp", resp)
-        # if resp.status_code == 201:
-        #     resp = resp.json()
-        #     stream_id = resp["id"]
-        #     playbackId = resp["playbackId"]
-        #     streamKey = resp["streamKey"]
-        #     return {
-        #         "stream_id": stream_id,
-        #         "playbackId": playbackId,
-        #         "streamKey": streamKey,
-        #     }
-        return resp.json()
+        resp = resp.json()
+        stream_id = resp["id"]
+        playbackId = resp["playbackId"]
+        streamKey = resp["streamKey"]
+        return {
+            "stream_id": stream_id,
+            "playbackId": playbackId,
+            "streamKey": streamKey,
+        }
 
 
-@livepeer_route.get("/")
-async def get_stream_status(stream_id: str):
+@livepeer_route.post("/stream-status")
+async def get_stream_status(stream: LivepeerStreamStatus):
+    stream_id = stream.stream_id
     if not stream_id:
         raise HTTPException(status_code=400, detail="No stream_id found.")
 
@@ -73,7 +71,5 @@ async def get_stream_status(stream_id: str):
         resp = await client.get(
             f"{LIVEPEER_BASE_URL}/stream/{stream_id}", headers=HEADERS
         )
-        if resp:
-            resp = resp.json()
-            return resp
-        return "Some error occured. Please try again later."
+        resp = resp.json()
+        return resp
