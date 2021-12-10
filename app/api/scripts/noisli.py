@@ -13,22 +13,26 @@ async def fake_analytics_data():
     """Fake analytics data for testing."""
     from datetime import datetime, timedelta
 
-    from api.config.database import database
-    from api.models.nemo import nemo_user_analytics
+    from app.api.config.database import create_table, close_connection, async_session
+    from app.api.models.nemo import nemo_user_analytics
 
-    await database.connect()
-    date = datetime.now() + timedelta(days=1)
-    # date = datetime.now()
-    user_analytics = {
-        "created_at": date,
-        "google_id": "100258543595566787621",
-        "duration": 9000,
-        "full_date": date,
-    }
+    await create_table()
+    date = datetime.now()
 
-    query = nemo_user_analytics.insert().values(**user_analytics)
-    await database.execute(query)
-    await database.disconnect()
+    for i in range(6):
+        date -= timedelta(days=i)
+        user_analytics = {
+            "created_at": date,
+            "google_id": "100258543595566787621",
+            "duration": 9000,
+            "full_date": date,
+        }
+        async with async_session as session:
+            query = nemo_user_analytics.insert().values(**user_analytics)
+            await session.execute(query)
+            await session.commit()
+
+    await close_connection()
 
 
 async def get_analytics():
@@ -64,4 +68,4 @@ async def get_stastics():
     await database.disconnect()
 
 
-asyncio.run(get_stastics())
+asyncio.run(fake_analytics_data())

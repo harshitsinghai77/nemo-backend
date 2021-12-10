@@ -132,6 +132,11 @@ async def update_user_timer_settings(
 async def get_user_account(user=Depends(current_user)):
     """Get user account."""
     account = await NemoUser.get_user_by_id(google_id=user["google_id"])
+    if not account:
+        raise HTTPException(
+            status_code=404,
+            detail="No user account found or is empty.",
+        )
     return account
 
 
@@ -146,8 +151,13 @@ async def update_user_account(account: Account, user=Depends(current_user)):
 @nemo_route.get("/analytics")
 async def get_user_analytics(user=Depends(current_user)):
     """Get all analytics."""
-    results = await NemoAnalytics.get_analytics(google_id=user["google_id"])
-    return results
+    analytics = await NemoAnalytics.get_analytics(google_id=user["google_id"])
+    if not analytics:
+        raise HTTPException(
+            status_code=404,
+            detail="No user analytics found or is empty.",
+        )
+    return analytics
 
 
 @nemo_route.post("/analytics", response_model=GetAnalytics)

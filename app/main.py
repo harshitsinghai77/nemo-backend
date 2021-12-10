@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from mangum import Mangum
 
-from api.config.database import create_table
+from api.config.database import create_table, close_connection
 from api.config.settings import get_setting
 from api.routers.nemo import nemo_route
 from api.routers.livepeer import livepeer_route
@@ -26,13 +26,12 @@ app.add_middleware(
 async def startup():
     """Connect to database on startup."""
     await create_table()
-    # await database.connect()
 
 
-# @app.on_event("shutdown")
-# async def shutdown():
-#     """Disconnect to database on shutdown."""
-#     await database.disconnect()
+@app.on_event("shutdown")
+async def shutdown():
+    """Disconnect to database on shutdown."""
+    await close_connection()
 
 
 @app.get("/")

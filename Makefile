@@ -7,8 +7,11 @@ export_requirments:
 deploy:
 	git push heroku master
 
+new-tab:
+	gnome-terminal --tab -e "bash -c 'cd ../../frontend/nemo/ && code . && npm start'"
+
 runserver:
-	uvicorn app.main:app --reload
+	cd app/ && uvicorn main:app --reload
 
 docker_image:
 	docker build -t nemo-app .

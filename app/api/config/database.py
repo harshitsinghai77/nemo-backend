@@ -2,8 +2,8 @@ import os
 
 # import databases
 from sqlalchemy import MetaData
-from sqlalchemy.orm import declarative_base
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, engine
+from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 
 DB_NAME = os.getenv("DB_NAME", "nemo")
 DB_USER = os.getenv("DB_USER", "nemo")
@@ -22,10 +22,15 @@ if environment == "development":
 
 metadata = MetaData()
 Base = declarative_base()
-engine = create_async_engine(DATABASE_URL)
-async_session = AsyncSession(bind=engine, expire_on_commit=True)
+async_engine = create_async_engine(DATABASE_URL, pool_size=20)
+# async_session = AsyncSession(async_engine, expire_on_commit=False)
+async_session = sessionmaker(async_engine, expire_on_commit=False, class_=AsyncSession)
 
 
 async def create_table():
-    async with engine.begin() as conn:
+    async with async_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+
+
+async def close_connection():
+    await async_engine.dispose()
