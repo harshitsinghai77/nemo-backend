@@ -23,7 +23,6 @@ if environment == "development":
 metadata = MetaData()
 Base = declarative_base()
 async_engine = create_async_engine(DATABASE_URL, pool_size=20)
-# async_session = AsyncSession(async_engine, expire_on_commit=False)
 async_session = sessionmaker(async_engine, expire_on_commit=False, class_=AsyncSession)
 
 

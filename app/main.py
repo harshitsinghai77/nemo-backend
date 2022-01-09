@@ -2,7 +2,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
-from mangum import Mangum
 
 from api.config.database import create_table, close_connection
 from api.config.settings import get_setting
@@ -52,4 +51,5 @@ app.include_router(
     tags=["Livepeer"],
 )
 
-handler = Mangum(app)
+# Only for AWS Lambda Deployment
+# handler = Mangum(app)
