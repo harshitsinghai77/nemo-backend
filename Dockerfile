@@ -27,7 +27,7 @@ RUN mkdir /app
 
 WORKDIR /app
 
-COPY . .
+COPY deploy_prod.sh pyproject.toml app/ ./ 
 
 # Allow installing dev dependencies to run tests
 ARG INSTALL_DEV=false
