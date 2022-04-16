@@ -28,3 +28,8 @@ Get personalized spotify music recommendation directly to your inbox every day b
 Make your morning better with ☕ and Noiist.
 
 Demo: https://noiist.netlify.app/
+
+## Deployment
+
+The app is currently being deployed to Heroku.
+https://nemo-python.herokuapp.com/
