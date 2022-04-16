@@ -3,8 +3,8 @@ from datetime import datetime, timedelta
 from sqlalchemy import and_
 from sqlalchemy.sql import func
 
-from api.config.database import async_session, async_engine
-from api.models.nemo import nemo_user, nemo_user_analytics, nemo_user_settings
+from app.api.config.database import async_session, async_engine
+from app.api.models.nemo import nemo_user, nemo_user_analytics, nemo_user_settings
 
 
 class NemoUser:

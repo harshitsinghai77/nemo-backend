@@ -2,7 +2,7 @@ import os
 
 import httpx
 from fastapi import APIRouter, HTTPException
-from api.pydantic.livepeer import LivepeerStream, LivepeerStreamStatus
+from app.api.pydantic.livepeer import LivepeerStream, LivepeerStreamStatus
 
 livepeer_route = APIRouter()
 

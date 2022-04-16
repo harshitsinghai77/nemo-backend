@@ -3,10 +3,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 
-from api.config.database import create_table, close_connection
-from api.config.settings import get_setting
-from api.routers.nemo import nemo_route
-from api.routers.livepeer import livepeer_route
+from app.api.config.database import create_table, close_connection
+from app.api.config.settings import get_setting
+from app.api.routers.nemo import nemo_route
+from app.api.routers.livepeer import livepeer_route
 
 
 settings = get_setting()
@@ -50,6 +50,3 @@ app.include_router(
     prefix="/stream",
     tags=["Livepeer"],
 )
-
-# Only for AWS Lambda Deployment
-# handler = Mangum(app)

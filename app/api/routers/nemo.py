@@ -7,17 +7,17 @@ from fastapi.exceptions import HTTPException
 from fastapi.param_functions import Depends
 from fastapi.responses import JSONResponse
 
-from api.core.get_stream import (
+from app.api.core.get_stream import (
     check_cache_expiry,
     clear_streams_cache,
     get_all_streams,
     get_stream_by_id,
     update_cache,
 )
-from api.crud.nemo import NemoAnalytics, NemoSettings, NemoUser
+from app.api.crud.nemo import NemoAnalytics, NemoSettings, NemoUser
 
 # from nemo.emails.send_email import send_email
-from api.pydantic.nemo import (
+from app.api.pydantic.nemo import (
     Account,
     Analytics,
     GetAnalytics,
@@ -25,12 +25,12 @@ from api.pydantic.nemo import (
     UserAccount,
     UserSettings,
 )
-from api.routers.constants import (
+from app.api.routers.constants import (
     COOKIE_AUTHORIZATION_NAME,
     COOKIE_DOMAIN,
     JWT_ACCESS_TOKEN_EXPIRE_DAYS,
 )
-from api.utils.nemo import (
+from app.api.utils.nemo import (
     check_google_user,
     create_access_token,
     create_dict_from_payload,
