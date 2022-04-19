@@ -5,7 +5,7 @@ export_requirments:
 	poetry export -f requirements.txt --output requirements.txt
 
 deploy:
-	git push heroku master
+	make export_requirments && git push heroku master
 
 new-tab:
 	gnome-terminal --tab -e "bash -c 'cd ../../frontend/nemo/ && code . && npm start'"
