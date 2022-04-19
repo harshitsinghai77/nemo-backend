@@ -2,8 +2,8 @@ import os
 
 # import databases
 from sqlalchemy import MetaData
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 
 DB_NAME = os.getenv("DB_NAME", "nemo")
 DB_USER = os.getenv("DB_USER", "nemo")

@@ -13,7 +13,7 @@ async def fake_analytics_data():
     """Fake analytics data for testing."""
     from datetime import datetime, timedelta
 
-    from app.api.config.database import create_table, close_connection, async_session
+    from app.api.config.database import async_session, close_connection, create_table
     from app.api.models.nemo import nemo_user_analytics
 
     await create_table()

@@ -5,9 +5,6 @@ import os
 from typing import Optional
 
 import requests
-from fastapi import APIRouter
-from fastapi.responses import HTMLResponse, RedirectResponse
-
 from api.config.database import database
 from api.models import model
 from api.routers.constants import (
@@ -18,6 +15,8 @@ from api.routers.constants import (
     SPOTIFY_TOKEN_URL,
     SPOTIFY_USER_URL,
 )
+from fastapi import APIRouter
+from fastapi.responses import HTMLResponse, RedirectResponse
 
 LOGGER = logging.getLogger()
 

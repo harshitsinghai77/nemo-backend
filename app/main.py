@@ -3,11 +3,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 
-from app.api.config.database import create_table, close_connection
+from app.api.config.database import close_connection, create_table
 from app.api.config.settings import get_setting
-from app.api.routers.nemo import nemo_route
 from app.api.routers.livepeer import livepeer_route
-
+from app.api.routers.nemo import nemo_route
 
 settings = get_setting()
 app = FastAPI(title=settings.APP_NAME)
