@@ -7,15 +7,15 @@ from fastapi.exceptions import HTTPException
 from fastapi.param_functions import Depends
 from fastapi.responses import JSONResponse
 
-from app.api.core.get_stream import (
-    check_cache_expiry,
-    clear_streams_cache,
-    get_all_streams,
-    get_stream_by_id,
-    update_cache,
-)
-from app.api.crud.nemo import NemoAnalytics, NemoSettings, NemoUser
+# from app.api.core.get_stream import (
+#     check_cache_expiry,
+#     clear_streams_cache,
+#     get_all_streams,
+#     get_stream_by_id,
+#     update_cache,
+# )
 # from nemo.emails.send_email import send_email
+from app.api.crud.nemo import NemoAnalytics, NemoSettings, NemoUser
 from app.api.pydantic.nemo import (
     Account,
     Analytics,
@@ -44,11 +44,11 @@ nemo_route = APIRouter()
 async def current_user(x_auth_token: str = Header(None)):
     """Get current user based on x_auth_token"""
     if not x_auth_token:
-        raise HTTPException(status_code=400, detail="x-auth-token header missing.")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="x-auth-token header missing.")
     user = get_current_user(x_auth_token)
     if not user:
         raise HTTPException(
-            status_code=404,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail="No user found from the token. Invalid x-auth-token.",
         )
     return user
@@ -70,7 +70,7 @@ async def create_user(auth: GoogleAuth, background_tasks: BackgroundTasks):
     # Get user payload from auth token
     payload = get_user_payload(token=auth.google_token)
     if not check_google_user(payload):
-        raise HTTPException(status_code=400, detail="Unable to validate google user")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Unable to validate google user")
 
     user = await NemoUser.check_user_exists(payload["sub"], payload["email"])
     # If user does not exists then create new user and settings for the user
@@ -111,7 +111,7 @@ async def get_user_settings(user=Depends(current_user)):
     """Get all user settings."""
     settings = await NemoSettings.get(user["google_id"])
     if not settings:
-        raise HTTPException(status_code=404, detail="No settings found for the user")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No settings found for the user")
     return settings
 
 
@@ -133,7 +133,7 @@ async def get_user_account(user=Depends(current_user)):
     account = await NemoUser.get_user_by_id(google_id=user["google_id"])
     if not account:
         raise HTTPException(
-            status_code=404,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail="No user account found or is empty.",
         )
     return account
@@ -153,7 +153,7 @@ async def get_user_analytics(user=Depends(current_user)):
     analytics = await NemoAnalytics.get_analytics(google_id=user["google_id"])
     if not analytics:
         raise HTTPException(
-            status_code=404,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="No user analytics found or is empty.",
         )
     return analytics
@@ -201,39 +201,39 @@ async def delete_user(user=Depends(current_user)):
     )
 
 
-@nemo_route.get("/get-all-streams/{category}")
-async def get_all_stream(category: str, background_tasks: BackgroundTasks):
-    """Get streams from pafy and return the data."""
-    if category:
-        result = get_all_streams(category=category)
-        if check_cache_expiry():
-            background_tasks.add_task(update_cache)
-        return result
-    return JSONResponse(
-        status_code=status.HTTP_204_NO_CONTENT,
-        content={"message": "Category not found"},
-    )
+# @nemo_route.get("/get-all-streams/{category}")
+# async def get_all_stream(category: str, background_tasks: BackgroundTasks):
+#     """Get streams from pafy and return the data."""
+#     if category:
+#         result = get_all_streams(category=category)
+#         if check_cache_expiry():
+#             background_tasks.add_task(update_cache)
+#         return result
+#     return JSONResponse(
+#         status_code=status.HTTP_204_NO_CONTENT,
+#         content={"message": "Category not found"},
+#     )
 
 
-@nemo_route.get("/get-stream-by-id/{category}/{id}")
-async def get_stream(category: str, id: str):
-    """Fetch streams by id."""
-    if id and category:
-        result = get_stream_by_id(category=category, id=id)
-        return result
-    return JSONResponse(
-        status_code=status.HTTP_204_NO_CONTENT,
-        content={"message": "Category or Id not found"},
-    )
+# @nemo_route.get("/get-stream-by-id/{category}/{id}")
+# async def get_stream(category: str, id: str):
+#     """Fetch streams by id."""
+#     if id and category:
+#         result = get_stream_by_id(category=category, id=id)
+#         return result
+#     return JSONResponse(
+#         status_code=status.HTTP_204_NO_CONTENT,
+#         content={"message": "Category or Id not found"},
+#     )
 
 
-@nemo_route.get("/clear-streams")
-async def clear_streams():
-    """Clear streams from cache.
-    This should be called when streams url have expired.
-    """
-    clear_streams_cache()
-    return JSONResponse(
-        status_code=status.HTTP_200_OK,
-        content={"message": "Cleared streams cache."},
-    )
+# @nemo_route.get("/clear-streams")
+# async def clear_streams():
+#     """Clear streams from cache.
+#     This should be called when streams url have expired.
+#     """
+#     clear_streams_cache()
+#     return JSONResponse(
+#         status_code=status.HTTP_200_OK,
+#         content={"message": "Cleared streams cache."},
+#     )

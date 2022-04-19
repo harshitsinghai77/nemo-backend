@@ -185,23 +185,26 @@ class NemoAnalytics:
 
     @staticmethod
     async def get_best_day(google_id):
-        """Return most number of seconds completed in the last 7 days."""
+        """Return best day (day with most hrs) in the last 7 days."""
         query = """
             SELECT * from core_nemo_analytics
-            where full_date > CURRENT_DATE - INTERVAL '7 days' and google_id=:google_id
+            where google_id=:google_id and full_date > CURRENT_DATE - INTERVAL '7 days'
             and duration = (SELECT MAX (duration) from core_nemo_analytics)
         """
-        seven_day_interval_before = datetime.now() - timedelta(days=7)
+        # seven_day_interval_before = datetime.now() - timedelta(days=7)
+        # max_value = func.max(nemo_user_analytics.c.duration)
+        # print('max_value: ', max_value)
+        # select_max_value = nemo_user_analytics.select(max_value).with_only_columns(nemo_user_analytics.c.duration).scalar_subquery()
+        # print('select_max_value: ', select_max_value)
+        # query = nemo_user_analytics.select().where(
+        #     and_(
+        #         nemo_user_analytics.c.google_id == google_id,
+        #         nemo_user_analytics.c.full_date > seven_day_interval_before,
+        #         nemo_user_analytics.c.duration == select_max_value
+        #     )
+        # )
         async with async_session() as session:
-            max_value = func.max(nemo_user_analytics.c.duration)
-            query = nemo_user_analytics.select().where(
-                and_(
-                    nemo_user_analytics.c.full_date > seven_day_interval_before,
-                    nemo_user_analytics.c.google_id == google_id,
-                    nemo_user_analytics.c.duration == max_value,
-                )
-            )
-            result = await session.execute(query)
+            result = await session.execute(query, {"google_id": google_id})
             return result.fetchone()
 
     @staticmethod
