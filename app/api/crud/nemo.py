@@ -4,8 +4,7 @@ from sqlalchemy import and_
 from sqlalchemy.sql import func
 
 from app.api.config.database import async_engine, async_session
-from app.api.models.nemo import nemo_user, nemo_user_analytics, nemo_user_settings
-
+from app.api.models.nemo import nemo_user, nemo_user_analytics, nemo_user_settings, nemo_user_task
 
 class NemoUser:
     """Utility class to manage nemo user."""
@@ -139,16 +138,6 @@ class NemoAnalytics:
             return user_analytics
 
     @staticmethod
-    async def get(google_id):
-        """Get user analytics."""
-        async with async_session() as session:
-            query = nemo_user_analytics.select().where(
-                nemo_user_analytics.c.google_id == google_id
-            )
-            result = await session.execute(query)
-            return result.fetchall()
-
-    @staticmethod
     async def get_analytics(google_id):
         """Get Weekly Anlytics."""
         # """
@@ -193,9 +182,7 @@ class NemoAnalytics:
         """
         # seven_day_interval_before = datetime.now() - timedelta(days=7)
         # max_value = func.max(nemo_user_analytics.c.duration)
-        # print('max_value: ', max_value)
         # select_max_value = nemo_user_analytics.select(max_value).with_only_columns(nemo_user_analytics.c.duration).scalar_subquery()
-        # print('select_max_value: ', select_max_value)
         # query = nemo_user_analytics.select().where(
         #     and_(
         #         nemo_user_analytics.c.google_id == google_id,
@@ -222,8 +209,7 @@ class NemoAnalytics:
                 )
                 .where(
                     and_(
-                        func.date(nemo_user_analytics.c.full_date)
-                        == func.current_date(),
+                        func.date(nemo_user_analytics.c.full_date) == func.current_date(),
                         nemo_user_analytics.c.google_id == google_id,
                     )
                 )
@@ -239,3 +225,39 @@ class NemoAnalytics:
                 nemo_user_analytics.c.google_id == google_id
             )
             return await session.execute(query)
+
+class NemoTask:
+    """Utility class to manage user taks."""
+    @staticmethod
+    async def create(task):
+        """Create a new task."""
+        async with async_session() as session:
+            query = nemo_user_task.insert().values(**task)
+            await session.execute(query)
+            await session.commit()
+            task.pop("google_id", None)
+            return task
+
+    @staticmethod
+    async def get_all_tasks(google_id):
+        """Get all the user tasks."""
+        ten_day_interval = datetime.now() - timedelta(days=10)
+        query = (
+            nemo_user_task.select().with_only_columns(
+                    [
+                        func.to_char(nemo_user_task.c.created_at, "Mon DD YYYY").label("date"),
+                        func.to_char(nemo_user_task.c.created_at, "HH24:MI").label("time"),
+                        nemo_user_task.c.task_description,
+                        nemo_user_task.c.duration,
+                    ]
+                ).where(
+                and_(
+                    nemo_user_task.c.created_at >= ten_day_interval,
+                    nemo_user_task.c.google_id == google_id,
+                )
+            )
+        )
+        async with async_session() as session:
+            result = await session.execute(query)
+            return result.fetchall()
+        

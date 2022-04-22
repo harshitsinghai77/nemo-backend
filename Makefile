@@ -7,8 +7,11 @@ export_requirments:
 deploy:
 	make export_requirments && git push heroku master
 
+start-server:
+	code . && uvicorn app.main:app --reload
+
 new-tab:
-	gnome-terminal --tab -e "bash -c 'cd ../../frontend/nemo/ && code . && npm start'"
+	gnome-terminal --tab -e "bash -c 'cd ../../frontend/nemo/ && code . && npm start'" && make start-server
 
 runserver:
 	cd app/ && uvicorn main:app --reload

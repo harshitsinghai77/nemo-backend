@@ -14,21 +14,16 @@ DB_MAX_SIZE = 10
 
 environment = os.getenv("ENV", "development")
 
-DATABASE_URL = (
-    f"postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-)
 if environment == "development":
     DATABASE_URL = "postgresql+asyncpg://nemo:password@localhost:5432/nemo"
 
 metadata = MetaData()
-Base = declarative_base()
 async_engine = create_async_engine(DATABASE_URL, pool_size=5)
 async_session = sessionmaker(async_engine, expire_on_commit=False, class_=AsyncSession)
 
-
 async def create_table():
     async with async_engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+        await conn.run_sync(metadata.create_all)
 
 
 async def close_connection():
