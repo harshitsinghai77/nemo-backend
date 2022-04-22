@@ -15,7 +15,7 @@ from fastapi.responses import JSONResponse
 #     update_cache,
 # )
 # from nemo.emails.send_email import send_email
-from app.api.crud.nemo import NemoAnalytics, NemoSettings, NemoUser
+from app.api.crud.nemo import NemoAnalytics, NemoSettings, NemoUser, NemoTask
 from app.api.pydantic.nemo import (
     Account,
     Analytics,
@@ -23,6 +23,7 @@ from app.api.pydantic.nemo import (
     GoogleAuth,
     UserAccount,
     UserSettings,
+    CreateTask
 )
 from app.api.routers.constants import (
     COOKIE_AUTHORIZATION_NAME,
@@ -189,6 +190,22 @@ async def get_stats(user=Depends(current_user), stats=str):
         content={"message": "Invalid category or category not found"},
     )
 
+@nemo_route.post("/create_task")
+async def create_new_task(task: CreateTask, user=Depends(current_user)):
+    """Create new task."""
+    created_at = datetime.now()
+    task = task.dict()
+    task["created_at"] = created_at
+    task["google_id"] = user["google_id"]
+    task["task_date"] = created_at.date()
+    new_task = await NemoTask.create(task)
+    return new_task
+
+@nemo_route.get("/get-tasks")
+async def get_tasks(user=Depends(current_user)):
+    """Get all task."""
+    all_tasks = await NemoTask.get_all_tasks(user["google_id"])
+    return all_tasks
 
 @nemo_route.delete("/delete")
 async def delete_user(user=Depends(current_user)):

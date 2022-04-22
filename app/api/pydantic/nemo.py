@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from typing import Optional
 
 from pydantic import BaseModel
@@ -6,13 +6,11 @@ from pydantic import BaseModel
 
 class GoogleAuth(BaseModel):
     """User google token."""
-
     google_token: str
 
 
 class UserAccount(BaseModel):
     """Return user account."""
-
     given_name: Optional[str] = None
     family_name: Optional[str] = None
     username: Optional[str] = None
@@ -22,7 +20,6 @@ class UserAccount(BaseModel):
 
 class GetAnalytics(BaseModel):
     """Get User Analytics"""
-
     created_at: datetime
     google_id: str
     duration: int
@@ -31,7 +28,6 @@ class GetAnalytics(BaseModel):
 
 class UserSettings(BaseModel):
     """User Settings Update"""
-
     display_time: Optional[str]
     timer_time: Optional[str]
     timer_end_notification: Optional[bool]
@@ -47,13 +43,15 @@ class UserSettings(BaseModel):
 
 class Analytics(BaseModel):
     """Save analytics."""
-
     duration: int
 
+class CreateTask(BaseModel):
+    """Save analytics."""
+    task_description: str
+    duration: int
 
 class Account(BaseModel):
     """Update user account"""
-
     given_name: str
     family_name: str
     username: str

@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Table, Text
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Table, Text, Time
 
 from app.api.config.database import metadata
 
@@ -42,4 +42,14 @@ nemo_user_analytics = Table(
     Column("google_id", ForeignKey("core_nemo_user.google_id")),
     Column("duration", Integer),  # in seconds
     Column("full_date", DateTime),
+)
+
+nemo_user_task = Table(
+    "core_nemo_tasks",
+    metadata,
+    Column("created_at", DateTime),
+    Column("google_id", ForeignKey("core_nemo_user.google_id")),
+    Column("task_description", Text),
+    Column("duration", Integer),  # in seconds
+    Column("task_date", DateTime),
 )
