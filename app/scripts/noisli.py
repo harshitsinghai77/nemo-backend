@@ -1,4 +1,6 @@
 import asyncio
+import random
+from datetime import datetime, timedelta
 
 
 def dangerously_drop_noistli_table():
@@ -11,8 +13,6 @@ def dangerously_drop_noistli_table():
 
 async def fake_analytics_data():
     """Fake analytics data for testing."""
-    from datetime import datetime, timedelta
-
     from app.api.config.database import async_session, close_connection, create_table
     from app.api.models.nemo import nemo_user_analytics
 
@@ -32,6 +32,29 @@ async def fake_analytics_data():
             await session.execute(query)
             await session.commit()
 
+    await close_connection()
+
+
+async def fake_tasks_data():
+    from app.api.config.database import close_connection
+    from app.api.crud.nemo import NemoTask
+
+    google_id = "105048648072263223821"
+    today_date = datetime.now()
+
+    for i in range(10):
+        today_date -= timedelta(days=i)
+        for j in range(10):
+            today_date -= timedelta(hours=j)
+            task = {
+                "created_at": today_date,
+                "google_id": google_id,
+                "task_description": f"task-{i}-{j}",
+                "duration": random.randint(1800, 9000),
+                "task_date": today_date.date(),
+            }
+            await NemoTask.create(task)
+    print("initialized dummy task data")
     await close_connection()
 
 
@@ -68,4 +91,4 @@ async def get_stastics():
     await database.disconnect()
 
 
-asyncio.run(fake_analytics_data())
+asyncio.run(fake_tasks_data())

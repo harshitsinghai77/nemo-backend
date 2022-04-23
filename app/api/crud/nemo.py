@@ -4,7 +4,13 @@ from sqlalchemy import and_
 from sqlalchemy.sql import func
 
 from app.api.config.database import async_engine, async_session
-from app.api.models.nemo import nemo_user, nemo_user_analytics, nemo_user_settings, nemo_user_task
+from app.api.models.nemo import (
+    nemo_user,
+    nemo_user_analytics,
+    nemo_user_settings,
+    nemo_user_task,
+)
+
 
 class NemoUser:
     """Utility class to manage nemo user."""
@@ -209,7 +215,8 @@ class NemoAnalytics:
                 )
                 .where(
                     and_(
-                        func.date(nemo_user_analytics.c.full_date) == func.current_date(),
+                        func.date(nemo_user_analytics.c.full_date)
+                        == func.current_date(),
                         nemo_user_analytics.c.google_id == google_id,
                     )
                 )
@@ -226,8 +233,10 @@ class NemoAnalytics:
             )
             return await session.execute(query)
 
+
 class NemoTask:
     """Utility class to manage user taks."""
+
     @staticmethod
     async def create(task):
         """Create a new task."""
@@ -241,23 +250,48 @@ class NemoTask:
     @staticmethod
     async def get_all_tasks(google_id):
         """Get all the user tasks."""
+        # select created_at, task_description, duration, n1.sum_duration from (
+        #     SELECT date(created_at) as created_at_1, sum(duration) as sum_duration from core_nemo_tasks group by created_at_1
+        # ) as n1 JOIN core_nemo_tasks as n2 ON date(n2.created_at) = date(n1.created_at_1)
         ten_day_interval = datetime.now() - timedelta(days=10)
+        sub_query = (
+            nemo_user_task.select()
+            .with_only_columns(
+                [
+                    func.date(nemo_user_task.c.created_at).label("created_at_grouped"),
+                    func.sum(nemo_user_task.c.duration).label("total_duration"),
+                ]
+            )
+            .group_by("created_at_grouped")
+        )
+        sub_query = sub_query.alias("sub_query")
+
         query = (
-            nemo_user_task.select().with_only_columns(
-                    [
-                        func.to_char(nemo_user_task.c.created_at, "Mon DD YYYY").label("date"),
-                        func.to_char(nemo_user_task.c.created_at, "HH24:MI").label("time"),
-                        nemo_user_task.c.task_description,
-                        nemo_user_task.c.duration,
-                    ]
-                ).where(
+            nemo_user_task.select()
+            .with_only_columns(
+                [
+                    func.to_char(nemo_user_task.c.created_at, "Mon DD YYYY").label(
+                        "date"
+                    ),
+                    func.to_char(nemo_user_task.c.created_at, "HH24:MI").label("time"),
+                    nemo_user_task.c.task_description,
+                    nemo_user_task.c.duration,
+                    sub_query.c.total_duration,
+                ]
+            )
+            .where(
                 and_(
                     nemo_user_task.c.created_at >= ten_day_interval,
                     nemo_user_task.c.google_id == google_id,
                 )
             )
         )
+
+        query = query.join(
+            sub_query,
+            func.date(nemo_user_task.c.created_at)
+            == func.date(sub_query.c.created_at_grouped),
+        )
         async with async_session() as session:
             result = await session.execute(query)
             return result.fetchall()
-        

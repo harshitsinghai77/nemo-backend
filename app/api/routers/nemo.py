@@ -15,15 +15,15 @@ from fastapi.responses import JSONResponse
 #     update_cache,
 # )
 # from nemo.emails.send_email import send_email
-from app.api.crud.nemo import NemoAnalytics, NemoSettings, NemoUser, NemoTask
+from app.api.crud.nemo import NemoAnalytics, NemoSettings, NemoTask, NemoUser
 from app.api.pydantic.nemo import (
     Account,
     Analytics,
+    CreateTask,
     GetAnalytics,
     GoogleAuth,
     UserAccount,
     UserSettings,
-    CreateTask
 )
 from app.api.routers.constants import (
     COOKIE_AUTHORIZATION_NAME,
@@ -45,7 +45,9 @@ nemo_route = APIRouter()
 async def current_user(x_auth_token: str = Header(None)):
     """Get current user based on x_auth_token"""
     if not x_auth_token:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="x-auth-token header missing.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="x-auth-token header missing."
+        )
     user = get_current_user(x_auth_token)
     if not user:
         raise HTTPException(
@@ -71,7 +73,10 @@ async def create_user(auth: GoogleAuth, background_tasks: BackgroundTasks):
     # Get user payload from auth token
     payload = get_user_payload(token=auth.google_token)
     if not check_google_user(payload):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Unable to validate google user")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Unable to validate google user",
+        )
 
     user = await NemoUser.check_user_exists(payload["sub"], payload["email"])
     # If user does not exists then create new user and settings for the user
@@ -112,7 +117,10 @@ async def get_user_settings(user=Depends(current_user)):
     """Get all user settings."""
     settings = await NemoSettings.get(user["google_id"])
     if not settings:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No settings found for the user")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No settings found for the user",
+        )
     return settings
 
 
@@ -190,6 +198,7 @@ async def get_stats(user=Depends(current_user), stats=str):
         content={"message": "Invalid category or category not found"},
     )
 
+
 @nemo_route.post("/create_task")
 async def create_new_task(task: CreateTask, user=Depends(current_user)):
     """Create new task."""
@@ -201,11 +210,13 @@ async def create_new_task(task: CreateTask, user=Depends(current_user)):
     new_task = await NemoTask.create(task)
     return new_task
 
+
 @nemo_route.get("/get-tasks")
 async def get_tasks(user=Depends(current_user)):
     """Get all task."""
     all_tasks = await NemoTask.get_all_tasks(user["google_id"])
     return all_tasks
+
 
 @nemo_route.delete("/delete")
 async def delete_user(user=Depends(current_user)):
