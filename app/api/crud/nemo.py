@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from sqlalchemy import and_
+from sqlalchemy import and_, desc
 from sqlalchemy.sql import func
 
 from app.api.config.database import async_engine, async_session
@@ -263,6 +263,7 @@ class NemoTask:
                 ]
             )
             .group_by("created_at_grouped")
+            .order_by(desc("created_at_grouped"))
         )
         sub_query = sub_query.alias("sub_query")
 
