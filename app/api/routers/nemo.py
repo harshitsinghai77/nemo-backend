@@ -202,8 +202,8 @@ async def get_stats(user=Depends(current_user), stats=str):
 @nemo_route.post("/create_task")
 async def create_new_task(task: CreateTask, user=Depends(current_user)):
     """Create new task."""
-    created_at = datetime.now()
     task = task.dict()
+    created_at = datetime.fromtimestamp(task["created_at"] / 1000.0)
     task["created_at"] = created_at
     task["google_id"] = user["google_id"]
     task["task_date"] = created_at.date()

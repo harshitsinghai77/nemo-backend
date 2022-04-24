@@ -54,6 +54,7 @@ class Analytics(BaseModel):
 class CreateTask(BaseModel):
     """Save analytics."""
 
+    created_at: float
     task_description: str
     duration: int
 
