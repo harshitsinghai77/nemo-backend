@@ -70,17 +70,29 @@ class NemoUser:
 
     @staticmethod
     async def check_if_email_exists(email: str):
-        """Check if the email already exists."""
+        """Check if email already exists."""
         async with async_session() as session:
             query = nemo_user.select().where(nemo_user.c.email == email)
             return await session.fetch_one(query)
 
     @staticmethod
     async def check_user_exists(google_id: str, email: str):
-        """Check if user exists."""
+        """Check if user already exists."""
         async with async_session() as session:
             query = nemo_user.select().where(
                 nemo_user.c.google_id == google_id and nemo_user.c.email == email
+            )
+            result = await session.execute(query)
+            return result.fetchone()
+
+    @staticmethod
+    async def get_user_profile_pic(google_id: str):
+        """Check if user exists."""
+        async with async_session() as session:
+            query = (
+                nemo_user.select()
+                .with_only_columns([nemo_user.c.profile_pic])
+                .where(nemo_user.c.google_id == google_id)
             )
             result = await session.execute(query)
             return result.fetchone()

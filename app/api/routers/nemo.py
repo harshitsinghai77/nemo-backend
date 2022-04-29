@@ -136,6 +136,13 @@ async def update_user_timer_settings(
     return user
 
 
+@nemo_route.get("/user-image")
+async def get_user_image_url(user=Depends(current_user)):
+    """Get user image recieved from google login."""
+    user_image_url = await NemoUser.get_user_profile_pic(google_id=user["google_id"])
+    return user_image_url
+
+
 @nemo_route.get("/account", response_model=UserAccount)
 async def get_user_account(user=Depends(current_user)):
     """Get user account."""
@@ -199,6 +206,13 @@ async def get_stats(user=Depends(current_user), stats=str):
     )
 
 
+@nemo_route.get("/get-tasks")
+async def get_tasks(user=Depends(current_user)):
+    """Get all task."""
+    all_tasks = await NemoTask.get_all_tasks(user["google_id"])
+    return all_tasks
+
+
 @nemo_route.post("/create_task")
 async def create_new_task(task: CreateTask, user=Depends(current_user)):
     """Create new task."""
@@ -221,13 +235,6 @@ async def delete_task_by_task_id(user=Depends(current_user), task_id=int):
         status_code=status.HTTP_200_OK,
         content={"success": True},
     )
-
-
-@nemo_route.get("/get-tasks")
-async def get_tasks(user=Depends(current_user)):
-    """Get all task."""
-    all_tasks = await NemoTask.get_all_tasks(user["google_id"])
-    return all_tasks
 
 
 @nemo_route.delete("/delete")
