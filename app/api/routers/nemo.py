@@ -211,6 +211,18 @@ async def create_new_task(task: CreateTask, user=Depends(current_user)):
     return new_task
 
 
+@nemo_route.delete("/tasks/{task_id}")
+async def delete_task_by_task_id(user=Depends(current_user), task_id=int):
+    """Get all task."""
+    await NemoTask.remove_task_by_task_id(
+        task_id=int(task_id), google_id=user["google_id"]
+    )
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={"success": True},
+    )
+
+
 @nemo_route.get("/get-tasks")
 async def get_tasks(user=Depends(current_user)):
     """Get all task."""

@@ -271,6 +271,7 @@ class NemoTask:
             nemo_user_task.select()
             .with_only_columns(
                 [
+                    nemo_user_task.c.id,
                     func.to_char(nemo_user_task.c.created_at, "Mon DD YYYY").label(
                         "date"
                     ),
@@ -296,3 +297,19 @@ class NemoTask:
         async with async_session() as session:
             result = await session.execute(query)
             return result.fetchall()
+
+    @staticmethod
+    async def remove_task_by_task_id(
+        task_id,
+        google_id,
+    ):
+        """Given a task_id and google_id remove the task from core_nemo_tasks"""
+        query = nemo_user_task.delete().where(
+            and_(
+                nemo_user_task.c.id == task_id,
+                nemo_user_task.c.google_id == google_id,
+            )
+        )
+        async with async_session() as session:
+            await session.execute(query)
+            return await session.commit()
