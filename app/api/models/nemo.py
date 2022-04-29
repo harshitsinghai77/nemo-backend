@@ -57,7 +57,8 @@ nemo_user_analytics = Table(
 nemo_user_task = Table(
     "core_nemo_tasks",
     metadata,
-    Column("created_at", DateTime),
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("created_at", DateTime(timezone=True)),
     Column("google_id", ForeignKey("core_nemo_user.google_id")),
     Column("task_description", Text),
     Column("duration", Integer),  # in seconds
