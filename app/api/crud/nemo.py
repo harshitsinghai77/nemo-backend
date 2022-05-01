@@ -287,7 +287,7 @@ class NemoTask:
                     func.to_char(nemo_user_task.c.created_at, "Mon DD YYYY").label(
                         "date"
                     ),
-                    func.to_char(nemo_user_task.c.created_at, "HH24:MI").label("time"),
+                    nemo_user_task.c.created_at,
                     nemo_user_task.c.task_description,
                     nemo_user_task.c.duration,
                     sub_query.c.total_duration,
