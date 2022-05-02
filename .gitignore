@@ -5,6 +5,7 @@ __pycache__/
 
 # Environments
 .env
+.env.*
 .venv
 env/
 venv/
@@ -33,3 +34,6 @@ docs_build
 venv
 docs.zip
 archive.zip
+
+#deta Deployment
+.deta
