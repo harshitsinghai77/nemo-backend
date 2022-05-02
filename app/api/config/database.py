@@ -21,7 +21,7 @@ if environment == "development":
     DATABASE_URL = "postgresql+asyncpg://nemo:password@localhost:5432/nemo"
 
 metadata = MetaData()
-async_engine = create_async_engine(DATABASE_URL, pool_size=5)
+async_engine = create_async_engine(DATABASE_URL, pool_size=15)
 async_session = sessionmaker(async_engine, expire_on_commit=False, class_=AsyncSession)
 
 
