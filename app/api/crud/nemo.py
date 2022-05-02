@@ -193,10 +193,13 @@ class NemoAnalytics:
     @staticmethod
     async def get_best_day(google_id):
         """Return best day (day with most hrs) in the last 7 days."""
+        # SELECT MAX(duration) from core_nemo_analytics
+        # where google_id=:google_id and full_date > CURRENT_DATE - INTERVAL '7 days'
         query = """
-            SELECT * from core_nemo_analytics
+            SELECT full_date, duration from core_nemo_analytics
             where google_id=:google_id and full_date > CURRENT_DATE - INTERVAL '7 days'
-            and duration = (SELECT MAX (duration) from core_nemo_analytics)
+            and duration = (SELECT MAX(duration) from core_nemo_analytics where full_date > CURRENT_DATE - INTERVAL '7 days')
+            ORDER BY full_date DESC
         """
         # seven_day_interval_before = datetime.now() - timedelta(days=7)
         # max_value = func.max(nemo_user_analytics.c.duration)
