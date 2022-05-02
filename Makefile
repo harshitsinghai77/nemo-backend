@@ -8,7 +8,7 @@ deploy-heroku:
 	make export_requirments && git push heroku master
 
 deploy-deta:
-	make export_requirments && deta deploy
+	deta deploy
 
 deploy:
 	make deploy-deta
