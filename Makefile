@@ -2,10 +2,16 @@ install:
 	poetry install
 
 export_requirments:
-	poetry export -f requirements.txt --output requirements.txt
+	poetry export --without-hashes -f requirements.txt --output requirements.txt
+
+deploy-heroku:
+	make export_requirments && git push heroku master
+
+deploy-deta:
+	make export_requirments && deta deploy
 
 deploy:
-	make export_requirments && git push heroku master
+	make deploy-deta
 
 start-server:
 	code . && uvicorn main:app --reload
