@@ -1,23 +1,29 @@
 # Backend powering Nemo and Noiist
 
-### Nemo: https://nemo-app.netlify.app/
+<img src="https://nemo-landing-page.netlify.app/images/happy_music.svg" />
 
-### Noiist: https://noiist.netlify.app/
+## Nemo:
+
+Landing Page: https://nemo-landing-page.netlify.app/
+
+App: https://nemo-app.netlify.app/
+
+## Noiist: https://noiist.netlify.app/
 
 ## Tech
 
 1. Python
 2. FastAPI
 3. Postgres Heroku for prod and Docker container for local setup.
-4. Async database support using encode/databases
-5. Frontend hosted on Netlify
-6. Backend hosted on Heroku
+4. Async database support using Async Sqlalchemy ORM.
+5. Frontend (React) hosted on Netlify (https://nemo-app.netlify.app/)
+6. Backend hosted on Heroku and DETA.
 
 ## Nemo
 
-Nemo is your digital place for focus.
+Nemo is your little helper and companion no matter if you need to focus, tune out other noises or if you want to have a moment of calm and relaxation.
 
-Nemo helps you boost your motivation and help you think more creatively.
+LandingPage: https://nemo-landing-page.netlify.app/
 
 Demo: https://nemo-app.netlify.app/
 
@@ -31,5 +37,8 @@ Demo: https://noiist.netlify.app/
 
 ## Deployment
 
-The app is currently being deployed to Heroku.
+Heroku Deployment:
 https://nemo-python.herokuapp.com/
+
+DETA Deployment:
+https://h7b2na.deta.dev/
