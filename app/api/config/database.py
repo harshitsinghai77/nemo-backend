@@ -3,7 +3,9 @@ import os
 # import databases
 from sqlalchemy import MetaData
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.pool import QueuePool
+from sqlalchemy.orm import sessionmaker
+
 
 DB_NAME = os.getenv("DB_NAME", "nemo")
 DB_USER = os.getenv("DB_USER", "nemo")
@@ -21,7 +23,7 @@ if environment == "development":
     DATABASE_URL = "postgresql+asyncpg://nemo:password@localhost:5432/nemo"
 
 metadata = MetaData()
-async_engine = create_async_engine(DATABASE_URL, pool_size=15)
+async_engine = create_async_engine(DATABASE_URL, pool_size=15, poolclass=QueuePool)
 async_session = sessionmaker(async_engine, expire_on_commit=False, class_=AsyncSession)
 
 
