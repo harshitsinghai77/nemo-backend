@@ -6,12 +6,11 @@ from email.mime.text import MIMEText
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-env = Environment(
-    loader=FileSystemLoader(searchpath="nemo/emails/templates/"),
+jinja_env = Environment(
+    loader=FileSystemLoader(searchpath="app/api/emails/templates/"),
     autoescape=select_autoescape(),
 )
-
-template = env.get_template("welcome-email.html")
+template = jinja_env.get_template("welcome-email.html")
 
 app_email: str = os.getenv("GMAIL_EMAIL", "")
 app_password: str = os.getenv("GMAIL_EMAIL_PASSWORD", "")
@@ -38,6 +37,3 @@ def send_email(receiver_fullname: str, receiver_email: str):
     with smtplib.SMTP_SSL("smtp.gmail.com", email_port, context=context) as server:
         server.login(app_email, app_password)
         server.sendmail(app_email, receiver_email, email_message.as_string())
-
-
-send_email("Harshit Singhau", "harshitsinghai77@gmail.com")
