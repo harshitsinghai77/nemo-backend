@@ -19,9 +19,6 @@ start-server:
 new-tab:
 	gnome-terminal --tab -e "bash -c 'cd ../../frontend/nemo/ && code . && npm start'" && make start-server
 
-runserver:
-	cd app/ && uvicorn main:app --reload
-
 docker_image:
 	docker build -t nemo-app .
 
