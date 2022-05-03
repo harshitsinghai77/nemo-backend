@@ -248,12 +248,6 @@ async def delete_user(user=Depends(current_user)):
     )
 
 
-# Just for testing, should be removed
-@nemo_route.get("/send-email")
-def send_welcome_email():
-    send_email("SomethingJustLikeThis", "vexera2123@angeleslid.com")
-
-
 # @nemo_route.get("/get-all-streams/{category}")
 # async def get_all_stream(category: str, background_tasks: BackgroundTasks):
 #     """Get streams from pafy and return the data."""
