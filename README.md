@@ -42,3 +42,7 @@ https://nemo-python.herokuapp.com/
 
 DETA Deployment:
 https://h7b2na.deta.dev/
+
+## Deploy your own Nemo on Deta
+
+[![Deploy](https://button.deta.dev/1/svg)](https://go.deta.dev/deploy?repo=https://github.com/harshitsinghai77/nemo-backend)
