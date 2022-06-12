@@ -17,6 +17,8 @@ google-auth = "^2.3.3"
 SQLAlchemy = "^1.4.27"
 asyncpg = "^0.25.0"
 httpx = "^0.21.1"
+deta = {version = "1.1.0a2", extras = ["async"]}
+pandas = "1.4.1"
 
 
 [tool.poetry.dev-dependencies]
