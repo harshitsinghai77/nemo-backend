@@ -5,11 +5,14 @@ import os
 
 from deta import Deta
 
+
+def getdetabase(db_name):
+    deta = Deta()
+    return deta.Base(db_name)
+
+
 PROJECT_KEY = os.getenv("DETA_PROJECT_KEY")
 PROJECT_ID = os.getenv("DETA_PROJECT_ID")
-DETA_TASK_BASENAME = "nemo_tasks"
-
-deta = Deta(PROJECT_KEY)
-deta_db = deta.Base("nemo")
-deta_analytics_db = deta.Base("nemo_analytics")
-deta_task_db = deta.Base(DETA_TASK_BASENAME)
+DETA_BASE_NEMO = "nemo"
+DETA_BASE_TASK = "nemo_tasks"
+DETA_BASE_ANALYTICS = "nemo_analytics"
