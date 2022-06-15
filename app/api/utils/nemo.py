@@ -29,7 +29,7 @@ def check_google_user(payload):
 def create_dict_from_payload(payload):
     """Create and return dict from the payload."""
     return {
-        "created_at": str(datetime.utcnow()),
+        "created_at": datetime.utcnow(),
         "google_id": payload["sub"],
         "given_name": payload["given_name"],
         "family_name": payload["family_name"],
