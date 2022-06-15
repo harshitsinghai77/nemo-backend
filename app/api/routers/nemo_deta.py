@@ -15,6 +15,7 @@ from fastapi.responses import JSONResponse
 #     update_cache,
 # )
 # from app.api.emails.send_email import send_email
+from app.api.crud.nemodeta import NemoDeta
 from app.api.crud.nemo import NemoAnalytics, NemoSettings, NemoTask, NemoUser
 from app.api.pydantic.nemo import (
     Account,
@@ -39,10 +40,10 @@ from app.api.utils.nemo import (
 )
 
 LOGGER = logging.getLogger()
-nemo_route = APIRouter()
+nemo_deta_route = APIRouter()
 
 
-async def current_user(x_auth_token: str = Header(None)):
+def current_user(x_auth_token: str = Header(None)):
     """Get current user based on x_auth_token"""
     if not x_auth_token:
         raise HTTPException(
@@ -57,8 +58,8 @@ async def current_user(x_auth_token: str = Header(None)):
     return user
 
 
-@nemo_route.post("/login")
-async def create_user(auth: GoogleAuth, background_tasks: BackgroundTasks):
+@nemo_deta_route.post("/login")
+def create_user(auth: GoogleAuth, background_tasks: BackgroundTasks):
     """Create a new user or return existing user
 
     Args:
@@ -78,12 +79,13 @@ async def create_user(auth: GoogleAuth, background_tasks: BackgroundTasks):
             detail="Unable to validate google user",
         )
 
-    user = await NemoUser.check_user_exists(payload["sub"], payload["email"])
-    # If user does not exists then create new user and settings for the user
+    user = NemoDeta.check_user_exists(google_id=payload["sub"])
+    # If user does not exists then create new user
     if not user:
         user_obj = create_dict_from_payload(payload)
-        user = await NemoUser.create(user_obj)
-        await NemoSettings.create(google_id=user["google_id"])
+        if user_obj.get("created_at"):
+            user_obj["created_at"] = str(user_obj["created_at"])
+        user = NemoDeta.create_new_user(user_obj)
         # send welcome email to user as a background task
         # background_tasks.add_task(
         #     send_email,
@@ -94,7 +96,7 @@ async def create_user(auth: GoogleAuth, background_tasks: BackgroundTasks):
     # create a access token
     access_token_expires = timedelta(days=JWT_ACCESS_TOKEN_EXPIRE_DAYS)
     access_token = create_access_token(
-        data={"email": user["email"], "google_id": user["google_id"]},
+        data={"email": user.profile.email, "google_id": user.profile.google_id},
         expires_delta=access_token_expires,
     )
     access_token = jsonable_encoder(access_token)
@@ -112,10 +114,10 @@ async def create_user(auth: GoogleAuth, background_tasks: BackgroundTasks):
     return response
 
 
-@nemo_route.get("/settings")
-async def get_user_settings(user=Depends(current_user)):
+@nemo_deta_route.get("/settings")
+def get_user_settings(user=Depends(current_user)):
     """Get all user settings."""
-    settings = await NemoSettings.get(user["google_id"])
+    settings = NemoDeta.get_user_settings(user["google_id"])
     if not settings:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -124,29 +126,27 @@ async def get_user_settings(user=Depends(current_user)):
     return settings
 
 
-@nemo_route.patch("/settings")
-async def update_user_timer_settings(
-    settings: UserSettings, user=Depends(current_user)
-):
+@nemo_deta_route.patch("/settings")
+def update_user_timer_settings(settings: UserSettings, user=Depends(current_user)):
     """Update user settings."""
-    updated_body = settings.dict(exclude_unset=True)
-    user = await NemoSettings.update(
-        google_id=user["google_id"], settings_dict=updated_body
+    updated_setting = settings.dict(exclude_unset=True)
+    NemoDeta.update_settings(
+        google_id=user["google_id"], updated_setting=updated_setting
     )
-    return user
+    return updated_setting
 
 
-@nemo_route.get("/user-image")
-async def get_user_image_url(user=Depends(current_user)):
+@nemo_deta_route.get("/user-image")
+def get_user_image_url(user=Depends(current_user)):
     """Get user image recieved from google login."""
-    user_image_url = await NemoUser.get_user_profile_pic(google_id=user["google_id"])
+    user_image_url = NemoDeta.get_user_image_url(google_id=user["google_id"])
     return user_image_url
 
 
-@nemo_route.get("/account", response_model=UserAccount)
-async def get_user_account(user=Depends(current_user)):
+@nemo_deta_route.get("/account", response_model=UserAccount)
+def get_user_account(user=Depends(current_user)):
     """Get user account."""
-    account = await NemoUser.get_user_by_id(google_id=user["google_id"])
+    account = NemoDeta.get_user_profile(google_id=user["google_id"])
     if not account:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -155,45 +155,46 @@ async def get_user_account(user=Depends(current_user)):
     return account
 
 
-@nemo_route.patch("/account", response_model=UserAccount)
-async def update_user_account(account: Account, user=Depends(current_user)):
+@nemo_deta_route.patch("/account", response_model=UserAccount)
+def update_user_account(account: Account, user=Depends(current_user)):
     """Update user account."""
     account_dict = account.dict()
-    user = await NemoUser.update(google_id=user["google_id"], user_dict=account_dict)
-    return user
+    NemoDeta.update_user_account(
+        google_id=user["google_id"], updated_profile=account_dict
+    )
+    return account_dict
 
 
-@nemo_route.get("/analytics")
-async def get_user_analytics(user=Depends(current_user)):
+@nemo_deta_route.get("/analytics")
+def get_user_analytics(user=Depends(current_user)):
     """Get all analytics."""
-    analytics = await NemoAnalytics.get_analytics(google_id=user["google_id"])
+    analytics = NemoDeta.get_analytics(google_id=user["google_id"])
     return analytics
 
 
-@nemo_route.post("/analytics", response_model=GetAnalytics)
-async def create_user_analytics(analytics: Analytics, user=Depends(current_user)):
+@nemo_deta_route.post("/analytics", response_model=GetAnalytics)
+def create_user_analytics(analytics: Analytics, user=Depends(current_user)):
     """Create new analytics."""
     created_at = datetime.now()
     user_analytics = {
-        "created_at": created_at,
+        "created_at": str(created_at),
         "google_id": user["google_id"],
         "duration": analytics.duration,
-        "full_date": created_at,
+        "full_date": str(created_at),
     }
-
-    analytics = await NemoAnalytics.create(user_analytics)
+    analytics = NemoDeta.create_analytics(user_analytics)
     return analytics
 
 
-@nemo_route.get("/statistics/{stats}")
-async def get_stats(user=Depends(current_user), stats=str):
+@nemo_deta_route.get("/statistics/{stats}")
+def get_stats(user=Depends(current_user), stats=str):
     """Get statistics."""
     user_google_id = user["google_id"]
     if stats == "best-day":
-        results = await NemoAnalytics.get_best_day(google_id=user_google_id)
+        results = NemoDeta.analytics_get_best_day(google_id=user_google_id)
         return results
     if stats == "current-goal":
-        results = await NemoAnalytics.get_current_goal(google_id=user_google_id)
+        results = NemoDeta.analytics_get_current_goal(google_id=user_google_id)
         return results
     return JSONResponse(
         status_code=status.HTTP_204_NO_CONTENT,
@@ -201,49 +202,47 @@ async def get_stats(user=Depends(current_user), stats=str):
     )
 
 
-@nemo_route.get("/get-tasks")
-async def get_tasks(user=Depends(current_user)):
+@nemo_deta_route.get("/get-tasks")
+def get_tasks(user=Depends(current_user)):
     """Get all task."""
-    all_tasks = await NemoTask.get_all_tasks(user["google_id"])
+    all_tasks = NemoDeta.get_tasks(user["google_id"])
     return all_tasks
 
 
-@nemo_route.post("/create_task")
-async def create_new_task(task: CreateTask, user=Depends(current_user)):
+@nemo_deta_route.post("/create_task")
+def create_new_task(task: CreateTask, user=Depends(current_user)):
     """Create new task."""
     task = task.dict()
     created_at = datetime.fromtimestamp(task["created_at"] / 1000.0)
     task["created_at"] = created_at
     task["google_id"] = user["google_id"]
     task["task_date"] = created_at.date()
-    new_task = await NemoTask.create(task)
+    new_task = NemoDeta.create_new_task(task)
     return new_task
 
 
-@nemo_route.delete("/tasks/{task_id}")
-async def delete_task_by_task_id(user=Depends(current_user), task_id=int):
+@nemo_deta_route.delete("/tasks/{task_key}")
+def delete_task_by_task_id(user=Depends(current_user), task_key=str):
     """Get all task."""
-    await NemoTask.remove_task_by_task_id(
-        task_id=int(task_id), google_id=user["google_id"]
-    )
+    NemoDeta.delete_task_by_id(key=task_key)
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={"success": True},
     )
 
 
-@nemo_route.delete("/delete")
+@nemo_deta_route.delete("/delete")
 async def delete_user(user=Depends(current_user)):
     """Permanently remove user from the database."""
     user_google_id = user["google_id"]
-    await NemoUser.completely_remove_user(google_id=user_google_id)
+    await NemoDeta.completely_remove_user(google_id=user_google_id)
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={"success": True, "google_id": user_google_id},
     )
 
 
-# @nemo_route.get("/get-all-streams/{category}")
+# @nemo_deta_route.get("/get-all-streams/{category}")
 # async def get_all_stream(category: str, background_tasks: BackgroundTasks):
 #     """Get streams from pafy and return the data."""
 #     if category:
@@ -257,7 +256,7 @@ async def delete_user(user=Depends(current_user)):
 #     )
 
 
-# @nemo_route.get("/get-stream-by-id/{category}/{id}")
+# @nemo_deta_route.get("/get-stream-by-id/{category}/{id}")
 # async def get_stream(category: str, id: str):
 #     """Fetch streams by id."""
 #     if id and category:
@@ -269,7 +268,7 @@ async def delete_user(user=Depends(current_user)):
 #     )
 
 
-# @nemo_route.get("/clear-streams")
+# @nemo_deta_route.get("/clear-streams")
 # async def clear_streams():
 #     """Clear streams from cache.
 #     This should be called when streams url have expired.

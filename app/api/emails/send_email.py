@@ -40,4 +40,4 @@ def send_email(receiver_fullname: str, receiver_email: str):
 
 
 if __name__ == "__main__":
-    send_email("Rupayan", "rupayan98@gmail.com")
+    send_email("", "")
