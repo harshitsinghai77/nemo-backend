@@ -19,7 +19,6 @@ asyncpg = "^0.25.0"
 httpx = "^0.21.1"
 pandas = "1.4.1"
 deta = "^1.1.0"
-aiohttp = "^3.8.1"
 
 
 [tool.poetry.dev-dependencies]
