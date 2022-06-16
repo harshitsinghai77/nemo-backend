@@ -1,9 +1,7 @@
 from datetime import datetime, timedelta
 
-import aiohttp
-import asyncio
 import pandas as pd
-from typing import Optional, List
+from typing import List
 from pydantic import BaseModel
 
 from app.api.config.detabase import (
@@ -60,10 +58,6 @@ class NemoTasks(BaseModel):
 class NemoUser(BaseModel):
     profile: NemoUserInformation
     settings: NemoSettings
-
-
-# async_db = deta.AsyncBase("nemo")
-headers = {"X-API-Key": PROJECT_KEY}
 
 
 class NemoPandasDataFrame:
@@ -146,12 +140,11 @@ class NemoDeta:
 
     @get_analytics_detabase
     def get_user_analytics(deta_analytics_db, func):
-        def inner(google_id):
+        def inner(google_id, filter_analytics=True):
             seven_day_interval = datetime.now() - timedelta(days=7)
-            query = {
-                "google_id": google_id,
-                "created_at?gte": str(seven_day_interval),
-            }
+            query = {"google_id": google_id}
+            if filter_analytics:
+                query["created_at?gte"] = str(seven_day_interval)
             res = deta_analytics_db.fetch(query)
             all_analytics = res.items
 
@@ -163,11 +156,6 @@ class NemoDeta:
             return func(all_analytics)
 
         return inner
-
-    @staticmethod
-    async def delete_task_http(session, key):
-        url = f"https://database.deta.sh/v1/{PROJECT_ID}/{DETA_BASE_TASK}/items/{key}"
-        return await session.delete(url, headers=headers)
 
     @staticmethod
     @get_nemo_detabase
@@ -192,7 +180,7 @@ class NemoDeta:
         return settings
 
     @classmethod
-    def get_user_profile(cls, google_id: str) -> NemoSettings:
+    def get_user_profile(cls, google_id: str) -> NemoUserInformation:
         user = cls.get_user_by_id(google_id)
         profile = NemoUserInformation(**user["profile"])
         return profile
@@ -256,12 +244,14 @@ class NemoDeta:
 
     @staticmethod
     @get_task_detabase
-    def get_tasks(deta_task_db, google_id: str) -> List[NemoTasks]:
+    def get_tasks(deta_task_db, google_id: str, filter_task=True) -> List[NemoTasks]:
         ten_day_interval = datetime.now() - timedelta(days=10)
+
         query = {
             "google_id": google_id,
-            "created_at?gte": str(ten_day_interval),
         }
+        if filter_task:
+            query["created_at?gte"] = str(ten_day_interval)
         res = deta_task_db.fetch(query)
         user_tasks = res.items
 
@@ -286,33 +276,51 @@ class NemoDeta:
         return new_task
 
     @staticmethod
+    @get_nemo_detabase
+    def delete_user_by_key(deta_analytics_db, key: str) -> None:
+        if not key:
+            raise ValueError("No key found.")
+        deta_analytics_db.delete(key=key)
+
+    @staticmethod
     @get_task_detabase
-    def delete_task_by_id(deta_task_db, key: str) -> None:
+    def delete_task_by_key(deta_task_db, key: str) -> None:
         if not key:
             raise ValueError("No key found.")
         deta_task_db.delete(key=key)
 
-    @classmethod
-    async def delete_all_tasks(cls, googl_id: str):
-        """Get all the tasks and then make multiple delete request concurrently using asyncio."""
-        # at the time of writing, deta doesn't support deleteMany.
-        all_tasks = cls.get_tasks(googl_id)
-        all_tasks = [task["key"] for task in all_tasks]
-
-        async with aiohttp.ClientSession() as session:
-            task = [
-                asyncio.ensure_future(cls.delete_task_http(session, key))
-                for key in all_tasks
-            ]
-            await asyncio.gather(*task)
+    @staticmethod
+    @get_analytics_detabase
+    def delete_analytics_by_key(deta_analytics_db, key: str) -> None:
+        if not key:
+            raise ValueError("No key found.")
+        deta_analytics_db.delete(key=key)
 
     @classmethod
-    @get_nemo_detabase
-    async def completely_remove_user(cls, deta_db, google_id: str) -> None:
+    def delete_all_user_task(cls, google_id: str):
+        """Get all the tasks and then delete them sequentially."""
+        all_tasks = cls.get_tasks(google_id, filter_task=False)
+        task_keys = [task["key"] for task in all_tasks]
+        for key in task_keys:
+            NemoDeta.delete_task_by_key(key)
+
+    @get_user_analytics
+    def delete_all_user_analytics(all_analytics):
+        """Get all the analytics and then delete them sequentially."""
+        analytics_keys = [analytics["key"] for analytics in all_analytics]
+        for key in analytics_keys:
+            NemoDeta.delete_analytics_by_key(key)
+
+    @classmethod
+    def completely_remove_user(cls, google_id: str) -> None:
         if not google_id:
-            raise ValueError("no google_id found.")
+            raise ValueError("Invalid or no google_id found.")
 
-        # delete use info
-        deta_db.delete(google_id)
-        # delete all tasks associated to user.
-        await cls.delete_all_tasks(google_id)
+        # delete all tasks associated with user.
+        cls.delete_all_user_task(google_id)
+
+        # delete all analytics associated with user.
+        cls.delete_all_user_analytics(google_id)
+
+        # delete user info
+        cls.delete_user_by_key(google_id)
