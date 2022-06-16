@@ -214,9 +214,9 @@ def create_new_task(task: CreateTask, user=Depends(current_user)):
     """Create new task."""
     task = task.dict()
     created_at = datetime.fromtimestamp(task["created_at"] / 1000.0)
-    task["created_at"] = created_at
+    task["created_at"] = str(created_at)
     task["google_id"] = user["google_id"]
-    task["task_date"] = created_at.date()
+    task["task_date"] = str(created_at.date())
     new_task = NemoDeta.create_new_task(task)
     return new_task
 
@@ -224,7 +224,7 @@ def create_new_task(task: CreateTask, user=Depends(current_user)):
 @nemo_deta_route.delete("/tasks/{task_key}")
 def delete_task_by_task_id(user=Depends(current_user), task_key=str):
     """Get all task."""
-    NemoDeta.delete_task_by_id(key=task_key)
+    NemoDeta.delete_task_by_key(key=task_key)
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={"success": True},
