@@ -83,6 +83,7 @@ def create_user(auth: GoogleAuth, background_tasks: BackgroundTasks):
     # If user does not exists then create new user
     if not user:
         user_obj = create_dict_from_payload(payload)
+        # Deta doesn't accept Timestamp. JSON is not serializable.
         if user_obj.get("created_at"):
             user_obj["created_at"] = str(user_obj["created_at"])
         user = NemoDeta.create_new_user(user_obj)
@@ -140,7 +141,7 @@ def update_user_timer_settings(settings: UserSettings, user=Depends(current_user
 def get_user_image_url(user=Depends(current_user)):
     """Get user image recieved from google login."""
     user_image_url = NemoDeta.get_user_image_url(google_id=user["google_id"])
-    return user_image_url
+    return {"profile_pic": user_image_url}
 
 
 @nemo_deta_route.get("/account", response_model=UserAccount)

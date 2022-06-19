@@ -171,7 +171,12 @@ class NemoDeta:
     @classmethod
     def check_user_exists(cls, google_id) -> bool:
         """Check is user already exists in the deta base"""
-        return cls.get_user_by_id(google_id)
+        user = cls.get_user_by_id(google_id)
+        if user:
+            return NemoUser(
+                profile=NemoUserInformation(**user["profile"]),
+                settings=NemoSettings(**user["settings"]),
+            )
 
     @classmethod
     def get_user_settings(cls, google_id: str) -> NemoSettings:
