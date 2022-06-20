@@ -233,10 +233,10 @@ def delete_task_by_task_id(user=Depends(current_user), task_key=str):
 
 
 @nemo_deta_route.delete("/delete")
-async def delete_user(user=Depends(current_user)):
+def delete_user(user=Depends(current_user)):
     """Permanently remove user from the database."""
     user_google_id = user["google_id"]
-    await NemoDeta.completely_remove_user(google_id=user_google_id)
+    NemoDeta.completely_remove_user(google_id=user_google_id)
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={"success": True, "google_id": user_google_id},

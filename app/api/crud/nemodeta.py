@@ -9,8 +9,6 @@ from app.api.config.detabase import (
     DETA_BASE_NEMO,
     DETA_BASE_TASK,
     DETA_BASE_ANALYTICS,
-    PROJECT_KEY,
-    PROJECT_ID,
 )
 
 
