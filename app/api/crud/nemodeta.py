@@ -109,6 +109,9 @@ class NemoPandasDataFrame:
 
         # join dataframe
         result = self.df.join(df2, on=["date"])
+
+        # sort values by date
+        result = result.sort_values("created_at", ascending=False)
         return result.to_dict(orient="records")
 
 
