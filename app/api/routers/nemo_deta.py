@@ -214,10 +214,7 @@ def get_tasks(user=Depends(current_user)):
 def create_new_task(task: CreateTask, user=Depends(current_user)):
     """Create new task."""
     task = task.dict()
-    created_at = datetime.fromtimestamp(task["created_at"] / 1000.0)
-    task["created_at"] = str(created_at)
     task["google_id"] = user["google_id"]
-    task["task_date"] = str(created_at.date())
     new_task = NemoDeta.create_new_task(task)
     return new_task
 

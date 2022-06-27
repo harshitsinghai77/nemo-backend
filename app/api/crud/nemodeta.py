@@ -100,6 +100,9 @@ class NemoPandasDataFrame:
         # drop unnecessary columns if exists
         self.df = self.df.drop(["google_id", "task_date"], axis=1, errors="ignore")
 
+        # convert column to datetime
+        self.df["created_at"] = pd.to_datetime(self.df["created_at"], utc=True)
+
         # create date column
         self.df["date"] = self.df["created_at"].dt.strftime("%b %d %Y")
 
