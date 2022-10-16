@@ -16,20 +16,23 @@ CACHE_TTL = 19800  # Cache TTL in sec
 @cache
 def pafy_worker(category: str, video_id: str):
     """Return a stream url given a category and video_id."""
-    video_url = f"http://www.youtube.com/watch?v={video_id}"
-    video = pafy.new(video_url, basic=False, gdata=False, size=False)
-    best_audio = video.getbestaudio()
-    if best_audio:
-        playurl = best_audio.url
-        return {
-            "category": category,
-            "title": video._title,
-            "author": video._author,
-            "id": video.videoid,
-            "duration": video.duration,
-            "url": playurl,
-            "expiry": video.expiry,
-        }
+    try:
+        video_url = f"http://www.youtube.com/watch?v={video_id}"
+        video = pafy.new(video_url, basic=False, gdata=False, size=False)
+        best_audio = video.getbestaudio()
+        if best_audio:
+            playurl = best_audio.url
+            return {
+                "category": category,
+                "title": video._title,
+                "author": video._author,
+                "id": video.videoid,
+                "duration": video.duration,
+                "url": playurl,
+                "expiry": video.expiry,
+            }
+    except OSError as e:
+        print("invalid_video_id", video_id)
 
 
 def check_cache_expiry():
@@ -87,4 +90,4 @@ def clear_streams_cache():
         ydl.cache.remove()
 
 
-# update_cache()
+update_cache()

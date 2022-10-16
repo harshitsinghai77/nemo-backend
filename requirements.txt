@@ -40,3 +40,5 @@ uvicorn==0.14.0
 uvloop==0.16.0; python_version >= "3.7"
 watchgod==0.8.2; python_version >= "3.7"
 websockets==10.3; python_version >= "3.7"
+youtube-dl==2021.12.17
+git+https://github.com/mps-youtube/pafy.git
