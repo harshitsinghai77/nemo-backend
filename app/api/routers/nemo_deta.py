@@ -7,17 +7,16 @@ from fastapi.exceptions import HTTPException
 from fastapi.param_functions import Depends
 from fastapi.responses import JSONResponse
 
-from app.api.core.get_stream import (
-    check_cache_expiry,
-    clear_streams_cache,
-    get_all_streams,
-    get_stream_by_id,
-    update_cache,
-)
+# from app.api.core.get_stream import (
+#     check_cache_expiry,
+#     clear_streams_cache,
+#     get_all_streams,
+#     get_stream_by_id,
+#     update_cache,
+# )
 
 # from app.api.emails.send_email import send_email
 from app.api.crud.nemodeta import NemoDeta
-from app.api.crud.nemo import NemoAnalytics, NemoSettings, NemoTask, NemoUser
 from app.api.pydantic.nemo import (
     Account,
     Analytics,
@@ -241,39 +240,39 @@ def delete_user(user=Depends(current_user)):
     )
 
 
-@nemo_deta_route.get("/get-all-streams/{category}")
-async def get_all_stream(category: str, background_tasks: BackgroundTasks):
-    """Get streams from pafy and return the data."""
-    if category:
-        result = get_all_streams(category=category)
-        if check_cache_expiry():
-            background_tasks.add_task(update_cache)
-        return result
-    return JSONResponse(
-        status_code=status.HTTP_204_NO_CONTENT,
-        content={"message": "Category not found"},
-    )
+# @nemo_deta_route.get("/get-all-streams/{category}")
+# async def get_all_stream(category: str, background_tasks: BackgroundTasks):
+#     """Get streams from pafy and return the data."""
+#     if category:
+#         result = get_all_streams(category=category)
+#         if check_cache_expiry():
+#             background_tasks.add_task(update_cache)
+#         return result
+#     return JSONResponse(
+#         status_code=status.HTTP_204_NO_CONTENT,
+#         content={"message": "Category not found"},
+#     )
 
 
-@nemo_deta_route.get("/get-stream-by-id/{category}/{id}")
-async def get_stream(category: str, id: str):
-    """Fetch streams by id."""
-    if id and category:
-        result = get_stream_by_id(category=category, id=id)
-        return result
-    return JSONResponse(
-        status_code=status.HTTP_204_NO_CONTENT,
-        content={"message": "Category or Id not found"},
-    )
+# @nemo_deta_route.get("/get-stream-by-id/{category}/{id}")
+# async def get_stream(category: str, id: str):
+#     """Fetch streams by id."""
+#     if id and category:
+#         result = get_stream_by_id(category=category, id=id)
+#         return result
+#     return JSONResponse(
+#         status_code=status.HTTP_204_NO_CONTENT,
+#         content={"message": "Category or Id not found"},
+#     )
 
 
-@nemo_deta_route.get("/clear-streams")
-async def clear_streams():
-    """Clear streams from cache.
-    This should be called when streams url have expired.
-    """
-    clear_streams_cache()
-    return JSONResponse(
-        status_code=status.HTTP_200_OK,
-        content={"message": "Cleared streams cache."},
-    )
+# @nemo_deta_route.get("/clear-streams")
+# async def clear_streams():
+#     """Clear streams from cache.
+#     This should be called when streams url have expired.
+#     """
+#     clear_streams_cache()
+#     return JSONResponse(
+#         status_code=status.HTTP_200_OK,
+#         content={"message": "Cleared streams cache."},
+#     )
