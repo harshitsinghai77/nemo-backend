@@ -1,6 +1,6 @@
 # Backend powering Nemo and Noiist
 
-<img src="https://nemo-landing-page.netlify.app/images/happy_music.svg" />
+<img src="https://iili.io/tSScHG.png" />
 
 ## Nemo:
 
