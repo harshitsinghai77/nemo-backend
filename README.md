@@ -37,7 +37,7 @@ Heroku Deployment:
 https://nemo-python.herokuapp.com/
 
 DETA Deployment:
-https://udhssf.deta.dev/
+https://nemo.deta.dev/
 
 ## Deploy your own Nemo on Deta
 
