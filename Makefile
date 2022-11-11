@@ -1,17 +1,14 @@
 install:
 	poetry install
 
-add_pafy_to_requirements:
-	bash add_library.sh
-
 export_requirments:
-	poetry export --without-hashes -f requirements.txt --output requirements.txt && make add_pafy_to_requirements
+	poetry export --without-hashes -f requirements.txt --output requirements.txt
 
 deploy-heroku:
 	make export_requirments && git push heroku master
 
 deploy-deta:
-	pytest && make add_pafy_to_requirements && deta deploy
+	pytest && deta deploy
 
 deploy:
 	make deploy-deta
