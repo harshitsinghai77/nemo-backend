@@ -67,7 +67,6 @@ def test_check_invalid_user_exists():
 def test_get_user_settings(settings, google_id):
     user_settings = NemoDeta().get_user_settings(google_id)
     assert user_settings.dict() == settings
-    return user_settings.dict()
 
 
 def test_update_settings(google_id):
