@@ -110,18 +110,28 @@ def update_cache_time():
     last_cache_updated = datetime.now()
 
 
-def update_cache():
-    """Clear chache, for each category loop through all the video_url and update cache."""
-    clear_streams_cache()
-    all_ids = [(k, video_id) for k in streams.keys() for video_id in streams[k]]
+def get_streams(video_ids):
+    """Process streams using multithreading."""
+    if not (video_ids and isinstance(video_ids, list)):
+        raise ValueError("Invalid or empty videos_id")
 
     max_worker = 10
     with ThreadPoolExecutor(max_workers=max_worker) as executor:
-        executor.map(YOUTUBE_DDL.process_stream, all_ids)
+        result = list(executor.map(YOUTUBE_DDL.process_stream, video_ids))
+    return result
+
+
+def update_cache():
+    """Clear chache, for each category loop through all the video_url and update cache."""
+    clear_streams_cache()
+
+    all_ids = [(k, video_id) for k in streams.keys() for video_id in streams[k]]
+    get_streams(all_ids)
+
     update_cache_time()
 
 
-def get_all_streams(category):
+def get_stream_by_category(category):
     """Get all streams corresponding to a category."""
     if category not in streams.keys():
         return {
@@ -132,10 +142,7 @@ def get_all_streams(category):
 
     video_urls = streams[category]
     video_urls = [(category, url) for url in video_urls]
-    max_workers = 10
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        result = list(executor.map(YOUTUBE_DDL.process_stream, video_urls))
-
+    result = get_streams(video_urls)
     return result
 
 
@@ -149,6 +156,3 @@ def clear_streams_cache():
     YOUTUBE_DDL.process_stream.cache_clear()
     with youtube_dl.YoutubeDL({}) as ydl:
         ydl.cache.remove()
-
-
-update_cache()
