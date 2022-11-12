@@ -5,7 +5,6 @@ from fastapi.responses import HTMLResponse
 
 from app.api.config.database import close_connection, create_table
 from app.api.config.settings import get_setting
-from app.api.routers.livepeer import livepeer_route
 from app.api.routers.nemo import nemo_route
 from app.api.routers.nemo_deta import nemo_deta_route
 
@@ -16,7 +15,7 @@ app = FastAPI(title=settings.APP_NAME)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.BACKEND_CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -48,10 +47,4 @@ app.include_router(
     nemo_route,
     prefix="/nemo",
     tags=["Nemo"],
-)
-
-app.include_router(
-    livepeer_route,
-    prefix="/stream",
-    tags=["Livepeer"],
 )
