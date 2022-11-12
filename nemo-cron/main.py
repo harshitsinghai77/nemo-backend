@@ -41,7 +41,7 @@ def clear_streams_cache():
 
 
 @app.lib.cron()
-def app(event):
+def cron_job(event):
     clear_streams_cache()
     start = time.perf_counter()
     for video_info in get_all_streams_tuple():
