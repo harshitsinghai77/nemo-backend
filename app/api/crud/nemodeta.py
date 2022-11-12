@@ -9,6 +9,7 @@ from app.api.config.detabase import (
     DETA_BASE_NEMO,
     DETA_BASE_TASK,
     DETA_BASE_ANALYTICS,
+    DETA_BASE_AUDIO_STREAM,
 )
 
 
@@ -56,6 +57,15 @@ class NemoTasks(BaseModel):
 class NemoUser(BaseModel):
     profile: NemoUserInformation
     settings: NemoSettings
+
+
+class NemoAudioStreamSchema(BaseModel):
+    category: str
+    title: str
+    author: str
+    stream_id: str
+    url: str
+    expiry: float
 
 
 class NemoPandasDataFrame:
@@ -333,3 +343,54 @@ class NemoDeta:
 
         # delete user info
         cls.delete_user_by_key(google_id)
+
+
+class NemoAudioStream:
+    """Utility class to manage nemo audio streams in Deta Base."""
+
+    def get_nemo_audio_stream_detabase(func):
+        def inner(*args, **krwargs):
+            deta_db = getdetabase(DETA_BASE_AUDIO_STREAM)
+            return func(deta_db, *args, **krwargs)
+
+        return inner
+
+    @staticmethod
+    @get_nemo_audio_stream_detabase
+    def create_new__audio_stream(
+        deta_db, stream_dict, expire_in=14400
+    ) -> NemoAudioStreamSchema:
+        """Create new stream entry in nemo_audio_stream deta base"""
+        stream = NemoAudioStreamSchema(**stream_dict)
+        deta_db.put(stream.dict(), key=stream.stream_id, expire_in=expire_in)
+        return stream
+
+    @staticmethod
+    @get_nemo_audio_stream_detabase
+    def get_audio_stream(deta_db, stream_id: str) -> NemoUserInformation:
+        """Get audio stream from nemo_audio_stream using stream_id"""
+        stream = deta_db.get(stream_id)
+        return stream
+
+    def get_nemo_audio_stream_detabase(func):
+        def inner(*args, **krwargs):
+            deta_db = getdetabase(DETA_BASE_AUDIO_STREAM)
+            return func(deta_db, *args, **krwargs)
+
+        return inner
+
+    @staticmethod
+    @get_nemo_audio_stream_detabase
+    def create_new__audio_stream(
+        deta_db, stream_dict, expire_in=14400
+    ) -> NemoAudioStreamSchema:
+        """Create new stream entry in nemo_audio_stream deta base"""
+        stream = NemoAudioStreamSchema(**stream_dict)
+        deta_db.put(stream.dict(), key=stream.stream_id, expire_in=expire_in)
+        return stream
+
+    @staticmethod
+    @get_nemo_audio_stream_detabase
+    def delete_audio_stream(deta_db, stream_id: str) -> NemoUserInformation:
+        """Delete audio stream from nemo_audio_stream using stream_id"""
+        deta_db.delete(stream_id)

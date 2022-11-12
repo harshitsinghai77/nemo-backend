@@ -10,6 +10,7 @@ PROJECT_KEY = os.getenv("DETA_PROJECT_KEY")
 DETA_BASE_NEMO = "nemo"
 DETA_BASE_TASK = "nemo_tasks"
 DETA_BASE_ANALYTICS = "nemo_analytics"
+DETA_BASE_AUDIO_STREAM = "nemo_audio_stream"
 
 
 def getdetabase(db_name):
