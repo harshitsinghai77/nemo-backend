@@ -25,10 +25,10 @@ def get_all_streams_tuple():
 
 def fire_and_forget(video_info):
     category, video_id = video_info
+    url = NEMO_URL + f"/get-stream-by-id/{category}/{video_id}"
+    print("url: ", url)
     try:
-        requests.get(
-            NEMO_URL + f"/get-stream-by-id/{category}/{video_id}", timeout=0.0000000001
-        )
+        requests.get(url, timeout=0.0000000001)
     except requests.exceptions.ReadTimeout:
         print("completed:", video_id)
         pass
