@@ -11,6 +11,7 @@ from app.api.core.nemo_stream import (
     clear_streams_cache,
     get_stream_by_category,
     get_stream_by_id,
+    populate_stream_cache,
 )
 from app.api.core.nemo_sound import fetch_nemo_sound
 
@@ -286,4 +287,14 @@ async def clear_streams():
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={"message": "Cleared streams cache."},
+    )
+
+
+@nemo_deta_route.get("/populate-lofi-stream-cache")
+async def populate_lofi_stream_cache():
+    """Populates Nemo Lofi Stream Cache"""
+    populate_stream_cache()
+    return JSONResponse(
+        status_code=status.HTTP_204_NO_CONTENT,
+        content={"message": "Succesfully created request."},
     )

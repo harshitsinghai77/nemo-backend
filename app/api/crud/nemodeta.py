@@ -359,7 +359,7 @@ class NemoAudioStream:
 
     @staticmethod
     @get_nemo_audio_stream_detabase
-    def create_new__audio_stream(
+    def create_new_audio_stream(
         deta_db, stream_dict, expire_in=14400
     ) -> NemoAudioStreamSchema:
         """Create new stream entry in nemo_audio_stream deta base"""

@@ -1,4 +1,6 @@
+import time
 import json
+import requests
 from concurrent.futures import ThreadPoolExecutor
 
 import youtube_dl
@@ -57,3 +59,28 @@ def clear_streams_cache():
 
     with youtube_dl.YoutubeDL({}) as ydl:
         ydl.cache.remove()
+
+
+def get_all_streams_tuple():
+    """Generator containing tuple of all the streams."""
+    all_stream = ((k, video_id) for k in STREAMS.keys() for video_id in STREAMS[k])
+    return all_stream
+
+
+def fire_and_forget(video_info):
+    """Create request to Deta. Don't wait for the response, fire and forget.
+    This is used to submit the request for processing and excape the Deta Micros 10s timeout."""
+    category, video_id = video_info
+    url = f"https://nemo.deta.dev/nemo/get-stream-by-id/{category}/{video_id}"
+    try:
+        requests.get(url, timeout=0.001)
+    except requests.exceptions.ReadTimeout:
+        pass
+    except requests.exceptions.ConnectTimeout:
+        pass
+
+
+def populate_stream_cache():
+    """For each tuple, create a fire and forget request"""
+    for video_info in get_all_streams_tuple():
+        fire_and_forget(video_info)

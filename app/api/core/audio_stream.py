@@ -87,11 +87,13 @@ class YoutubeDDL:
 
     def process_stream(self, video_info: str) -> Dict:
         """Put results in Deta cache and return the results"""
-        # if video_info exists in cache, return the result
         _, stream_id = video_info
+
+        # if stream_id exists in cache, fetch and return the stream
         stream = NemoAudioStream.get_audio_stream(stream_id)
         if not stream:
+            # If key not in cache, calculate the stream and put it in cache.
             stream = self.__process_stream(video_info)
-            NemoAudioStream.create_new__audio_stream(stream)
+            NemoAudioStream.create_new_audio_stream(stream)
 
         return stream
