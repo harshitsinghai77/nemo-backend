@@ -5,13 +5,14 @@ from fastapi import APIRouter, Header, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import HTTPException
 from fastapi.param_functions import Depends
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 
-from app.api.core.get_stream import (
+from app.api.core.nemo_stream import (
     clear_streams_cache,
     get_stream_by_category,
     get_stream_by_id,
 )
+from app.api.core.nemo_sound import fetch_nemo_sound
 
 # from app.api.emails.send_email import send_email
 from app.api.crud.nemodeta import NemoDeta
@@ -235,6 +236,20 @@ def delete_user(user=Depends(current_user)):
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={"success": True, "google_id": user_google_id},
+    )
+
+
+@nemo_deta_route.get("/cdn/{sound_id}")
+async def cdn(sound_id: str):
+    """Fetch nemo sound from Deta Drive and return the file as Response."""
+    file = fetch_nemo_sound(sound_id)
+    if not file:
+        raise HTTPException(status_code=404)
+    headers = {"Cache-Control": "public, max-age=86400"}
+    return Response(
+        content=file.read(),
+        media_type="application/octet-stream",
+        headers=headers,
     )
 
 

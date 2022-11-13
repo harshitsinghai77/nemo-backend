@@ -6,10 +6,12 @@ from pydantic import BaseModel
 
 from app.api.config.detabase import (
     getdetabase,
+    getdetadrive,
     DETA_BASE_NEMO,
     DETA_BASE_TASK,
     DETA_BASE_ANALYTICS,
     DETA_BASE_AUDIO_STREAM,
+    DETA_DRIVE_NEMO_SOUNDS,
 )
 
 
@@ -394,3 +396,20 @@ class NemoAudioStream:
     def delete_audio_stream(deta_db, stream_id: str) -> NemoUserInformation:
         """Delete audio stream from nemo_audio_stream using stream_id"""
         deta_db.delete(stream_id)
+
+
+class NemoSoundDrive:
+    """Utility class to manage nemo audio streams in Deta Base."""
+
+    def get_nemo_sound_drive(func):
+        def inner(*args, **krwargs):
+            drive_storage = getdetadrive(DETA_DRIVE_NEMO_SOUNDS)
+            return func(drive_storage, *args, **krwargs)
+
+        return inner
+
+    @staticmethod
+    @get_nemo_sound_drive
+    def get_file_from_drive(drive_storage, sound_id: str) -> NemoUserInformation:
+        """Get nemo sound file using sound_id"""
+        return drive_storage.get(sound_id)
