@@ -1,6 +1,5 @@
-import requests
 import time
-import json
+import requests
 
 from deta import app
 
@@ -13,25 +12,29 @@ make the subsequest requests faster.
 
 NEMO_URL = "https://nemo.deta.dev/nemo"
 
-with open("streams.json") as json_file:
-    STREAMS = json.load(json_file)
+# with open("./streams.json") as json_file:
+#     STREAMS = json.load(json_file)
+#     print("STREAMS: ", STREAMS)
 
 
-def get_all_streams_tuple():
-    """Generator containing tuple of all the streams."""
-    all_stream = ((k, video_id) for k in STREAMS.keys() for video_id in STREAMS[k])
-    return all_stream
+# def get_all_streams_tuple():
+#     """Generator containing tuple of all the streams."""
+#     all_stream = ((k, video_id) for k in STREAMS.keys() for video_id in STREAMS[k])
+#     return all_stream
 
 
-def fire_and_forget(video_info):
-    category, video_id = video_info
-    url = NEMO_URL + f"/get-stream-by-id/{category}/{video_id}"
-    print("url: ", url)
-    try:
-        requests.get(url, timeout=0.0000000001)
-    except requests.exceptions.ReadTimeout:
-        print("completed:", video_id)
-        pass
+# def divide_chunks(l, n):
+#     # looping till length l
+#     for i in range(0, len(l), n):
+#         yield l[i : i + n]
+
+
+# async def fire_and_forget(video_info, client):
+#     category, video_id = video_info
+#     url = NEMO_URL + f"/get-stream-by-id/{category}/{video_id}"
+#     print("url: ", url)
+#     await client.get(url)
+#     await client.close()
 
 
 def clear_streams_cache():
@@ -40,11 +43,16 @@ def clear_streams_cache():
     print(r.json())
 
 
+def update_cache():
+    # update cache
+    r = requests.get(NEMO_URL + "/populate-lofi-stream-cache")
+    print(r.json())
+
+
 @app.lib.cron()
 def cron_job(event):
-    clear_streams_cache()
     start = time.perf_counter()
-    for video_info in get_all_streams_tuple():
-        fire_and_forget(video_info)
+    clear_streams_cache()
+    update_cache()
     end = time.perf_counter()
     print("Total time taken", end - start)
