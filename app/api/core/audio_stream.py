@@ -63,7 +63,7 @@ class YoutubeDLWrapper:
             except youtube_dl.utils.DownloadError as e:
                 raise IOError(str(e).replace("YouTube said", "Youtube says"))
 
-    def __process_stream(self, video_info: str) -> Dict:
+    def _process_stream(self, video_info: str) -> Dict:
         """Extract info, process only audio streams and return the best audio.
         video_info:(category, video_id)
         """
@@ -97,7 +97,7 @@ class YoutubeDLWrapper:
         stream = NemoAudioStream.get_audio_stream(stream_id)
         if not stream:
             # If key not in cache, calculate the stream and put it in cache.
-            stream = self.__process_stream(video_info)
+            stream = self._process_stream(video_info)
             NemoAudioStream.create_new_audio_stream(stream)
 
         return stream

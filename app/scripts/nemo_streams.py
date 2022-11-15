@@ -1,11 +1,13 @@
 import os
 import sys
+import time
 
 sys.path.append(os.path.dirname(".."))
 
 import json
 from app.api.core.audio_stream import YoutubeDLWrapper
-from app.api.core.nemo_stream import clear_streams_cache, populate_stream_cache
+
+# from app.api.core.nemo_stream import clear_streams_cache, populate_stream_cache
 
 with open("app/api/data/streams.json") as json_file:
     STREAMS = json.load(json_file)
@@ -19,5 +21,9 @@ yt = YoutubeDLWrapper()
 #         res = yt._YoutubeDDL__process_stream(stream_info)
 #         print("res: ", res)
 #         print()
-
-print(yt.get_streams_count_in_detabase())
+k = "Broken Heart"
+for s in STREAMS[k]:
+    start = time.perf_counter()
+    result = yt._process_stream((k, s))
+    end = time.perf_counter()
+    print("result: ", end - start)
