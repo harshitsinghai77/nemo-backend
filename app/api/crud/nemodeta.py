@@ -359,31 +359,14 @@ class NemoAudioStream:
 
     @staticmethod
     @get_nemo_audio_stream_detabase
-    def create_new_audio_stream(
-        deta_db, stream_dict, expire_in=14400
-    ) -> NemoAudioStreamSchema:
-        """Create new stream entry in nemo_audio_stream deta base"""
-        stream = NemoAudioStreamSchema(**stream_dict)
-        deta_db.put(stream.dict(), key=stream.stream_id, expire_in=expire_in)
-        return stream
-
-    @staticmethod
-    @get_nemo_audio_stream_detabase
     def get_audio_stream(deta_db, stream_id: str) -> NemoUserInformation:
-        """Get audio stream from nemo_audio_stream using stream_id"""
+        """Get audio from nemo_audio_stream using stream_id"""
         stream = deta_db.get(stream_id)
         return stream
 
-    def get_nemo_audio_stream_detabase(func):
-        def inner(*args, **krwargs):
-            deta_db = getdetabase(DETA_BASE_AUDIO_STREAM)
-            return func(deta_db, *args, **krwargs)
-
-        return inner
-
     @staticmethod
     @get_nemo_audio_stream_detabase
-    def create_new__audio_stream(
+    def create_new_audio_stream(
         deta_db, stream_dict, expire_in=14400
     ) -> NemoAudioStreamSchema:
         """Create new stream entry in nemo_audio_stream deta base"""
@@ -396,6 +379,12 @@ class NemoAudioStream:
     def delete_audio_stream(deta_db, stream_id: str) -> NemoUserInformation:
         """Delete audio stream from nemo_audio_stream using stream_id"""
         deta_db.delete(stream_id)
+
+    @staticmethod
+    @get_nemo_audio_stream_detabase
+    def get_streams_count_in_detabase(deta_db):
+        all_streams = deta_db.fetch()
+        return all_streams.count
 
 
 class NemoSoundDrive:

@@ -6,7 +6,7 @@ import youtube_dl
 import asyncio
 import aiohttp
 
-from app.api.core.audio_stream import YoutubeDDL
+from app.api.core.audio_stream import YoutubeDLWrapper
 from app.api.crud.nemodeta import NemoAudioStream
 
 
@@ -17,7 +17,7 @@ VIDEO_LIFESPAN = 60 * 60 * 5  # 5 hours
 CACHE_TTL = 16200  # Cache TTL in sec (4.5 hours)
 
 
-YOUTUBE_DDL = YoutubeDDL()
+YOUTUBE_DDL = YoutubeDLWrapper()
 
 
 def get_streams(video_ids):

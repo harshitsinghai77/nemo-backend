@@ -8,11 +8,11 @@ from app.api.crud.nemodeta import NemoAudioStream
 VIDEO_LIFESPAN = 60 * 60 * 5  # 5 hours
 
 
-class YoutubeDDL:
+class YoutubeDLWrapper:
 
     ydl_opts = {"quiet": True, "prefer_insecure": False, "no_warnings": True}
 
-    def get_duration(self, duration: int):
+    def __get_duration(self, duration: int):
         """Duration of a video (HH:MM:SS). Returns str."""
         if not duration:
             return
@@ -80,10 +80,14 @@ class YoutubeDDL:
                 "title": stream_info.get("title"),
                 "author": stream_info.get("uploader"),
                 "stream_id": video_id,
-                "duration": self.get_duration(stream_info.get("duration")),
+                "duration": self.__get_duration(stream_info.get("duration")),
                 "url": best_audio["url"],
                 "expiry": time.time() + VIDEO_LIFESPAN,
             }
+
+    def get_streams_count_in_detabase(self):
+        """Current count of all the streams"""
+        return NemoAudioStream.get_streams_count_in_detabase()
 
     def process_stream(self, video_info: str) -> Dict:
         """Put results in Deta cache and return the results"""
