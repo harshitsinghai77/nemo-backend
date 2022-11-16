@@ -21,9 +21,3 @@ yt = YoutubeDLWrapper()
 #         res = yt._YoutubeDDL__process_stream(stream_info)
 #         print("res: ", res)
 #         print()
-k = "Broken Heart"
-for s in STREAMS[k]:
-    start = time.perf_counter()
-    result = yt._process_stream((k, s))
-    end = time.perf_counter()
-    print("result: ", end - start)

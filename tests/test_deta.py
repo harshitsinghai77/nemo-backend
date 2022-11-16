@@ -2,7 +2,6 @@ import random
 from datetime import datetime, timedelta
 
 import pytest
-import asyncio
 
 from app.api.crud.nemodeta import NemoDeta
 

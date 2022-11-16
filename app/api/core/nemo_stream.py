@@ -43,6 +43,7 @@ def get_stream_by_category(category):
     video_urls = STREAMS[category]
     video_urls = [(category, url) for url in video_urls]
     result = get_streams(video_urls)
+    result = list(filter(lambda x: x is not None, result))
     return result
 
 
@@ -90,4 +91,3 @@ def populate_stream_cache():
         for video_info in chunk:
             client = aiohttp.ClientSession()
             asyncio.create_task(fire_and_forget(video_info, client))
-        time.sleep(1)

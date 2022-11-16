@@ -1,4 +1,5 @@
 import time
+import requests
 from typing import Dict, List
 
 import youtube_dl
@@ -63,6 +64,12 @@ class YoutubeDLWrapper:
             except youtube_dl.utils.DownloadError as e:
                 raise IOError(str(e).replace("YouTube said", "Youtube says"))
 
+    def __check_if_stream_valid(self, stream_url) -> bool:
+        """Make a head request and check if stream returns 200 status code."""
+        if stream_url:
+            req = requests.head(stream_url)
+            return req.status_code == 200
+
     def _process_stream(self, video_info: str) -> Dict:
         """Extract info, process only audio streams and return the best audio.
         video_info:(category, video_id)
@@ -90,14 +97,19 @@ class YoutubeDLWrapper:
         return NemoAudioStream.get_streams_count_in_detabase()
 
     def process_stream(self, video_info: str) -> Dict:
-        """Put results in Deta cache and return the results"""
+        """Fetch metadata, put it in Deta cache and return the result"""
         _, stream_id = video_info
 
         # if stream_id exists in cache, fetch and return the stream
         stream = NemoAudioStream.get_audio_stream(stream_id)
         if not stream:
-            # If key not in cache, calculate the stream and put it in cache.
+            # If stream_id not in cache, fetch stream metadata
             stream = self._process_stream(video_info)
-            NemoAudioStream.create_new_audio_stream(stream)
 
+            # Check if stream metadata url is valid and returning 200 status code
+            valid_stream = self.__check_if_stream_valid(stream.get("url"))
+
+            # if stream is valid, put it in the cache
+            if valid_stream:
+                NemoAudioStream.create_new_audio_stream(stream)
         return stream
