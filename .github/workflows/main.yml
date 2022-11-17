@@ -55,7 +55,7 @@ jobs:
     if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     steps:
       - uses: actions/checkout@v2
-      - uses: BogDAAAMN/deta-deploy-action@v1.0.1
+      - uses: HarshKapadia2/deta-deploy@v1.0.2
         with:
           deta-access-token: ${{ secrets.DETA_ACCESS_TOKEN }}
           deta-name: 'nemo'
