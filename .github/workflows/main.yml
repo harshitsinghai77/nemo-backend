@@ -4,6 +4,11 @@ on:
   push:
     branches: [master]
 
+env:
+  deta-name: 'nemo'
+  deta-project: 'default'
+  deta-project-dir: '.'
+
 jobs:
   continuous-integration:
     runs-on: ubuntu-latest
@@ -55,10 +60,37 @@ jobs:
     if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     steps:
       - uses: actions/checkout@v2
-      - uses: HarshKapadia2/deta-deploy@v1.0.2
-        with:
-          deta-access-token: ${{ secrets.DETA_ACCESS_TOKEN }}
-          deta-name: 'nemo'
+      
+      - name: Install Deta CLI
+        shell: bash
+        run: |
+          curl -fsSL https://get.deta.dev/cli.sh | sh
+
+      # Using the access token and existing Deta Micro and project,
+      # clone the Micro and copy `.deta` metadata folder to use it in deploy
+      # https://docs.deta.sh/docs/cli/commands#deta-clone
+      - name: Clone Deta Metadata
+        shell: bash
+        run: |
+          export DETA_ACCESS_TOKEN=${{ secrets.DETA_ACCESS_TOKEN }}
+          mkdir -p tmp/${{ env.deta-name }}
+          ~/.deta/bin/deta clone --name ${{ env.deta-name }} --project ${{ env.deta-project }} tmp/${{ env.deta-name }}
+          cp -r tmp/${{ env.deta-name }}/.deta ${{ env.deta-project-dir }}
+          rm -rf tmp/${{ env.deta-name }}
+          # Delete the `tmp` directory if it is empty
+          if ! [ "$(ls -A tmp/)" ]; then
+              rm -r tmp/
+          fi
+
+      # Using the access token, deploy the project to Deta
+      # https://docs.deta.sh/docs/cli/commands#deta-deploy
+      - name: Deploy to Deta
+        shell: bash
+        run: |
+          export DETA_ACCESS_TOKEN=${{ secrets.DETA_ACCESS_TOKEN }}
+          cd ${{ env.deta-project-dir }}
+          ~/.deta/bin/deta deploy
+
       
   #       with:
   #         version: 1
