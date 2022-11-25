@@ -5,7 +5,6 @@ import os
 
 from deta import Deta
 
-PROJECT_ID = os.getenv("DETA_PROJECT_ID")
 PROJECT_KEY = os.getenv("DETA_PROJECT_KEY")
 DETA_BASE_NEMO = "nemo"
 DETA_BASE_TASK = "nemo_tasks"
