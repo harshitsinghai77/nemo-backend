@@ -21,9 +21,9 @@ yt = YoutubeDLWrapper()
 #         res = yt._YoutubeDDL__process_stream(stream_info)
 #         print("res: ", res)
 #         print()
-all_stream = ((k, video_id) for k in STREAMS.keys() for video_id in STREAMS[k])
-for stream_info in all_stream:
+# all_stream = ((k, video_id) for k in STREAMS.keys() for video_id in STREAMS[k])
+for stream_info in STREAMS["Broken Heart"]:
     print("stream_info: ", stream_info)
-    res = yt.process_stream(stream_info)
+    res = yt.process_stream(("Broken Heart", stream_info))
     print("res: ", res)
     print()

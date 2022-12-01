@@ -1,5 +1,4 @@
 import json
-import time
 from concurrent.futures import ThreadPoolExecutor
 
 import youtube_dl
@@ -25,7 +24,7 @@ def get_streams(video_ids):
     if not (video_ids and isinstance(video_ids, list)):
         raise ValueError("Invalid or empty videos_id")
 
-    max_worker = 10
+    max_worker = 4
     with ThreadPoolExecutor(max_workers=max_worker) as executor:
         result = list(executor.map(YOUTUBE_DDL.process_stream, video_ids))
     return result
@@ -56,7 +55,7 @@ def clear_streams_cache():
     "Delete all entries in nemo_audio_stream detabase and remove Youtube DL cache."
     all_stream_id = [video_id for k in STREAMS.keys() for video_id in STREAMS[k]]
 
-    with ThreadPoolExecutor(max_workers=10) as executor:
+    with ThreadPoolExecutor(max_workers=5) as executor:
         executor.map(NemoAudioStream.delete_audio_stream, all_stream_id)
 
     with youtube_dl.YoutubeDL({}) as ydl:

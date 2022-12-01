@@ -1,10 +1,14 @@
 import requests
+import os
 import time
+import json
+from dotenv import load_dotenv
 
-from main import NEMO_URL, get_all_streams_tuple
+load_dotenv()
 
-Authorization = ""
+Authorization = f"Bearer {os.getenv('CRON_JOB_ORG_AUTHORIZATION')}"
 
+NEMO_URL = "https://nemo.deta.dev/nemo"
 cookies = {
     "refreshToken": "Qs8lanPkPasB1rdl5RtPMJHmHVBxjYnTvHGYJdQDKi3ui5H9iZspBNRtGKb80v9r",
 }
@@ -109,12 +113,20 @@ def delete():
     print("response", response.json())
 
 
+def get_all_streams_tuple():
+    with open("app/api/data/streams.json") as json_file:
+        STREAMS = json.load(json_file)
+
+        all_stream = ((k, video_id) for k in STREAMS.keys() for video_id in STREAMS[k])
+    return all_stream
+
+
 def main():
     for category, video_id in get_all_streams_tuple():
         title = f"{category}/{video_id}"
         url = NEMO_URL + f"/get-stream-by-id/{category}/{video_id}"
         make_request(title, url)
-        time.sleep(5)
+        # time.sleep(5)
 
 
 main()
