@@ -17,3 +17,6 @@ GRANT_TYPE = "authorization_code"
 REDIRECT_URI = os.getenv("SPOTIFY_REDIRECT_URI")
 SPOTIFY_CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
 SPOTIFY_CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
+
+# Nemo Backend
+NEMO_BACKEND_URL = "https://nemo.deta.dev/nemo"

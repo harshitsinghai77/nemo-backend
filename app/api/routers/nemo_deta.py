@@ -258,7 +258,7 @@ async def cdn(sound_id: str):
 async def nemo_get_stream_by_category(category: str):
     """Get streams from pafy and return the data."""
     if category:
-        result = get_stream_by_category(category=category)
+        result = await get_stream_by_category(category=category)
         return result
     return JSONResponse(
         status_code=status.HTTP_204_NO_CONTENT,

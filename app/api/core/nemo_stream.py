@@ -7,7 +7,7 @@ import aiohttp
 
 from app.api.core.audio_stream import YoutubeDLWrapper
 from app.api.crud.nemodeta import NemoAudioStream
-
+from app.api.routers.constants import NEMO_BACKEND_URL
 
 with open("app/api/data/streams.json") as json_file:
     STREAMS = json.load(json_file)
@@ -19,18 +19,38 @@ CACHE_TTL = 16200  # Cache TTL in sec (4.5 hours)
 YOUTUBE_DDL = YoutubeDLWrapper()
 
 
-def get_streams(video_ids):
+async def make_get_stream_by_id_request(session, url):
+    async with session.get(url) as resp:
+        stream = await resp.json()
+        return stream
+
+
+async def get_streams(video_ids):
     """Process streams using multithreading."""
     if not (video_ids and isinstance(video_ids, list)):
         raise ValueError("Invalid or empty videos_id")
 
-    max_worker = 4
-    with ThreadPoolExecutor(max_workers=max_worker) as executor:
-        result = list(executor.map(YOUTUBE_DDL.process_stream, video_ids))
-    return result
+    # max_worker = 8
+    # with ThreadPoolExecutor(max_workers=max_worker) as executor:
+    #     result = list(executor.map(YOUTUBE_DDL.process_stream, video_ids))
+    # # result = [YOUTUBE_DDL.process_stream(video_info) for video_info in video_ids]
+    # return result
+    async with aiohttp.ClientSession() as session:
+        tasks = []
+        for category, video_id in video_ids:
+            stream_url = NEMO_BACKEND_URL + f"/get-stream-by-id/{category}/{video_id}"
+            tasks.append(
+                asyncio.create_task(
+                    make_get_stream_by_id_request(session=session, url=stream_url)
+                )
+            )
+
+        all_streams = await asyncio.gather(*tasks)
+
+    return all_streams
 
 
-def get_stream_by_category(category):
+async def get_stream_by_category(category):
     """Get all streams corresponding to a category."""
     if category not in STREAMS.keys():
         return {
@@ -41,7 +61,7 @@ def get_stream_by_category(category):
 
     video_urls = STREAMS[category]
     video_urls = [(category, url) for url in video_urls]
-    result = get_streams(video_urls)
+    result = await get_streams(video_urls)
     result = list(filter(lambda x: x is not None, result))
     return result
 
