@@ -88,7 +88,17 @@ class NemoPandasDataFrame:
     @check_empty_dataframe
     def get_total_hours(self):
         self.df["weekday"] = self.df["created_at"].dt.strftime("%b %d")
-        self.df = self.df.groupby(by="weekday", as_index=False).sum()
+
+        # This will be used in sort by month_number, we want the results to be sorted by months i.e. 30 Nov -> 1 Dec
+        self.df["month_number"] = self.df["created_at"].dt.month
+        # do not user groupby("weekday").sum(), we want to only sum `duration` column and keep month_number as it is
+        self.df = self.df.groupby(by="weekday", as_index=False).agg(
+            {
+                "duration": "sum",
+                "month_number": "first",
+            }
+        )
+        self.df = self.df.sort_values("month_number", ascending=True)
         self.df = self.df.rename({"duration": "total_count"}, axis=1)  # rename column
         return self.df.to_dict(orient="records")
 

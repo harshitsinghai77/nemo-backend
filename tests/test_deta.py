@@ -136,6 +136,7 @@ def test_get_total_hours(google_id):
     get_total_hrs = NemoDeta.get_analytics(google_id)
     assert get_total_hrs is not None
     assert len(get_total_hrs) > 1
+    assert get_total_hrs == sorted(get_total_hrs, key=lambda x: x["month_number"])
     assert all(key in get_total_hrs[0].keys() for key in ("weekday", "total_count"))
 
 
