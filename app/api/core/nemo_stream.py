@@ -50,6 +50,11 @@ async def get_streams(video_ids):
     return all_streams
 
 
+def get_stream_by_id(category: str, video_id: str):
+    """Get Any stream by id."""
+    return YOUTUBE_DDL.process_stream((category, video_id))
+
+
 async def get_stream_by_category(category):
     """Get all streams corresponding to a category."""
     if category not in STREAMS.keys():
@@ -64,11 +69,6 @@ async def get_stream_by_category(category):
     result = await get_streams(video_urls)
     result = list(filter(lambda x: x is not None, result))
     return result
-
-
-def get_stream_by_id(category: str, video_id: str):
-    """Get Any stream by id."""
-    return YOUTUBE_DDL.process_stream((category, video_id))
 
 
 def clear_streams_cache():
@@ -88,25 +88,7 @@ def get_all_streams_tuple():
     return all_stream
 
 
-async def fire_and_forget(video_info, client):
-    """Create request to Deta. Don't wait for the response, fire and forget.
-    This is used to submit the request for processing and excape the Deta Micros 10s timeout."""
-
-    category, video_id = video_info
-    url = f"https://nemo.deta.dev/nemo/get-stream-by-id/{category}/{video_id}"
-    await client.get(url)
-    await client.close()
-
-
-def divide_chunks(l, n):
-    # looping till length l
-    for i in range(0, len(l), n):
-        yield l[i : i + n]
-
-
-def populate_stream_cache():
-    """For each tuple, create a fire and forget request"""
-    for chunk in divide_chunks(list(get_all_streams_tuple()), 10):
-        for video_info in chunk:
-            client = aiohttp.ClientSession()
-            asyncio.create_task(fire_and_forget(video_info, client))
+async def populate_stream_cache():
+    """For each stream"""
+    for category in STREAMS.keys():
+        await get_stream_by_category(category)

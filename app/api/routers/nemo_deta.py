@@ -293,7 +293,7 @@ async def clear_streams():
 @nemo_deta_route.get("/populate-lofi-stream-cache")
 async def populate_lofi_stream_cache():
     """Populates Nemo Lofi Stream Cache"""
-    populate_stream_cache()
+    await populate_stream_cache()
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={"message": "Succesfully created request."},
