@@ -140,6 +140,11 @@ class NemoPandasDataFrame:
         return result.to_dict(orient="records")
 
 
+class NemoHabitDataFrame(NemoPandasDataFrame):
+    def __init__(self, items_dict: dict):
+        super().__init__(items_dict)
+
+
 class NemoDeta:
     """Utility class to manage nemo in Deta Base."""
 
@@ -412,3 +417,36 @@ class NemoSoundDrive:
     def get_file_from_drive(drive_storage, sound_id: str) -> NemoUserInformation:
         """Get nemo sound file using sound_id"""
         return drive_storage.get(sound_id)
+
+
+class NemoHabits:
+
+    habits_obj = {}
+
+    def get_nemo_habits_detabase(func):
+        def inner(*args, **krwargs):
+            deta_db = getdetabase(DETA_BASE_HABITS)
+            return func(deta_db, *args, **krwargs)
+
+        return inner
+
+    @staticmethod
+    def get_habits():
+        df = NemoHabitDataFrame(NemoHabits.habits_obj)
+
+        # Extract the week number and day of the week from the datetime objects
+        df["week_num"] = df["created_date"].dt.isocalendar().week
+        df["day_of_week"] = df["created_date"].dt.weekday
+
+        # Group the data by task name and week number
+        df_grouped = (
+            df.groupby(["task_name", "week_num"]).size().reset_index(name="count")
+        )
+
+        # Filter the data to include only the weeks between the last Monday and upcoming Sunday
+        df_filtered = df_grouped[
+            (df_grouped["day_of_week"] >= 0) & (df_grouped["day_of_week"] <= 6)
+        ]
+
+        # Display the resulting DataFrame
+        return df_filtered.to_dict(orient="records")

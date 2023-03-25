@@ -1,0 +1,70 @@
+{
+  "Mon, Dec 05 - Sun, Dec 11": [
+    {
+      "habit_id": "1",
+      "week_ending": "2022-12-11",
+      "completed": 1.0,
+      "goal": 5.0,
+      "total": 7.0,
+      "habitName": "Leetcode",
+      "habit_created_at": "2022-11-23",
+      "week_ending_str": "Mon, Dec 05 - Sun, Dec 11"
+    }
+  ],
+  "Mon, Dec 19 - Sun, Dec 25": [
+    {
+      "habit_id": "1",
+      "week_ending": "2022-12-25",
+      "completed": 4.0,
+      "goal": 5.0,
+      "total": 7.0,
+      "habitName": "Leetcode",
+      "habit_created_at": "2022-11-23",
+      "week_ending_str": "Mon, Dec 19 - Sun, Dec 25"
+    },
+    {
+      "habit_id": "2",
+      "week_ending": "2022-12-25",
+      "completed": 3.0,
+      "goal": 5.0,
+      "total": 7.0,
+      "habitName": "Gym",
+      "habit_created_at": "2022-12-28",
+      "week_ending_str": "Mon, Dec 19 - Sun, Dec 25"
+    }
+  ],
+  "Mon, Nov 28 - Sun, Dec 04": [
+    {
+      "habit_id": "1",
+      "week_ending": "2022-12-04",
+      "completed": 1.0,
+      "goal": 5.0,
+      "total": 7.0,
+      "habitName": "Leetcode",
+      "habit_created_at": "2022-11-23",
+      "week_ending_str": "Mon, Nov 28 - Sun, Dec 04"
+    }
+  ],
+  "Mon, Oct 24 - Sun, Oct 30": [
+    {
+      "habit_id": "1",
+      "week_ending": "2022-10-30",
+      "completed": 3.0,
+      "goal": 5.0,
+      "total": 7.0,
+      "habitName": "Leetcode",
+      "habit_created_at": "2022-11-23",
+      "week_ending_str": "Mon, Oct 24 - Sun, Oct 30"
+    },
+    {
+      "habit_id": "2",
+      "week_ending": "2022-10-30",
+      "completed": 1.0,
+      "goal": 5.0,
+      "total": 7.0,
+      "habitName": "Gym",
+      "habit_created_at": "2022-12-28",
+      "week_ending_str": "Mon, Oct 24 - Sun, Oct 30"
+    }
+  ]
+}

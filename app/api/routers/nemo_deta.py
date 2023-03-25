@@ -16,7 +16,7 @@ from app.api.core.nemo_stream import (
 from app.api.core.nemo_sound import fetch_nemo_sound
 
 # from app.api.emails.send_email import send_email
-from app.api.crud.nemodeta import NemoDeta
+from app.api.crud.nemodeta import NemoDeta, NemoHabits
 from app.api.pydantic.nemo import (
     Account,
     Analytics,
@@ -238,6 +238,12 @@ def delete_user(user=Depends(current_user)):
         status_code=status.HTTP_200_OK,
         content={"success": True, "google_id": user_google_id},
     )
+
+
+@nemo_deta_route.get("/habits")
+def get_user_habits(user=Depends(current_user)):
+    """Permanently remove user from the database."""
+    return NemoHabits.get_habits()
 
 
 @nemo_deta_route.get("/cdn/{sound_id}")

@@ -1,0 +1,17 @@
+[
+  {
+    "habitName": "Leetcode",
+    "created_date": "2022-12-26T09:00:00Z",
+    "completed": false
+  },
+  {
+    "habitName": "Gym",
+    "created_date": "2022-12-28T09:00:00Z",
+    "completed": true
+  },
+  {
+    "habitName": "GRE",
+    "created_date": "2022-12-29T09:00:00Z",
+    "completed": false
+  }
+]
