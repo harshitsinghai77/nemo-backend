@@ -1,119 +1,119 @@
-name: CI/CD Pipeline
+# name: CI/CD Pipeline
 
-on:
-  push:
-    branches: [master]
+# on:
+#   push:
+#     branches: [master]
 
-env:
-  deta-name: 'nemo'
-  deta-project: 'default'
-  deta-project-dir: '.'
+# env:
+#   deta-name: 'nemo'
+#   deta-project: 'default'
+#   deta-project-dir: '.'
 
-jobs:
-  continuous-integration:
-    runs-on: ubuntu-latest
+# jobs:
+#   continuous-integration:
+#     runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v2
+#     steps:
+#       - uses: actions/checkout@v2
 
-      - name: Set up Python all python version
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.10.5
+#       - name: Set up Python all python version
+#         uses: actions/setup-python@v2
+#         with:
+#           python-version: 3.10.5
 
-      - name: Install Python Virtual ENV
-        run: pip3 install virtualenv
+#       - name: Install Python Virtual ENV
+#         run: pip3 install virtualenv
 
-      - name: Setup Virtual env
-        uses: actions/cache@v2
-        id: cache-venv
-        with:
-          path: venv
-          key: ${{ runner.os }}-venv-${{ hashFiles('**/requirements*.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-venv-
-      - name: Activate and Install Depencies into Virtual env
-        run: python -m venv venv && source venv/bin/activate && pip3 install -r requirements.txt && pip3 install pytest
+#       - name: Setup Virtual env
+#         uses: actions/cache@v2
+#         id: cache-venv
+#         with:
+#           path: venv
+#           key: ${{ runner.os }}-venv-${{ hashFiles('**/requirements*.txt') }}
+#           restore-keys: |
+#             ${{ runner.os }}-venv-
+#       - name: Activate and Install Depencies into Virtual env
+#         run: python -m venv venv && source venv/bin/activate && pip3 install -r requirements.txt && pip3 install pytest
 
-      # Build the app and run tests
-      - name: Build and Run Test
-        env: 
-          DETA_PROJECT_ID: ${{ secrets.DETA_PROJECT_ID }}
-          DETA_PROJECT_KEY: ${{ secrets.DETA_PROJECT_KEY }}
-        run: source venv/bin/activate && pytest
+#       # Build the app and run tests
+#       - name: Build and Run Test
+#         env: 
+#           DETA_PROJECT_ID: ${{ secrets.DETA_PROJECT_ID }}
+#           DETA_PROJECT_KEY: ${{ secrets.DETA_PROJECT_KEY }}
+#         run: source venv/bin/activate && pytest
 
-      # - name: Create archive of dependencies
-      #   run: |
-      #     cd ./venv/lib/python3.9/site-packages
-      #     zip -r9 ../../../../api.zip .
-      # - name: Add API files to Zip file
-      #   run: cd ./app && zip -g ../api.zip -r .
-      # - name: Upload zip file artifact
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     name: api
-      #     path: api.zip
+#       # - name: Create archive of dependencies
+#       #   run: |
+#       #     cd ./venv/lib/python3.9/site-packages
+#       #     zip -r9 ../../../../api.zip .
+#       # - name: Add API files to Zip file
+#       #   run: cd ./app && zip -g ../api.zip -r .
+#       # - name: Upload zip file artifact
+#       #   uses: actions/upload-artifact@v2
+#       #   with:
+#       #     name: api
+#       #     path: api.zip
 
-  continuous-deployment:
-    runs-on: ubuntu-latest
-    needs: [continuous-integration]
-    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-    steps:
-      - uses: actions/checkout@v2
+#   continuous-deployment:
+#     runs-on: ubuntu-latest
+#     needs: [continuous-integration]
+#     if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+#     steps:
+#       - uses: actions/checkout@v2
       
-      - name: Install Deta CLI
-        shell: bash
-        run: |
-          curl -fsSL https://get.deta.dev/cli.sh | sh
+#       - name: Install Deta CLI
+#         shell: bash
+#         run: |
+#           curl -fsSL https://get.deta.dev/cli.sh | sh
 
-      # Using the access token and existing Deta Micro and project,
-      # clone the Micro and copy `.deta` metadata folder to use it in deploy
-      # https://docs.deta.sh/docs/cli/commands#deta-clone
-      - name: Clone Deta Metadata
-        shell: bash
-        run: |
-          export DETA_ACCESS_TOKEN=${{ secrets.DETA_ACCESS_TOKEN }}
-          mkdir -p tmp/${{ env.deta-name }}
-          ~/.deta/bin/deta clone --name ${{ env.deta-name }} --project ${{ env.deta-project }} tmp/${{ env.deta-name }}
-          cp -r tmp/${{ env.deta-name }}/.deta ${{ env.deta-project-dir }}
-          rm -rf tmp/${{ env.deta-name }}
-          # Delete the `tmp` directory if it is empty
-          if ! [ "$(ls -A tmp/)" ]; then
-              rm -r tmp/
-          fi
+#       # Using the access token and existing Deta Micro and project,
+#       # clone the Micro and copy `.deta` metadata folder to use it in deploy
+#       # https://docs.deta.sh/docs/cli/commands#deta-clone
+#       - name: Clone Deta Metadata
+#         shell: bash
+#         run: |
+#           export DETA_ACCESS_TOKEN=${{ secrets.DETA_ACCESS_TOKEN }}
+#           mkdir -p tmp/${{ env.deta-name }}
+#           ~/.deta/bin/deta clone --name ${{ env.deta-name }} --project ${{ env.deta-project }} tmp/${{ env.deta-name }}
+#           cp -r tmp/${{ env.deta-name }}/.deta ${{ env.deta-project-dir }}
+#           rm -rf tmp/${{ env.deta-name }}
+#           # Delete the `tmp` directory if it is empty
+#           if ! [ "$(ls -A tmp/)" ]; then
+#               rm -r tmp/
+#           fi
 
-      # Using the access token, deploy the project to Deta
-      # https://docs.deta.sh/docs/cli/commands#deta-deploy
-      - name: Deploy to Deta
-        shell: bash
-        run: |
-          export DETA_ACCESS_TOKEN=${{ secrets.DETA_ACCESS_TOKEN }}
-          cd ${{ env.deta-project-dir }}
-          ~/.deta/bin/deta deploy
+#       # Using the access token, deploy the project to Deta
+#       # https://docs.deta.sh/docs/cli/commands#deta-deploy
+#       - name: Deploy to Deta
+#         shell: bash
+#         run: |
+#           export DETA_ACCESS_TOKEN=${{ secrets.DETA_ACCESS_TOKEN }}
+#           cd ${{ env.deta-project-dir }}
+#           ~/.deta/bin/deta deploy
 
       
-  #       with:
-  #         version: 1
-  #       env:
-  #         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #         AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+#   #       with:
+#   #         version: 1
+#   #       env:
+#   #         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#   #         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#   #         AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
 
-  #     - name: Download Lambda api.zip
-  #       uses: actions/download-artifact@v2
-  #       with:
-  #         name: api
+#   #     - name: Download Lambda api.zip
+#   #       uses: actions/download-artifact@v2
+#   #       with:
+#   #         name: api
 
-  #     - name: Upload to S3
-  #       run: aws s3 cp api.zip s3://serverless-nemo-s3/api.zip
-  #       env:
-  #         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #         AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+#   #     - name: Upload to S3
+#   #       run: aws s3 cp api.zip s3://serverless-nemo-s3/api.zip
+#   #       env:
+#   #         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#   #         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#   #         AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
 
-  #     - name: Deploy new Lambda
-  #       run: aws lambda update-function-code --function-name serveless-nemo-lambda --s3-bucket serverless-nemo-s3 --s3-key api.zip
-  #       env:
-  #         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #         AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+#   #     - name: Deploy new Lambda
+#   #       run: aws lambda update-function-code --function-name serveless-nemo-lambda --s3-bucket serverless-nemo-s3 --s3-key api.zip
+#   #       env:
+#   #         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#   #         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#   #         AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
