@@ -38,4 +38,5 @@ molotov_benchmark:
 	molotov -v -r 100 benchmark/molotov-benchmark.py
 
 remove_pycache:
-	find . | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
+	find . -type d -name '__pycache__' -exec rm -rf {} +
+
