@@ -5,12 +5,11 @@ from fastapi.responses import HTMLResponse
 
 from app.api.config.database import close_connection, create_table
 from app.api.config.settings import get_setting
-from app.api.routers.nemo import nemo_route
+
+# from app.api.routers.nemo import nemo_route
 from app.api.routers.nemo_deta import nemo_deta_route
 
 settings = get_setting()
-use_database = settings.USE_DATABSE
-detabase = True if use_database == "DETA" else False
 app = FastAPI(title=settings.APP_NAME)
 
 app.add_middleware(
@@ -25,14 +24,14 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup():
     """Connect to database on startup."""
-    if not detabase:
+    if settings.USE_POSTGRES_DATABASE:
         await create_table()
 
 
 @app.on_event("shutdown")
 async def shutdown():
     """Disconnect to database on shutdown."""
-    if not detabase:
+    if settings.USE_POSTGRES_DATABASE:
         await close_connection()
 
 
@@ -42,9 +41,9 @@ def index():
     return HTMLResponse(content="<h1> Welcome to Nemo 🥳</h1> ", status_code=200)
 
 
-nemo_route = nemo_deta_route if detabase else nemo_route
+# nemo_route = nemo_deta_route if detabase else nemo_route
 app.include_router(
-    nemo_route,
+    nemo_deta_route,
     prefix="/nemo",
     tags=["Nemo"],
 )

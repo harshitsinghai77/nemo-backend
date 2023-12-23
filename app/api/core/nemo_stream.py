@@ -57,10 +57,10 @@ def get_stream_by_id(category: str, video_id: str):
 
 async def get_stream_by_category(category):
     """Get all streams corresponding to a category."""
-    if category not in STREAMS.keys():
+    if not STREAMS.get(category):
         return {
             "message": "Invalid category: {}. Should be one of {}".format(
-                category, list(STREAMS.keys())
+                category, STREAMS.keys()
             )
         }
 

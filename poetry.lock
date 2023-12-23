@@ -1719,19 +1719,7 @@ files = [
 idna = ">=2.0"
 multidict = ">=4.0"
 
-[[package]]
-name = "youtube-dl"
-version = "2021.12.17"
-description = "YouTube video downloader"
-category = "main"
-optional = false
-python-versions = "*"
-files = [
-    {file = "youtube_dl-2021.12.17-py2.py3-none-any.whl", hash = "sha256:f1336d5de68647e0364a47b3c0712578e59ec76f02048ff5c50ef1c69d79cd55"},
-    {file = "youtube_dl-2021.12.17.tar.gz", hash = "sha256:bc59e86c5d15d887ac590454511f08ce2c47698d5a82c27bfe27b5d814bbaed2"},
-]
-
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "592f3d5f8b2e478fade89459ba202cc4fbe22a13149b49631e92a326450829e3"
+content-hash = "2bd9563ffc45260ee54ee263a97ae5884ac8d28ad75107fbfcff31ecda243e25"

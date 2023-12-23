@@ -19,4 +19,4 @@ SPOTIFY_CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
 SPOTIFY_CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
 
 # Nemo Backend
-NEMO_BACKEND_URL = "https://nemo.deta.dev/nemo"
+NEMO_BACKEND_URL = "https://nemo-1-z3661706.deta.app"

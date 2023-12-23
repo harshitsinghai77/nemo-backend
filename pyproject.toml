@@ -18,7 +18,6 @@ SQLAlchemy = "^1.4.27"
 asyncpg = "^0.25.0"
 pandas = "1.4.1"
 deta = "^1.1.0"
-youtube_dl = "^2021.12.17"
 aiohttp = "^3.8.3"
 
 

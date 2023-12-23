@@ -7,7 +7,6 @@ from sqlalchemy import (
     String,
     Table,
     Text,
-    Time,
 )
 
 from app.api.config.database import metadata

@@ -7,12 +7,12 @@ from fastapi.exceptions import HTTPException
 from fastapi.param_functions import Depends
 from fastapi.responses import JSONResponse, Response
 
-from app.api.core.nemo_stream import (
-    clear_streams_cache,
-    get_stream_by_category,
-    get_stream_by_id,
-    populate_stream_cache,
-)
+# from app.api.core.nemo_stream import (
+#     clear_streams_cache,
+#     get_stream_by_category,
+#     get_stream_by_id,
+#     populate_stream_cache,
+# )
 from app.api.core.nemo_sound import fetch_nemo_sound
 
 # from app.api.emails.send_email import send_email
@@ -254,47 +254,47 @@ async def cdn(sound_id: str):
     )
 
 
-@nemo_deta_route.get("/get-streams-by-category/{category}")
-async def nemo_get_stream_by_category(category: str):
-    """Get streams from pafy and return the data."""
-    if category:
-        result = await get_stream_by_category(category=category)
-        return result
-    return JSONResponse(
-        status_code=status.HTTP_204_NO_CONTENT,
-        content={"message": "Category not found"},
-    )
+# @nemo_deta_route.get("/get-streams-by-category/{category}")
+# async def nemo_get_stream_by_category(category: str):
+#     """Get streams from pafy and return the data."""
+#     if category:
+#         result = await get_stream_by_category(category=category)
+#         return result
+#     return JSONResponse(
+#         status_code=status.HTTP_204_NO_CONTENT,
+#         content={"message": "Category not found"},
+#     )
 
 
-@nemo_deta_route.get("/get-stream-by-id/{category}/{video_id}")
-async def nemo_get_stream_by_id(category: str, video_id: str):
-    """Fetch streams by id."""
-    if video_id and category:
-        result = get_stream_by_id(category=category, video_id=video_id)
-        return result
-    return JSONResponse(
-        status_code=status.HTTP_204_NO_CONTENT,
-        content={"message": "Category or Id not found"},
-    )
+# @nemo_deta_route.get("/get-stream-by-id/{category}/{video_id}")
+# async def nemo_get_stream_by_id(category: str, video_id: str):
+#     """Fetch streams by id."""
+#     if video_id and category:
+#         result = get_stream_by_id(category=category, video_id=video_id)
+#         return result
+#     return JSONResponse(
+#         status_code=status.HTTP_204_NO_CONTENT,
+#         content={"message": "Category or Id not found"},
+#     )
 
 
-@nemo_deta_route.get("/clear-stream-cache")
-async def clear_streams():
-    """Clear streams from cache.
-    This should be called when streams url have expired.
-    """
-    clear_streams_cache()
-    return JSONResponse(
-        status_code=status.HTTP_200_OK,
-        content={"message": "Cleared streams cache."},
-    )
+# @nemo_deta_route.get("/clear-stream-cache")
+# async def clear_streams():
+#     """Clear streams from cache.
+#     This should be called when streams url have expired.
+#     """
+#     clear_streams_cache()
+#     return JSONResponse(
+#         status_code=status.HTTP_200_OK,
+#         content={"message": "Cleared streams cache."},
+#     )
 
 
-@nemo_deta_route.get("/populate-lofi-stream-cache")
-async def populate_lofi_stream_cache():
-    """Populates Nemo Lofi Stream Cache"""
-    await populate_stream_cache()
-    return JSONResponse(
-        status_code=status.HTTP_200_OK,
-        content={"message": "Succesfully created request."},
-    )
+# @nemo_deta_route.get("/populate-lofi-stream-cache")
+# async def populate_lofi_stream_cache():
+#     """Populates Nemo Lofi Stream Cache"""
+#     await populate_stream_cache()
+#     return JSONResponse(
+#         status_code=status.HTTP_200_OK,
+#         content={"message": "Succesfully created request."},
+#     )
