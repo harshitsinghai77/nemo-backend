@@ -1,6 +1,8 @@
 """Main app which serves the application."""
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import HTMLResponse
 
 from app.api.config.database import close_connection, create_table
@@ -12,6 +14,8 @@ from app.api.routers.nemo_deta import nemo_deta_route
 settings = get_setting()
 app = FastAPI(title=settings.APP_NAME)
 
+app.add_middleware(HTTPSRedirectMiddleware)  # Force HTTPS for security
+app.add_middleware(TrustedHostMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -38,7 +42,7 @@ async def shutdown():
 @app.get("/")
 def index():
     """Generic message if backend is deployed succesfully."""
-    return HTMLResponse(content="<h1> Welcome to Nemo 🥳</h1> ", status_code=200)
+    return HTMLResponse(content="<h1> Welcome to Nemo.🥳</h1> ", status_code=200)
 
 
 # nemo_route = nemo_deta_route if detabase else nemo_route

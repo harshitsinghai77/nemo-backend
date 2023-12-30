@@ -8,7 +8,7 @@ deploy-heroku:
 	make export_requirments && git push heroku master
 
 deploy-deta:
-	pytest && space release
+	pytest && space push && space release
 
 start-server:
 	code . && uvicorn main:app --reload
