@@ -118,7 +118,7 @@ class NemoPandasDataFrame:
         return {"current_goal": int(result["duration"].sum())}
 
     @check_empty_dataframe
-    def all_tasks(self):
+    def prepare_and_summarize_tasks_by_date(self):
         # drop unnecessary columns if exists
         self.df = self.df.drop(["google_id", "task_date"], axis=1, errors="ignore")
 
@@ -242,8 +242,6 @@ class NemoDeta:
     @get_nemo_detabase
     def get_user_by_id(deta_db, google_id: str) -> NemoUser:
         user = deta_db.get(google_id)
-        if not user:
-            return
         return user
 
     @get_user_analytics
@@ -273,9 +271,8 @@ class NemoDeta:
         deta_analytics_db.put(new_analytics.dict())
         return new_analytics
 
-    @staticmethod
     @get_task_detabase
-    def get_tasks(deta_task_db, google_id: str, filter_task=True) -> List[NemoTasks]:
+    def get_all_tasks(deta_task_db, google_id: str, filter_task=True) -> List[NemoTasks]:
         ten_day_interval = datetime.now() - timedelta(days=10)
 
         query = {
@@ -291,10 +288,13 @@ class NemoDeta:
             res = deta_task_db.fetch(last=res.last)
             user_tasks += res.items
 
+        return user_tasks
+
+    @classmethod
+    def get_task_summary(cls, google_id: str, filter_task=True) -> List[NemoTasks]:
+        user_tasks = cls.get_all_tasks(google_id, filter_task=filter_task)
         dataframe = NemoPandasDataFrame(user_tasks)
-        result = dataframe.all_tasks()
-        if not result:
-            return []
+        result = dataframe.prepare_and_summarize_tasks_by_date()
         return result
 
     @staticmethod
@@ -330,7 +330,7 @@ class NemoDeta:
     @classmethod
     def delete_all_user_task(cls, google_id: str):
         """Get all the tasks and then delete them sequentially."""
-        all_tasks = cls.get_tasks(google_id, filter_task=False)
+        all_tasks = cls.get_all_tasks(google_id, filter_task=False)
         task_keys = [task["key"] for task in all_tasks]
         for key in task_keys:
             NemoDeta.delete_task_by_key(key)

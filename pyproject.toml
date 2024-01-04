@@ -21,13 +21,9 @@ deta = "^1.1.0"
 aiohttp = "^3.8.3"
 
 
-[tool.poetry.dev-dependencies]
-pytest = "^5.2"
-isort = "^5.8.0"
-flake8 = "^3.9.2"
-autopep8 = "^1.5.7"
-molotov = "^2.1"
-black = "^22.3.0"
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.4"
+black = "^23.12.1"
 
 [tool.isort]
 multi_line_output = 3

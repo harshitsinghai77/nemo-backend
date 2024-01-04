@@ -5,17 +5,14 @@ import pytest
 
 from app.api.crud.nemodeta import NemoDeta
 
-
 @pytest.fixture
 def google_id():
-    """Returns a Wallet instance with a zero balance"""
     google_id = "my_test_id"
     return google_id
 
 
 @pytest.fixture
 def user(google_id):
-    """Returns a Wallet instance with a zero balance"""
     user = {
         "created_at": str(datetime.utcnow()),
         "google_id": google_id,
@@ -31,7 +28,6 @@ def user(google_id):
 
 @pytest.fixture
 def settings():
-    """Returns a Wallet instance with a zero balance"""
     settings = {
         "daily_goal": 4,
         "display_time": "45 : 00",
@@ -69,23 +65,26 @@ def test_get_user_settings(settings, google_id):
 
 
 def test_update_settings(google_id):
-    updated_setting = {
+    # Retrieve original setting
+    original_setting = NemoDeta().get_user_settings(google_id).dict()
+    new_setting = {
         "timer_time": "5200",
         "daily_goal": 10,
         "timer_web_notification": True,
         "preference_background_color": "SomeRandomColor",
     }
+    
     NemoDeta.update_settings(
         google_id=google_id,
-        updated_setting=updated_setting,
+        updated_setting=new_setting,
     )
 
     # Retrieve data and check if data has been updated
-    user_setting = NemoDeta().get_user_settings(google_id)
-    user_setting = user_setting.dict()
-    user_setting_lst = [user_setting[key] for key in updated_setting.keys()]
-    updated_setting_lst = [updated_setting[key] for key in updated_setting.keys()]
-    assert user_setting_lst == updated_setting_lst
+    user_setting = NemoDeta().get_user_settings(google_id).dict()
+
+    # Locally update original_setting with the new_setting
+    original_setting.update(new_setting)
+    assert original_setting == user_setting
 
 
 def test_get_user_profile(google_id, user):
@@ -168,8 +167,13 @@ def test_create_task(google_id):
         assert new_task == task
 
 
-def test_get_tasks(google_id):
-    all_tasks = NemoDeta.get_tasks(google_id)
+def test_get_all_tasks(google_id):
+    all_tasks = NemoDeta.get_all_tasks(google_id)
+    assert all_tasks
+    assert len(all_tasks) > 0
+
+def test_get_task_summary(google_id):
+    all_tasks = NemoDeta.get_task_summary(google_id)
     assert all_tasks
     assert len(all_tasks) > 0
 
@@ -181,7 +185,7 @@ def test_completely_remove_user(google_id):
 def test_remove_all_user_task(google_id):
     all_tasks = NemoDeta.delete_all_user_task(google_id)
 
-    all_tasks = NemoDeta.get_tasks(google_id, filter_task=False)
+    all_tasks = NemoDeta.get_all_tasks(google_id, filter_task=False)
     assert len(all_tasks) == 0
 
 

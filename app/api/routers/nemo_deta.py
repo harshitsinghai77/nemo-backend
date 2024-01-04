@@ -83,9 +83,6 @@ def create_user(auth: GoogleAuth):
     # If user does not exists then create new user
     if not user:
         user_obj = create_dict_from_payload(payload)
-        # Deta doesn't accept Timestamp. JSON is not serializable.
-        if user_obj.get("created_at"):
-            user_obj["created_at"] = str(user_obj["created_at"])
         user = NemoDeta.create_new_user(user_obj)
         # send welcome email to user as a background task
         # background_tasks.add_task(
@@ -206,7 +203,7 @@ def get_stats(user=Depends(current_user), stats=str):
 @nemo_deta_route.get("/get-tasks")
 def get_tasks(user=Depends(current_user)):
     """Get all task."""
-    all_tasks = NemoDeta.get_tasks(user["google_id"])
+    all_tasks = NemoDeta.get_task_summary(user["google_id"])
     return all_tasks
 
 
