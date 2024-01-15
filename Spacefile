@@ -9,4 +9,4 @@ micros:
       api_keys: true
     public_routes:
       - "/nemo/*" # wildcards
-    dev: uvicorn main:app # start the micro in development mode
+    dev: uvicorn main:app --reload # start the micro in development mode

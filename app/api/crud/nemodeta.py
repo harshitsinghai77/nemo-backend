@@ -80,7 +80,7 @@ class NemoPandasDataFrame:
     def check_empty_dataframe(func):
         def is_df_empty(self):
             if self.df.empty:
-                return
+                return []
             return func(self)
 
         return is_df_empty
@@ -133,11 +133,7 @@ class NemoPandasDataFrame:
 
         # Sort values by date
         result = self.df.sort_values("date", ascending=False)
-        # Check for empty result and return empty list if applicable
-        if result.empty:
-            return []  # Return an empty list
         return result.to_dict(orient="records")
-
 
 class NemoDeta:
     """Utility class to manage nemo in Deta Base."""
