@@ -119,24 +119,23 @@ class NemoPandasDataFrame:
 
     @check_empty_dataframe
     def prepare_and_summarize_tasks_by_date(self):
-        # drop unnecessary columns if exists
-        self.df = self.df.drop(["google_id", "task_date"], axis=1, errors="ignore")
+        # Drop unnecessary columns
+        self.df.drop(["google_id", "task_date"], axis=1, inplace=True, errors="ignore")
 
-        # convert column to datetime
+         # Convert created_at to datetime
         self.df["created_at"] = pd.to_datetime(self.df["created_at"], utc=True)
 
-        # create date column
+        # Create formatted date column
         self.df["date"] = self.df["created_at"].dt.strftime("%b %d %Y")
 
-        # groupby date column
-        df2 = self.df.groupby(by="date").sum()
-        df2 = df2.rename({"duration": "total_duration"}, axis=1)
+        # groupby date and sum the duration of each date
+        self.df["total_duration"] = self.df.groupby("date")["duration"].transform("sum")
 
-        # join dataframe
-        result = self.df.join(df2, on=["date"])
-
-        # sort values by date
-        result = result.sort_values("created_at", ascending=False)
+        # Sort values by date
+        result = self.df.sort_values("date", ascending=False)
+        # Check for empty result and return empty list if applicable
+        if result.empty:
+            return []  # Return an empty list
         return result.to_dict(orient="records")
 
 
@@ -296,7 +295,7 @@ class NemoDeta:
         dataframe = NemoPandasDataFrame(user_tasks)
         result = dataframe.prepare_and_summarize_tasks_by_date()
         return result
-
+    
     @staticmethod
     @get_task_detabase
     def create_new_task(deta_task_db, task: dict) -> NemoTasks:
