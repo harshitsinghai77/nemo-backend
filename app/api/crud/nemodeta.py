@@ -104,13 +104,11 @@ class NemoPandasDataFrame:
 
     @check_empty_dataframe
     def get_best_day(self):
-        self.df["weekday"] = self.df["created_at"].dt.strftime("%b %d")
-        self.df = self.df.groupby(by="weekday", as_index=False).sum()
-        self.df = self.df.rename({"weekday": "full_date"}, axis=1)  # rename column
-        maximum_value_index = self.df["duration"].idxmax()
-        result = self.df.loc[maximum_value_index]
-        return result.to_dict()
-
+        self.df["full_date"] = self.df["created_at"].dt.strftime("%a, %b %d %Y").rename("weekday")
+        result = self.df.groupby(by="full_date", as_index=False)["duration"].sum().sort_values("duration", ascending=False).to_dict("records")[0]
+        result = {"best_day_full_date": result.pop("full_date"), "best_day_duration": result.pop("duration")}
+        return result
+    
     @check_empty_dataframe
     def get_current_goal(self):
         current_date = pd.to_datetime("today")

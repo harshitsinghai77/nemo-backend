@@ -143,7 +143,9 @@ def test_get_best_day(google_id):
     best_day = NemoDeta.analytics_get_best_day(google_id)
     assert best_day is not None
     assert len(best_day) > 1
-    assert best_day["full_date"]
+    assert best_day["best_day_full_date"]
+    assert best_day["best_day_duration"]
+    assert best_day["best_day_duration"] > 1
 
 
 def test_get_current_goal(google_id):
@@ -195,6 +197,6 @@ def test_delete_all_user_analytics(google_id):
     get_total_hrs = NemoDeta.get_analytics(google_id)
     get_best_day = NemoDeta.analytics_get_best_day(google_id)
     get_current_goal = NemoDeta.analytics_get_current_goal(google_id)
-    assert get_total_hrs is None
-    assert get_best_day is None
-    assert get_current_goal is None
+    assert get_total_hrs == []
+    assert get_best_day == []
+    assert get_current_goal == []
