@@ -10,6 +10,9 @@ def google_id():
     google_id = "my_test_id"
     return google_id
 
+@pytest.fixture
+def random_id():
+    return "pgjvg_froga"
 
 @pytest.fixture
 def user(google_id):
@@ -54,14 +57,18 @@ def test_check_user_exists(google_id):
     assert check_user_exists
 
 
-def test_check_invalid_user_exists():
-    check_user_exists = NemoDeta().check_user_exists("random#user@77")
+def test_check_invalid_user_exists(random_id):
+    check_user_exists = NemoDeta().check_user_exists(random_id)
     assert not check_user_exists
+    assert check_user_exists is None
 
 
-def test_get_user_settings(settings, google_id):
+def test_get_user_settings(settings, google_id, random_id):
     user_settings = NemoDeta().get_user_settings(google_id)
     assert user_settings.dict() == settings
+
+    user_settings = NemoDeta().get_user_settings(random_id)
+    assert user_settings is None
 
 
 def test_update_settings(google_id):
@@ -87,13 +94,16 @@ def test_update_settings(google_id):
     assert original_setting == user_setting
 
 
-def test_get_user_profile(google_id, user):
+def test_get_user_profile(google_id, user, random_id):
     deta_user_profile = NemoDeta.get_user_profile(google_id)
     deta_user_profile = deta_user_profile.dict()
     deta_user_profile["created_at"] = deta_user_profile["created_at"][:10]
 
     user["created_at"] = user["created_at"][:10]
     assert deta_user_profile == user
+
+    deta_user_profile = NemoDeta.get_user_profile(random_id)
+    assert deta_user_profile is None
 
 
 def test_update_user_account(google_id):
@@ -107,15 +117,18 @@ def test_update_user_account(google_id):
     assert user_profile["email"] == new_email
 
 
-def test_get_user_image_url(google_id, user):
+def test_get_user_image_url(google_id, user, random_id):
     user_img = NemoDeta.get_user_image_url(google_id)
     assert user_img == user["profile_pic"]
+    user_img = NemoDeta.get_user_image_url(random_id)
+    assert user_img is None
 
 
-def test_get_user_by_id(google_id):
+def test_get_user_by_id(google_id, random_id):
     user = NemoDeta.get_user_by_id(google_id)
     assert user
-
+    user = NemoDeta.get_user_by_id(random_id)
+    assert user is None
 
 def test_create_analytics(google_id):
     n = 20

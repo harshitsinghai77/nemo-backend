@@ -200,12 +200,16 @@ class NemoDeta:
     @classmethod
     def get_user_settings(cls, google_id: str) -> NemoSettings:
         user = cls.get_user_by_id(google_id)
+        if not user:
+            return None
         settings = NemoSettings(**user["settings"])
         return settings
 
     @classmethod
     def get_user_profile(cls, google_id: str) -> NemoUserInformation:
         user = cls.get_user_by_id(google_id)
+        if not user:
+            return None
         profile = NemoUserInformation(**user["profile"])
         return profile
 
@@ -228,6 +232,8 @@ class NemoDeta:
     @classmethod
     def get_user_image_url(cls, google_id: str) -> str:
         user = cls.get_user_by_id(google_id)
+        if not user:
+            return None
         profile = NemoUserInformation(**user["profile"])
         return profile.profile_pic
 
