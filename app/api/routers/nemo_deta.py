@@ -15,7 +15,7 @@ from fastapi.responses import JSONResponse, Response
 # )
 from app.api.core.nemo_sound import fetch_nemo_sound
 
-from app.api.emails.send_email import send_email
+# from app.api.emails.send_email import send_email
 from app.api.crud.nemodeta import NemoDeta
 from app.api.pydantic.nemo import (
     Account,
@@ -85,7 +85,7 @@ def create_user(auth: GoogleAuth):
         user_obj = create_dict_from_payload(payload)
         user = NemoDeta.create_new_user(user_obj)
         # send welcome email to the new user
-        send_email(receiver_fullname=user_obj["given_name"], receiver_email=user_obj["email"])
+        # send_email(receiver_fullname=user_obj["given_name"], receiver_email=user_obj["email"])
         
     # create a access token
     access_token_expires = timedelta(days=JWT_ACCESS_TOKEN_EXPIRE_DAYS)
