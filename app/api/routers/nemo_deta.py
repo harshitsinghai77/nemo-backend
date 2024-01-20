@@ -15,7 +15,7 @@ from fastapi.responses import JSONResponse, Response
 # )
 from app.api.core.nemo_sound import fetch_nemo_sound
 
-# from app.api.emails.send_email import send_email
+from app.api.emails.send_email import send_email
 from app.api.crud.nemodeta import NemoDeta
 from app.api.pydantic.nemo import (
     Account,
@@ -84,13 +84,9 @@ def create_user(auth: GoogleAuth):
     if not user:
         user_obj = create_dict_from_payload(payload)
         user = NemoDeta.create_new_user(user_obj)
-        # send welcome email to user as a background task
-        # background_tasks.add_task(
-        #     send_email,
-        #     receiver_fullname=user_obj["given_name"],
-        #     receiver_email=user_obj["email"],
-        # )
-
+        # send welcome email to the new user
+        send_email(receiver_fullname=user_obj["given_name"], receiver_email=user_obj["email"])
+        
     # create a access token
     access_token_expires = timedelta(days=JWT_ACCESS_TOKEN_EXPIRE_DAYS)
     access_token = create_access_token(
@@ -249,7 +245,6 @@ async def cdn(sound_id: str):
         media_type="application/octet-stream",
         headers=headers,
     )
-
 
 # @nemo_deta_route.get("/get-streams-by-category/{category}")
 # async def nemo_get_stream_by_category(category: str):
