@@ -5,7 +5,7 @@ from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import HTMLResponse
 
-from app.api.config.database import close_connection, create_table
+# from app.api.config.database import close_connection, create_table
 from app.api.config.settings import get_setting
 
 # from app.api.routers.nemo import nemo_route
@@ -29,14 +29,18 @@ app.add_middleware(
 async def startup():
     """Connect to database on startup."""
     if settings.USE_POSTGRES_DATABASE:
-        await create_table()
+        pass
+        # Enable this when using Postgres as a database
+        # await create_table()
 
 
 @app.on_event("shutdown")
 async def shutdown():
     """Disconnect to database on shutdown."""
     if settings.USE_POSTGRES_DATABASE:
-        await close_connection()
+        pass
+        # Enable this when using Postgres as a database
+        # await close_connection()
 
 
 @app.get("/")

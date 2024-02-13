@@ -120,7 +120,7 @@ def get_user_settings(user=Depends(current_user)):
     return settings
 
 
-@nemo_deta_route.patch("/settings")
+@nemo_deta_route.post("/settings")
 def update_user_timer_settings(settings: UserSettings, user=Depends(current_user)):
     """Update user settings."""
     updated_setting = settings.dict(exclude_unset=True)
@@ -149,7 +149,7 @@ def get_user_account(user=Depends(current_user)):
     return account
 
 
-@nemo_deta_route.patch("/account", response_model=UserAccount)
+@nemo_deta_route.post("/account", response_model=UserAccount)
 def update_user_account(account: Account, user=Depends(current_user)):
     """Update user account."""
     account_dict = account.dict()
