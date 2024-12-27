@@ -4,11 +4,6 @@ on:
   push:
     branches: [master]
 
-env:
-  deta-name: 'nemo'
-  deta-project: 'default'
-  deta-project-dir: '.'
-
 jobs:
   continuous-integration:
     runs-on: ubuntu-latest
@@ -33,7 +28,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-venv-
       - name: Activate and Install Depencies into Virtual env
-        run: python -m venv venv && source venv/bin/activate && pip3 install -r requirements.txt && pip3 install -r requirements-dev.txt pip3 install pytest
+        run: python -m venv venv && source venv/bin/activate && pip3 install -r requirements.txt && pip3 install -r requirements-dev.txt && pip3 install pytest
 
       # Build the app and run tests
       - name: Build and Run Test
