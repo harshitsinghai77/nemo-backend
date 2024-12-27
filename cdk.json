@@ -1,0 +1,11 @@
+{
+    "app": "python cdk_app.py",
+    "context": {
+      "@aws-cdk/core:newStyleStackSynthesis": true
+    },
+    "outputsFile": "cdk.out/outputs.json",
+    "plugin": [],
+    "requireApproval": "never",
+    "versionReporting": true
+  }
+  

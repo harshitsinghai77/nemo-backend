@@ -35,6 +35,5 @@ venv
 docs.zip
 archive.zip
 
-#deta Deployment
-.deta
-.space
+cdk.out
+*.db

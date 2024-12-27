@@ -1,330 +1,271 @@
-from datetime import datetime, timedelta
+from datetime import datetime
+from typing import List, Dict, Optional
 
-from sqlalchemy import and_, desc
-from sqlalchemy.sql import func
+from sqlalchemy import Integer, case, cast, column, func
+from sqlalchemy.event import listens_for
+from sqlmodel import Session, delete, select
 
-from app.api.config.database import async_engine, async_session
+from app.api.config.database_sqlite import engine
 from app.api.models.nemo import (
-    nemo_user,
-    nemo_user_analytics,
-    nemo_user_settings,
-    nemo_user_task,
+    NemoAnalytics,
+    NemoSettings,
+    NemoTasks,
+    NemoUserInformation,
 )
+from app.api.utils.nemo import get_date_x_days_ago
 
+class NemoDeta:
+    """Utility class to manage nemo in Deta Base."""
 
-class NemoUser:
-    """Utility class to manage nemo user."""
-
-    @staticmethod
-    async def create(user_dict):
-        """Create a new user."""
-        async with async_session() as session:
-            query = nemo_user.insert().values(**user_dict).returning(nemo_user.c.id)
-            last_record = await session.execute(query)
-            last_record = last_record.fetchone()
-            await session.commit()
-            return {**user_dict, "id": last_record.id}
-
-    @staticmethod
-    async def update(google_id, user_dict):
-        """Update existing user."""
-        async with async_session() as session:
-            query = (
-                nemo_user.update()
-                .where(nemo_user.c.google_id == google_id)
-                .values(**user_dict)
-            )
-            await session.execute(query)
-            await session.commit()
-            return {**user_dict}
-
-    @staticmethod
-    async def get_user_by_id(google_id: str):
-        """Get the user from the database."""
-        async with async_session() as session:
-            query = nemo_user.select().where(nemo_user.c.google_id == google_id)
-            result = await session.execute(query)
-            return result.fetchone()
-
-    @staticmethod
-    async def delete(google_id: str):
-        """Delete the user from the database."""
-        async with async_session() as session:
-            query = nemo_user.delete().where(nemo_user.c.google_id == google_id)
-            return await session.execute(query)
-
-    @staticmethod
-    async def completely_remove_user(google_id):
-        """Delete user profile, user settings and user analytics as a transaction."""
-        async with async_engine.begin() as conn:
-            query_user = nemo_user.delete().where(nemo_user.c.google_id == google_id)
-            query_settings = nemo_user_settings.delete().where(
-                nemo_user_settings.c.google_id == google_id
-            )
-            query_analytics = nemo_user_analytics.delete().where(
-                nemo_user_analytics.c.google_id == google_id
-            )
-            await conn.execute(query_analytics)
-            await conn.execute(query_settings)
-            await conn.execute(query_user)
-
-    @staticmethod
-    async def check_if_email_exists(email: str):
-        """Check if email already exists."""
-        async with async_session() as session:
-            query = nemo_user.select().where(nemo_user.c.email == email)
-            return await session.fetch_one(query)
-
-    @staticmethod
-    async def check_user_exists(google_id: str, email: str):
-        """Check if user already exists."""
-        async with async_session() as session:
-            query = nemo_user.select().where(
-                nemo_user.c.google_id == google_id and nemo_user.c.email == email
-            )
-            result = await session.execute(query)
-            return result.fetchone()
-
-    @staticmethod
-    async def get_user_profile_pic(google_id: str):
-        """Check if user exists."""
-        async with async_session() as session:
-            query = (
-                nemo_user.select()
-                .with_only_columns([nemo_user.c.profile_pic])
-                .where(nemo_user.c.google_id == google_id)
-            )
-            result = await session.execute(query)
-            return result.fetchone()
-
-
-class NemoSettings:
-    """Utility class to manage nemo user settings."""
-
-    @staticmethod
-    async def create(google_id):
-        """Create new user settings."""
-        async with async_session() as session:
-            query_settings = nemo_user_settings.insert().values(
-                {"google_id": google_id}
-            )
-            await session.execute(query_settings)
-            return await session.commit()
-
-    @staticmethod
-    async def get(google_id):
-        """Get user settings."""
-        async with async_session() as session:
-            query = nemo_user_settings.select().where(
-                nemo_user_settings.c.google_id == google_id
-            )
-            result = await session.execute(query)
-            return result.fetchone()
-
-    @staticmethod
-    async def update(google_id, settings_dict):
-        """Update user settings."""
-        async with async_session() as session:
-            query = (
-                nemo_user_settings.update()
-                .where(nemo_user_settings.c.google_id == google_id)
-                .values(**settings_dict)
-            )
-            await session.execute(query)
-            return await session.commit()
-
-    @staticmethod
-    async def delete(google_id):
-        """Delete user settings"""
-        async with async_session() as session:
-            query = nemo_user_settings.delete().where(
-                nemo_user_settings.c.google_id == google_id
-            )
-            return await session.execute(query)
-
-
-class NemoAnalytics:
-    """Utility class to manage nemo user analytics."""
-
-    @staticmethod
-    async def create(user_analytics):
-        """Create new analytic."""
-        async with async_session() as session:
-            query = nemo_user_analytics.insert().values(**user_analytics)
-            await session.execute(query)
-            await session.commit()
-            return user_analytics
-
-    @staticmethod
-    async def get_analytics(google_id):
-        """Get Weekly Anlytics."""
-        # """
-        # SELECT TO_CHAR(full_date, 'Mon DD') as weekday, SUM(duration) as total_count
-        # from core_nemo_analytics
-        # where full_date > CURRENT_DATE - INTERVAL '7 days' and google_id=:google_id
-        # GROUP BY TO_CHAR(full_date, 'Mon DD')
-        # ORDER BY TO_CHAR(full_date, 'Mon DD')
-        # """
-        seven_day_interval_before = datetime.now() - timedelta(days=7)
-        async with async_session() as session:
-            query = (
-                nemo_user_analytics.select()
-                .with_only_columns(
-                    [
-                        func.to_char(nemo_user_analytics.c.full_date, "Mon DD").label(
-                            "weekday"
-                        ),
-                        func.sum(nemo_user_analytics.c.duration).label("total_count"),
-                    ]
-                )
-                .where(
-                    and_(
-                        nemo_user_analytics.c.full_date > seven_day_interval_before,
-                        nemo_user_analytics.c.google_id == google_id,
-                    )
-                )
-                .group_by("weekday")
-                .order_by("weekday")
-            )
-            result = await session.execute(query)
-            result = result.fetchall()
-            return result
-
-    @staticmethod
-    async def get_best_day(google_id):
-        """Return best day (day with most hrs) in the last 7 days."""
-        # SELECT MAX(duration) from core_nemo_analytics
-        # where google_id=:google_id and full_date > CURRENT_DATE - INTERVAL '7 days'
-        query = """
-            SELECT full_date, duration from core_nemo_analytics
-            where google_id=:google_id and full_date > CURRENT_DATE - INTERVAL '7 days'
-            and duration = (SELECT MAX(duration) from core_nemo_analytics where full_date > CURRENT_DATE - INTERVAL '7 days')
-            ORDER BY full_date DESC
-        """
-        # seven_day_interval_before = datetime.now() - timedelta(days=7)
-        # max_value = func.max(nemo_user_analytics.c.duration)
-        # select_max_value = nemo_user_analytics.select(max_value).with_only_columns(nemo_user_analytics.c.duration).scalar_subquery()
-        # query = nemo_user_analytics.select().where(
-        #     and_(
-        #         nemo_user_analytics.c.google_id == google_id,
-        #         nemo_user_analytics.c.full_date > seven_day_interval_before,
-        #         nemo_user_analytics.c.duration == select_max_value
-        #     )
-        # )
-        async with async_session() as session:
-            result = await session.execute(query, {"google_id": google_id})
-            return result.fetchone()
-
-    @staticmethod
-    async def get_current_goal(google_id):
-        """Get current number of hours completed in the day."""
-        # """
-        #     SELECT SUM(duration) as current_goal from core_nemo_analytics
-        #     where DATE(full_date) = CURRENT_DATE and google_id=:google_id
-        # """
-        async with async_session() as session:
-            query = (
-                nemo_user_analytics.select()
-                .with_only_columns(
-                    [func.sum(nemo_user_analytics.c.duration).label("current_goal")]
-                )
-                .where(
-                    and_(
-                        func.date(nemo_user_analytics.c.full_date)
-                        == func.current_date(),
-                        nemo_user_analytics.c.google_id == google_id,
-                    )
-                )
-            )
-            result = await session.execute(query)
-            return result.fetchone()
-
-    @staticmethod
-    async def delete(google_id):
-        """Delete user analytics"""
-        async with async_session() as session:
-            query = nemo_user_analytics.delete().where(
-                nemo_user_analytics.c.google_id == google_id
-            )
-            return await session.execute(query)
-
-
-class NemoTask:
-    """Utility class to manage user taks."""
-
-    @staticmethod
-    async def create(task):
-        """Create a new task."""
-        async with async_session() as session:
-            query = nemo_user_task.insert().values(**task)
-            await session.execute(query)
-            await session.commit()
-            task.pop("google_id", None)
-            return task
-
-    @staticmethod
-    async def get_all_tasks(google_id):
-        """Get all the user tasks."""
-        # select created_at, task_description, duration, n1.sum_duration from (
-        #     SELECT date(created_at) as created_at_1, sum(duration) as sum_duration from core_nemo_tasks group by created_at_1
-        # ) as n1 JOIN core_nemo_tasks as n2 ON date(n2.created_at) = date(n1.created_at_1)
-        ten_day_interval = datetime.now() - timedelta(days=10)
-        sub_query = (
-            nemo_user_task.select()
-            .with_only_columns(
-                [
-                    func.date(nemo_user_task.c.created_at).label("created_at_grouped"),
-                    func.sum(nemo_user_task.c.duration).label("total_duration"),
-                ]
-            )
-            .group_by("created_at_grouped")
-            .order_by(desc("created_at_grouped"))
-        )
-        sub_query = sub_query.alias("sub_query")
-
-        query = (
-            nemo_user_task.select()
-            .with_only_columns(
-                [
-                    nemo_user_task.c.id,
-                    func.to_char(nemo_user_task.c.created_at, "Mon DD YYYY").label(
-                        "date"
-                    ),
-                    nemo_user_task.c.created_at,
-                    nemo_user_task.c.task_description,
-                    nemo_user_task.c.duration,
-                    sub_query.c.total_duration,
-                ]
-            )
-            .where(
-                and_(
-                    nemo_user_task.c.created_at >= ten_day_interval,
-                    nemo_user_task.c.google_id == google_id,
-                )
-            )
+    # This event listener will automatically create a NemoSettings entry when a new user is inserted in NemoUserInformation table.
+    @listens_for(NemoUserInformation, "after_insert")
+    def create_settings_and_user(mapper, connection, target: NemoUserInformation):
+        # Automatically create the related settings entry
+        connection.execute(
+            NemoSettings.__table__.insert().values({"google_id": target.google_id})
         )
 
-        query = query.join(
-            sub_query,
-            func.date(nemo_user_task.c.created_at)
-            == func.date(sub_query.c.created_at_grouped),
-        )
-        async with async_session() as session:
-            result = await session.execute(query)
-            return result.fetchall()
+    @staticmethod
+    def create_new_user(user_dict) -> NemoUserInformation:
+        """Create a new user in the NemoUserInformation table."""
+        user = NemoUserInformation(**user_dict)
+        with Session(engine) as session:
+            # this will automatically trigger an event when a new user is inserted in the table.
+            # check `@listens_for(NemoUserInformation, "after_insert")`
+            session.add(user)
+            session.commit()
+            session.refresh(user)
+        return user
 
     @staticmethod
-    async def remove_task_by_task_id(
-        task_id,
-        google_id,
-    ):
-        """Given a task_id and google_id remove the task from core_nemo_tasks"""
-        query = nemo_user_task.delete().where(
-            and_(
-                nemo_user_task.c.id == task_id,
-                nemo_user_task.c.google_id == google_id,
+    def get_user_by_id(google_id: str) -> NemoUserInformation:
+        with Session(engine) as session:
+            statement = select(NemoUserInformation).where(NemoUserInformation.google_id == google_id)
+            user = session.exec(statement).first()
+        return user
+    
+    @classmethod
+    def check_user_exists(cls, google_id) -> NemoUserInformation:
+        """Check if user already exists in the NemoUserInformation table"""
+        user: NemoUserInformation = cls.get_user_by_id(google_id)
+        return user
+    
+    @staticmethod
+    def get_user_settings(google_id: str) -> NemoSettings:
+        with Session(engine) as session:
+            statement = select(NemoSettings).where(NemoSettings.google_id == google_id)
+            user_settings = session.exec(statement).first()
+        return user_settings
+
+    @classmethod
+    def get_user_profile(cls, google_id: str) -> NemoUserInformation:
+        user: NemoUserInformation = cls.get_user_by_id(google_id)
+        return user
+
+    @staticmethod
+    def update_settings(google_id: str, updated_setting: dict) -> None:
+        if not updated_setting:
+            return
+
+        with Session(engine) as session:
+            statement = select(NemoSettings).where(NemoSettings.google_id == google_id)
+            settings = session.exec(statement).one()
+
+            for key, value in updated_setting.items():
+                setattr(settings, key, value)
+
+            session.add(settings)
+            session.commit()
+
+    @staticmethod
+    def update_user_account(google_id: str, updated_profile: dict) -> None:
+        if not updated_profile:
+            return
+
+        with Session(engine) as session:
+            statement = select(NemoUserInformation).where(NemoUserInformation.google_id == google_id)
+            user = session.exec(statement).one()
+
+            for key, value in updated_profile.items():
+                setattr(user, key, value)
+
+            session.add(user)
+            session.commit()
+
+    @staticmethod
+    def get_user_image_url(google_id: str) -> str:
+        with Session(engine) as session:
+            statement = select(NemoUserInformation.profile_pic).where(NemoUserInformation.google_id == google_id)
+            profile_pic = session.exec(statement).first()
+        return profile_pic
+
+
+    @staticmethod
+    def get_analytics(google_id: str) -> List[NemoAnalytics]:
+        seven_days_ago = get_date_x_days_ago(7)
+        with Session(engine) as session:
+            subquery = (
+                select(
+                    NemoAnalytics.duration,
+                    cast(func.strftime("%m", NemoAnalytics.created_at), Integer).label("month_number"),
+                    func.strftime("%d", NemoAnalytics.created_at).label("day_of_date"),
+                )
+                .where(NemoAnalytics.google_id == google_id)
+                .where(NemoAnalytics.created_at >= seven_days_ago)
+                .subquery()
             )
-        )
-        async with async_session() as session:
-            await session.execute(query)
-            return await session.commit()
+
+            subquery2 = select(
+                subquery.c.month_number,
+                subquery.c.day_of_date,
+                subquery.c.duration,
+                (
+                    case(
+                        (subquery.c.month_number == 1, "January"),
+                        (subquery.c.month_number == 2, "February"),
+                        (subquery.c.month_number == 3, "March"),
+                        (subquery.c.month_number == 4, "April"),
+                        (subquery.c.month_number == 5, "May"),
+                        (subquery.c.month_number == 6, "June"),
+                        (subquery.c.month_number == 7, "July"),
+                        (subquery.c.month_number == 8, "August"),
+                        (subquery.c.month_number == 9, "September"),
+                        (subquery.c.month_number == 10, "October"),
+                        (subquery.c.month_number == 11, "November"),
+                        (subquery.c.month_number == 12, "December"),
+                        else_="Unknown",  # Default case for invalid months
+                    ) +
+                    " " +
+                    subquery.c.day_of_date
+                ).label("weekday"),
+            ).subquery()
+
+            subquery3 = (
+                select(
+                    subquery2.c.weekday,
+                    func.sum(subquery2.c.duration).label("total_count"),
+                    subquery2.c.month_number,
+                )
+                .group_by(subquery2.c.weekday)
+                .order_by(subquery2.c.weekday)
+            )
+
+            rows: List[NemoAnalytics] = session.exec(subquery3).fetchall()
+
+        result = list(map(lambda x: x._asdict(), rows))
+        return result
+
+    @staticmethod
+    def analytics_get_best_day(google_id: str) -> Optional[Dict[str, str]]:
+        seven_days_ago = get_date_x_days_ago(7)
+        with Session(engine) as session:
+            query = (
+                select(
+                    func.sum(NemoAnalytics.duration).label("duration"),
+                    func.date(NemoAnalytics.created_at).label("grouped_date"),
+                )
+                .where(NemoAnalytics.google_id == google_id)
+                .where(NemoAnalytics.created_at >= seven_days_ago)
+                .group_by(column("grouped_date"))
+                .order_by(column("duration").desc())
+                .limit(1)
+            )
+
+            row = session.exec(query).first()
+
+        if not row:
+            return
+        
+        result = {
+            "best_day_full_date": datetime.strptime(row.grouped_date, "%Y-%m-%d").strftime("%a, %b %d %Y"),
+            "best_day_duration": row.duration,
+        }
+        return result
+
+    @staticmethod
+    def analytics_get_current_goal(google_id: str) -> Optional[Dict[str, int]]:
+        with Session(engine) as session:
+            query = (
+                select(func.sum(NemoAnalytics.duration))
+                .where(NemoAnalytics.google_id == google_id)
+                .where(func.date(NemoAnalytics.created_at) == func.date("now"))
+            )
+            row = session.exec(query).first()
+        if not row:
+            return
+        return {"current_goal": int(row)}
+
+    @staticmethod
+    def insert_analytic(analytics: dict) -> None:
+        if not analytics:
+            return
+        new_analytics = NemoAnalytics(**analytics)
+        with Session(engine) as session:
+            session.add(new_analytics)
+            session.commit()
+
+    @staticmethod
+    def get_task_summary(google_id: str) -> List[NemoTasks]:
+        ten_day_interval = get_date_x_days_ago(10)
+        with Session(engine) as session:
+            query = (
+                select(
+                    NemoTasks.id,
+                    NemoTasks.created_at,
+                    NemoTasks.duration,
+                    NemoTasks.task_description,
+                    func.sum(NemoTasks.duration)
+                        .over(partition_by=func.date(NemoTasks.created_at))
+                        .label("total_duration"),
+                )
+                .where(NemoTasks.google_id == google_id)
+                .where(NemoTasks.created_at >= ten_day_interval)
+                .order_by(NemoTasks.duration.desc())
+            )
+
+            rows = session.exec(query).fetchall()
+
+        lsts = list(map(lambda x: { **x._asdict(), "date": x.created_at.strftime("%b %d %Y")}, rows))
+        return lsts
+
+    @staticmethod
+    def insert_new_task(task: dict) -> None:
+        if not task: return
+        new_task = NemoTasks(**task)
+        with Session(engine) as session:
+            session.add(new_task)
+            session.commit()
+
+    @staticmethod
+    def delete_task_by_key(google_id: str, key: str) -> None:
+        if not key:
+            raise ValueError("No key found.")
+
+        with Session(engine) as session:
+            statement = select(NemoTasks).where(NemoTasks.google_id == google_id).where(NemoTasks.id == key)
+            task = session.exec(statement).one()
+
+            session.delete(task)
+            session.commit()
+
+    @classmethod
+    def remove_user(cls, google_id: str) -> None:
+        if not google_id:
+            raise ValueError("Invalid or no google_id found.")
+
+        with Session(engine) as session:
+            statement_user = delete(NemoUserInformation).where(NemoUserInformation.google_id == google_id)
+            statement_settings = delete(NemoSettings).where(NemoSettings.google_id == google_id)
+            statement_analytics = delete(NemoAnalytics).where(NemoAnalytics.google_id == google_id)
+            statement_tasks = delete(NemoTasks).where(NemoTasks.google_id == google_id)
+
+            try:
+                session.exec(statement_analytics)
+                session.exec(statement_tasks)
+                session.exec(statement_settings)
+                session.exec(statement_user)
+                session.commit()
+            except Exception as e:
+                session.rollback()
+                print(f"Error: {e}")
+                raise e
