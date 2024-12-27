@@ -33,13 +33,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-venv-
       - name: Activate and Install Depencies into Virtual env
-        run: python -m venv venv && source venv/bin/activate && pip3 install -r requirements.txt && pip3 install pytest
+        run: python -m venv venv && source venv/bin/activate && pip3 install -r requirements.txt && pip3 install -r requirements-dev.txt pip3 install pytest
 
       # Build the app and run tests
       - name: Build and Run Test
-        env: 
-          DETA_PROJECT_ID: ${{ secrets.DETA_PROJECT_ID }}
-          DETA_PROJECT_KEY: ${{ secrets.DETA_PROJECT_KEY }}
         run: source venv/bin/activate && pytest --capture=no --durations=10
 
       # - name: Create archive of dependencies

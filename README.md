@@ -1,4 +1,4 @@
-# Backend powering Nemo and Noiist
+# Backend powering Nemo
 
 <img src="https://iili.io/tSScHG.png" />
 
@@ -23,14 +23,6 @@ LandingPage: https://nemo-landing-page.netlify.app/
 
 Demo: https://nemo-app.netlify.app/
 
-## Noiist
-
-Get personalized spotify music recommendation directly to your inbox every day based on what you listened the previous day.
-
-Make your morning better with ☕ and Noiist.
-
-Demo: https://noiist.netlify.app/
-
 ## Deployment
 
 Heroku Deployment:
@@ -38,6 +30,9 @@ https://nemo-python.herokuapp.com/
 
 DETA Deployment:
 https://nemo.deta.dev/
+
+AWS Deployment
+https://jt5o8ghpdk.execute-api.us-east-1.amazonaws.com/
 
 ## Deploy your own Nemo on Deta
 
