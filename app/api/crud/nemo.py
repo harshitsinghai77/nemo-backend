@@ -119,7 +119,7 @@ class NemoDeta:
                 subquery.c.month_number,
                 subquery.c.day_of_date,
                 subquery.c.duration,
-                func.concat(
+                (
                     case(
                         (subquery.c.month_number == 1, "January"),
                         (subquery.c.month_number == 2, "February"),
@@ -134,9 +134,9 @@ class NemoDeta:
                         (subquery.c.month_number == 11, "November"),
                         (subquery.c.month_number == 12, "December"),
                         else_="Unknown",  # Default case for invalid months
-                    ),
-                    " ",
-                    subquery.c.day_of_date,
+                    ) +
+                    " " +
+                    subquery.c.day_of_date
                 ).label("weekday"),
             ).subquery()
 
