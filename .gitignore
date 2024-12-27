@@ -36,3 +36,4 @@ docs.zip
 archive.zip
 
 cdk.out
+*.db
