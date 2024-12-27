@@ -1,65 +1,62 @@
-from sqlalchemy import (
-    Boolean,
-    Column,
-    DateTime,
-    ForeignKey,
-    Integer,
-    String,
-    Table,
-    Text,
-)
+from datetime import datetime
+from typing import Optional
 
-from app.api.config.database import metadata
+from sqlmodel import Field, Index, SQLModel
 
-nemo_user = Table(
-    "core_nemo_user",
-    metadata,
-    Column("created_at", DateTime),
-    Column("id", Integer, primary_key=True, unique=True, autoincrement=True),
-    Column(
-        "google_id", String, primary_key=True, unique=True, nullable=False
-    ),  # The unique ID of the user's Google Account
-    Column("given_name", String(length=255), nullable=False),
-    Column("family_name", String(length=255)),
-    Column("username", String(length=255)),
-    Column("email", Text, unique=True),
-    Column("profile_pic", Text),
-    Column("email_verified", Boolean, server_default="False"),
-)
+class NemoUserInformation(SQLModel, table=True):
+    __tablename__ = "nemo_user_information"
 
-nemo_user_settings = Table(
-    "core_nemo_settings",
-    metadata,
-    Column("google_id", ForeignKey("core_nemo_user.google_id")),
-    Column("timer_time", String, server_default="2700"),
-    Column("display_time", String, server_default="45 : 00"),
-    Column("timer_end_notification", Boolean, server_default="False"),
-    Column("timer_show_timer_on_browser_tab", Boolean, server_default="False"),
-    Column("timer_web_notification", Boolean, server_default="False"),
-    Column("timer_sessions", Integer, server_default="4"),
-    Column("timer_auto_start", Boolean, server_default="False"),
-    Column("timer_break_end_notification", Boolean, server_default="False"),
-    Column("preference_shuffle_time", String, server_default="10"),
-    Column("preference_background_color", String, server_default="rainbow"),
-    Column("daily_goal", Integer, server_default="4"),
-)
+    google_id: str = Field(primary_key=True)
+    email: str
+    given_name: str
+    family_name: Optional[str] = None
+    profile_pic: Optional[str] = None
+    email_verified: bool = Field(default=False)
+    username: str = Field(default="")
+    created_at: datetime
 
-nemo_user_analytics = Table(
-    "core_nemo_analytics",
-    metadata,
-    Column("created_at", DateTime),
-    Column("google_id", ForeignKey("core_nemo_user.google_id")),
-    Column("duration", Integer),  # in seconds
-    Column("full_date", DateTime),
-)
 
-nemo_user_task = Table(
-    "core_nemo_tasks",
-    metadata,
-    Column("id", Integer, primary_key=True, autoincrement=True),
-    Column("created_at", DateTime(timezone=True)),
-    Column("google_id", ForeignKey("core_nemo_user.google_id")),
-    Column("task_description", Text),
-    Column("duration", Integer),  # in seconds
-    Column("task_date", DateTime),
-)
+class NemoSettings(SQLModel, table=True):
+    __tablename__ = "nemo_settings"
+
+    google_id: str = Field(
+        foreign_key="nemo_user_information.google_id",
+        ondelete="CASCADE",
+        primary_key=True,
+    )
+    timer_time: str = Field(default="2700")
+    display_time: str = Field(default="45 : 00")
+    timer_end_notification: bool = Field(default=False)
+    timer_show_timer_on_browser_tab: bool = Field(default=False)
+    timer_web_notification: bool = Field(default=False)
+    timer_sessions: int = Field(default=4)
+    timer_auto_start: bool = Field(default=False)
+    timer_break_end_notification: bool = Field(default=False)
+    preference_shuffle_time: int = Field(default=10)
+    preference_background_color: str = Field(default="rainbow")
+    daily_goal: int = Field(default=4)
+
+
+class NemoAnalytics(SQLModel, table=True):
+    __tablename__ = "nemo_analytics"
+
+    id: int = Field(default=None, primary_key=True)
+    google_id: str = Field(foreign_key="nemo_user_information.google_id")
+    created_at: datetime
+    duration: int  # in seconds
+    full_date: datetime
+
+    __table_args__ = (Index("ix_analytics_google_id", "google_id"),)
+
+
+class NemoTasks(SQLModel, table=True):
+    __tablename__ = "nemo_tasks"
+
+    id: int = Field(default=None, primary_key=True)
+    google_id: str = Field(foreign_key="nemo_user_information.google_id")
+    created_at: datetime
+    task_description: str
+    duration: int  # in seconds
+    task_date: datetime
+
+    __table_args__ = (Index("ix_tasks_google_id", "google_id"),)

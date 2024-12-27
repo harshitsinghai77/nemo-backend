@@ -11,6 +11,7 @@ jinja_env = Environment(
 )
 template = jinja_env.get_template("welcome-email.html")
 
+
 def create_email(receiver_fullname: str):
     ctx = {"full_name": receiver_fullname}
     output = template.render(ctx=ctx)
@@ -20,12 +21,15 @@ def create_email(receiver_fullname: str):
 def send_email(receiver_fullname: str, receiver_email: str):
     html_content = create_email(receiver_fullname=receiver_fullname)
     resend.api_key = RESEND_API_KEY
-    r = resend.Emails.send({
-        "from": "mynoiist@gmail.com",
-        "to": receiver_email,
-        "subject": "Welcome to Nemo",
-        "html": html_content
-    })
-    
+    r = resend.Emails.send(
+        {
+            "from": "mynoiist@gmail.com",
+            "to": receiver_email,
+            "subject": "Welcome to Nemo",
+            "html": html_content,
+        }
+    )
+
+
 if __name__ == "__main__":
     send_email("", "")

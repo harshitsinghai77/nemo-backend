@@ -3,9 +3,8 @@ import os
 # import databases
 from sqlalchemy import MetaData
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.pool import QueuePool
 from sqlalchemy.orm import sessionmaker
-
+from sqlalchemy.pool import QueuePool
 
 DB_NAME = os.getenv("DB_NAME", "nemo")
 DB_USER = os.getenv("DB_USER", "nemo")
