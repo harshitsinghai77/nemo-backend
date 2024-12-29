@@ -34,6 +34,12 @@ https://nemo.deta.dev/
 AWS Deployment
 https://jt5o8ghpdk.execute-api.us-east-1.amazonaws.com/
 
-## Deploy your own Nemo on Deta
+### Deploy to AWS
 
-[![Deploy](https://button.deta.dev/1/svg)](https://go.deta.dev/deploy?repo=https://github.com/harshitsinghai77/nemo-backend)
+```docker build -t nemo-backend .```
+
+```docker run -d -p 3000:3000 --name nemo-backend nemo-backend```
+
+```docker cp <container_id>:/app/lambda_function.zip C:\Users\<user>\Documents\Projects\nemo-backend```
+
+```cdk deploy --profile <your-profile>```

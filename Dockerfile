@@ -1,11 +1,6 @@
-FROM python:3.9-slim-buster
+FROM python:3.13-slim
 
-ENV POETRY_HOME="/opt/poetry" \
-    POETRY_VIRTUALENVS_IN_PROJECT=false \
-    POETRY_VIRTUALENVS_CREATE=false \
-    POETRY_NO_INTERACTION=1 \
-    POETRY_NO_DEV=1
-
+# Install system dependencies
 RUN apt-get update \
     && apt-get install -y --no-install-recommends build-essential \
     && apt-get install -y --no-install-recommends curl \
@@ -13,26 +8,13 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Poetry
-RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | POETRY_HOME=/opt/poetry python3 && \
-    cd /usr/local/bin && \
-    ln -s /opt/poetry/bin/poetry && \
-    poetry config virtualenvs.create false
-
-# Install Poetry
-RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
-ENV PATH="$POETRY_HOME/bin:$PATH"
-
-RUN mkdir /app
-
 WORKDIR /app
 
-COPY deploy_prod.sh pyproject.toml app/ ./ 
+# Copy the requirements.txt and app files into the container
+COPY requirements.txt ./
+COPY app/ ./app/
+COPY main.py ./ 
+COPY package_lambda.py ./
 
-# Allow installing dev dependencies to run tests
-ARG INSTALL_DEV=false
-RUN bash -c "if [ $INSTALL_DEV == 'true' ] ; then poetry install --no-root ; else poetry install --no-root --no-dev ; fi"
-
-EXPOSE 5000
-
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "5000"]
+# Run the Python script package_lambda.py
+CMD ["python", "package_lambda.py"]
