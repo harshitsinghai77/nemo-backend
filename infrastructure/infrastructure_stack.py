@@ -19,8 +19,8 @@ from aws_cdk.aws_apigatewayv2_integrations import HttpLambdaIntegration
 load_dotenv()  # This will read the .env file in the current directory
 
 env = {
-    'GOOGLE_CLIENT_ID': os.getenv('SQLITE_CLOUD_HOST'), 
-    'SQLITE_CLOUD_API_KEY': os.getenv('SQLITE_CLOUD_HOST'), 
+    'GOOGLE_CLIENT_ID': os.getenv('GOOGLE_CLIENT_ID'), 
+    'SQLITE_CLOUD_API_KEY': os.getenv('SQLITE_CLOUD_API_KEY'), 
     'SQLITE_CLOUD_HOST': os.getenv('SQLITE_CLOUD_HOST'), 
 }
 

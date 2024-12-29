@@ -10,8 +10,6 @@ settings = get_setting()
 
 SQLITE_CLOUD_API_KEY = os.getenv("SQLITE_CLOUD_API_KEY")
 SQLITE_CLOUD_HOST = os.getenv("SQLITE_CLOUD_HOST")
-if not (SQLITE_CLOUD_API_KEY and SQLITE_CLOUD_HOST):
-    raise ValueError("SQLITE_CLOUD_API_KEY or SQLITE_CLOUD_HOST not found in env")
 
 sqlite_url = f"sqlitecloud://{SQLITE_CLOUD_HOST}:8860/{settings.SQLITE_CLOUD_DB}?apikey={SQLITE_CLOUD_API_KEY}"
 
