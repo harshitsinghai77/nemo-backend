@@ -7,11 +7,18 @@ from sqlmodel import create_engine
 from app.api.config.settings import get_setting
 
 settings = get_setting()
-sqlite_file_name = settings.SQLITE_LOCAL_PATH
-if os.getenv("ENV") == "running_tests":
-    sqlite_file_name = os.getenv("TEST_SQLITE_FILE_NAME")
 
-sqlite_url = f"sqlite:///{sqlite_file_name}"
+SQLITE_CLOUD_API_KEY = os.getenv("SQLITE_CLOUD_API_KEY")
+SQLITE_CLOUD_HOST = os.getenv("SQLITE_CLOUD_HOST")
+if not (SQLITE_CLOUD_API_KEY and SQLITE_CLOUD_HOST):
+    raise ValueError("SQLITE_CLOUD_API_KEY or SQLITE_CLOUD_HOST not found in env")
+
+sqlite_url = f"sqlitecloud://{SQLITE_CLOUD_HOST}:8860/{settings.SQLITE_CLOUD_DB}?apikey={SQLITE_CLOUD_API_KEY}"
+
+if os.getenv("ENV") == "running_tests":
+    # Local SQLite DB for running pytests 
+    sqlite_file_name = os.getenv("TEST_SQLITE_FILE_NAME")
+    sqlite_url = f"sqlite:///{sqlite_file_name}"
 
 # Enable foreign key constraints in SQLite
 @event.listens_for(Engine, "connect")

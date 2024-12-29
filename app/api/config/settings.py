@@ -5,6 +5,7 @@ from typing import List
 class Settings:
     APP_NAME = "Nemo"
     SQLITE_DB_NAME = "sqlite_db_prod.db" if os.getenv("ENV") == "prod" else "sqlite_db_dev.db"
+    SQLITE_CLOUD_DB = "nemo-prod.sqlite"
     SQLITE_LOCAL_PATH = f"/tmp/{SQLITE_DB_NAME}" if os.getenv("ENV") == "prod" else SQLITE_DB_NAME
     SQLITE_S3_BUCKET = "nemo-app-db"
     SECRET_KEY: str = os.getenv("SECRET_KEY", "09d25e094faa6ca")

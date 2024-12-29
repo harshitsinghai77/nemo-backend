@@ -3,7 +3,7 @@
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
-import boto3
+# import boto3
 from mangum import Mangum
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -20,14 +20,14 @@ from app.api.routers.nemo import nemo_route
 
 settings = get_setting()
 
-s3_client = boto3.client('s3')
+# s3_client = boto3.client('s3')
 
 # Function to handle both startup and shutdown using lifespan
 @asynccontextmanager
 async def lifespan_context(app: FastAPI) -> AsyncGenerator[None, None]:
     # Startup logic
-    print("Starting app... downloading db file from S3")
-    s3_client.download_file(settings.SQLITE_S3_BUCKET, settings.SQLITE_DB_NAME, settings.SQLITE_LOCAL_PATH)
+    print("Starting app...")
+    # s3_client.download_file(settings.SQLITE_S3_BUCKET, settings.SQLITE_DB_NAME, settings.SQLITE_LOCAL_PATH)
     print("Initializing database tables")
     SQLModel.metadata.create_all(engine)  # Create tables during startup
 
@@ -37,8 +37,7 @@ async def lifespan_context(app: FastAPI) -> AsyncGenerator[None, None]:
     # Shutdown logic
     print("Shutting down...")
     engine.dispose()  # Close all connections
-    print("Uploading db file to S3")
-    s3_client.upload_file(settings.SQLITE_LOCAL_PATH, settings.SQLITE_S3_BUCKET, settings.SQLITE_DB_NAME)
+    # s3_client.upload_file(settings.SQLITE_LOCAL_PATH, settings.SQLITE_S3_BUCKET, settings.SQLITE_DB_NAME)
 
 app = FastAPI(lifespan=lifespan_context, title=settings.APP_NAME)
 

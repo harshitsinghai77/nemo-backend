@@ -2,6 +2,9 @@
 # a lambda function serving as a FastAPI app
 # a API Gateway to route requests to the FastAPI app
 
+import os
+from dotenv import load_dotenv
+
 from aws_cdk import (
     Duration,
     Stack,
@@ -11,6 +14,15 @@ from aws_cdk import (
     RemovalPolicy
 )
 from aws_cdk.aws_apigatewayv2_integrations import HttpLambdaIntegration
+
+# Load environment variables from .env file
+load_dotenv()  # This will read the .env file in the current directory
+
+env = {
+    'GOOGLE_CLIENT_ID': os.getenv('SQLITE_CLOUD_HOST'), 
+    'SQLITE_CLOUD_API_KEY': os.getenv('SQLITE_CLOUD_HOST'), 
+    'SQLITE_CLOUD_HOST': os.getenv('SQLITE_CLOUD_HOST'), 
+}
 
 class InfrastructureStack(Stack):
 
@@ -32,11 +44,9 @@ class InfrastructureStack(Stack):
             runtime=_lambda.Runtime.PYTHON_3_13,
             handler="main.handler",
             code=_lambda.Code.from_asset("lambda_function.zip"),
-            environment={
-                "ENV": "prod",
-            },
+            environment=env,
             memory_size=256,
-            timeout=Duration.seconds(120)
+            timeout=Duration.seconds(30)
         )
 
         # Grant read/write permissions to the bucket
