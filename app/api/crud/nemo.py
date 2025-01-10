@@ -220,7 +220,7 @@ class NemoDeta:
                 )
                 .where(NemoTasks.google_id == google_id)
                 .where(NemoTasks.created_at >= ten_day_interval)
-                .order_by(NemoTasks.duration.desc())
+                .order_by(NemoTasks.created_at.desc())
             )
 
             rows = session.exec(query).fetchall()
