@@ -235,6 +235,8 @@ class NemoDeta:
         with Session(engine) as session:
             session.add(new_task)
             session.commit()
+            session.refresh(new_task)
+        return new_task
 
     @staticmethod
     def delete_task_by_key(google_id: str, key: str) -> None:

@@ -216,10 +216,10 @@ def create_new_task(task: CreateTask, user: User = Depends(current_user)):
             "created_at": created_at,
             "task_date": created_at,
         }
-        NemoDeta.insert_new_task(task_dict)
+        new_task = NemoDeta.insert_new_task(task_dict)
     except IntegrityError as e:
         handle_integrity_error(e)
-    return task_dict
+    return new_task
 
 @nemo_route.delete("/tasks/{task_key}")
 def delete_task_by_task_id(task_key=str, user: User = Depends(current_user)):
