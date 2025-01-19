@@ -43,3 +43,5 @@ https://jt5o8ghpdk.execute-api.us-east-1.amazonaws.com/
 ```docker cp <container_id>:/app/lambda_function.zip C:\Users\<user>\Documents\Projects\nemo-backend```
 
 ```cdk deploy --profile <your-profile>```
+or try
+```npx cdk deploy --profile <your-profile>```

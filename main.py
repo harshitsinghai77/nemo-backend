@@ -3,7 +3,6 @@
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
-# import boto3
 from mangum import Mangum
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
