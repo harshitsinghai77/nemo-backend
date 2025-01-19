@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Dict, Optional
 
-from sqlalchemy import Integer, case, cast, column, func
+from sqlalchemy import Integer, case, cast, func
 from sqlalchemy.event import listens_for
 from sqlmodel import Session, delete, select
 
@@ -159,26 +159,39 @@ class NemoDeta:
     def analytics_get_best_day(google_id: str) -> Optional[Dict[str, str]]:
         seven_days_ago = get_date_x_days_ago(7)
         with Session(engine) as session:
-            query = (
+            query_best_day = (
                 select(
                     func.sum(NemoAnalytics.duration).label("duration"),
                     func.date(NemoAnalytics.created_at).label("grouped_date"),
                 )
                 .where(NemoAnalytics.google_id == google_id)
                 .where(NemoAnalytics.created_at >= seven_days_ago)
-                .group_by(column("grouped_date"))
-                .order_by(column("duration").desc())
+                .group_by(func.date(NemoAnalytics.created_at))
+                .order_by(func.sum(NemoAnalytics.duration).desc())
                 .limit(1)
             )
 
-            row = session.exec(query).first()
+            query_best_session = (
+                select(
+                    NemoAnalytics.created_at, NemoAnalytics.duration
+                )
+                .where(NemoAnalytics.google_id == google_id)
+                .where(NemoAnalytics.created_at >= seven_days_ago)
+                .order_by(NemoAnalytics.duration.desc(), NemoAnalytics.created_at.desc())
+                .limit(1)
+            )
 
-        if not row:
+            row_best_day = session.exec(query_best_day).first()
+            row_best_session = session.exec(query_best_session).first()
+
+        if row_best_day is None or row_best_session is None:
             return
-        
+            
         result = {
-            "best_day_full_date": datetime.strptime(row.grouped_date, "%Y-%m-%d").strftime("%a, %b %d %Y"),
-            "best_day_duration": row.duration,
+            "best_day_full_date": datetime.strptime(row_best_day.grouped_date, "%Y-%m-%d").strftime("%a, %b %d %Y"),
+            "best_day_duration": row_best_day.duration,
+            "best_session_full_date": row_best_session.created_at,
+            "best_session_duration": row_best_session.duration,
         }
         return result
 

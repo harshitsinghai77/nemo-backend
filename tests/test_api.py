@@ -190,15 +190,7 @@ class TestApp(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIsInstance(response.json(), dict)
         self.assertCountEqual(
-            response.json().keys(), ("best_day_full_date", "best_day_duration")
-        )
-        self.assertGreaterEqual(len(response.json()), 1)
-
-        response = self.client.get("nemo/statistics/best-day", headers=headers)
-        self.assertEqual(response.status_code, 200)
-        self.assertIsInstance(response.json(), dict)
-        self.assertCountEqual(
-            response.json().keys(), ("best_day_full_date", "best_day_duration")
+            response.json().keys(), ("best_day_full_date", "best_day_duration", "best_session_full_date", "best_session_duration")
         )
         self.assertGreaterEqual(len(response.json()), 1)
 
