@@ -9,11 +9,9 @@ from aws_cdk import (
     Duration,
     Stack,
     aws_lambda as _lambda,
-    aws_s3 as _s3,
-    aws_apigatewayv2 as _apigw,
-    RemovalPolicy
+    # aws_apigatewayv2 as _apigw,
 )
-from aws_cdk.aws_apigatewayv2_integrations import HttpLambdaIntegration
+# from aws_cdk.aws_apigatewayv2_integrations import HttpLambdaIntegration
 
 # Load environment variables from .env file
 load_dotenv()  # This will read the .env file in the current directory
@@ -28,15 +26,6 @@ class InfrastructureStack(Stack):
 
     def __init__(self, scope, id, **kwargs):
         super().__init__(scope, id, **kwargs)
-
-        # Create an S3 bucket
-        bucket = _s3.Bucket(self, 
-            id="nemo-app-db",
-            bucket_name="nemo-app-db",
-            block_public_access=_s3.BlockPublicAccess.BLOCK_ALL,
-            versioned=False,   # No versioning (to avoid unnecessary costs)
-            removal_policy=RemovalPolicy.DESTROY  # Delete all objects when the stack is deleted
-        )
         
         # Create a Lambda function
         base_lambda = _lambda.Function(self, 
@@ -49,23 +38,30 @@ class InfrastructureStack(Stack):
             timeout=Duration.seconds(30)
         )
 
-        # Grant read/write permissions to the bucket
-        bucket.grant_read_write(base_lambda)
+        # # Create an API Gateway
+        # base_api = _apigw.HttpApi(self, "NemoAppAPIGateway",
+        #     api_name='nemo-app-api',
+        #     cors_preflight=_apigw.CorsPreflightOptions(
+        #         allow_origins=["*"],
+        #         allow_methods=[_apigw.CorsHttpMethod.GET, _apigw.CorsHttpMethod.POST, _apigw.CorsHttpMethod.DELETE],
+        #         allow_headers=["*"]
+        #     ))
+        
+        # base_api_integration = HttpLambdaIntegration("NemoAPILambdaIntegration", handler=base_lambda)
+        
+        # # Add API Gateway routes
+        # base_api.add_routes(
+        #     path="/{proxy+}",
+        #     methods=[_apigw.HttpMethod.GET, _apigw.HttpMethod.POST, _apigw.HttpMethod.DELETE],
+        #     integration=base_api_integration
+        # )
 
-        # Create an API Gateway
-        base_api = _apigw.HttpApi(self, "NemoAppAPIGateway",
-            api_name='nemo-app-api',
-            cors_preflight=_apigw.CorsPreflightOptions(
-                allow_origins=["*"],
-                allow_methods=[_apigw.CorsHttpMethod.GET, _apigw.CorsHttpMethod.POST, _apigw.CorsHttpMethod.DELETE],
-                allow_headers=["*"]
-            ))
-        
-        base_api_integration = HttpLambdaIntegration("NemoAPILambdaIntegration", handler=base_lambda)
-        
-        # Add API Gateway routes
-        base_api.add_routes(
-            path="/{proxy+}",
-            methods=[_apigw.HttpMethod.GET, _apigw.HttpMethod.POST, _apigw.HttpMethod.DELETE],
-            integration=base_api_integration
+        function_url = _lambda.FunctionUrl(self, "LambdaFunctionURL",
+            function=base_lambda,
+            auth_type=_lambda.FunctionUrlAuthType.NONE,
+            cors={
+                "allowed_origins": ["https://nemo-app.netlify.app"], 
+                "allowed_methods": [_lambda.HttpMethod.GET, _lambda.HttpMethod.POST, _lambda.HttpMethod.DELETE], 
+                "allowed_headers": ["*"],
+            }
         )

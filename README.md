@@ -40,7 +40,7 @@ https://jt5o8ghpdk.execute-api.us-east-1.amazonaws.com/
 
 ```docker run -d -p 3000:3000 --name nemo-backend nemo-backend```
 
-```docker cp <container_id>:/app/lambda_function.zip C:\Users\<user>\Documents\Projects\nemo-backend```
+```docker cp <container_id>:/app/lambda_function.zip $(pwd)```
 
 ```cdk deploy --profile <your-profile>```
 or try

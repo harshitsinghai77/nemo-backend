@@ -7,7 +7,6 @@ from mangum import Mangum
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
-from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import HTMLResponse
 from sqlmodel import SQLModel
 
@@ -36,8 +35,7 @@ async def lifespan_context(app: FastAPI) -> AsyncGenerator[None, None]:
 
 app = FastAPI(lifespan=lifespan_context, title=settings.APP_NAME)
 
-# app.add_middleware(HTTPSRedirectMiddleware)  # Force HTTPS for security
-# app.add_middleware(TrustedHostMiddleware)
+app.add_middleware(HTTPSRedirectMiddleware)  # Force HTTPS for security
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
